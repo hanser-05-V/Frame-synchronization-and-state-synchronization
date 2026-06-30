@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<title>联网预测回滚流程图</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0d1520;font-family:'Segoe UI',sans-serif;height:100vh;overflow:hidden}
+.bar{position:fixed;top:0;left:0;right:0;height:38px;z-index:999;display:flex;align-items:center;gap:10px;padding:0 12px;background:rgba(13,21,32,0.95);border-bottom:1px solid #1e2a3a}
+.bar h1{font-size:14px;color:#e8e8e8;font-weight:400}
+.bar .h{font-size:11px;color:#556;flex:1}
+.bar .sp{flex:1}
+.bar button{padding:2px 10px;background:#1e2a3a;border:1px solid #2a3a4a;border-radius:4px;color:#94a3b8;cursor:pointer;font-size:11px;white-space:nowrap}
+.bar button:hover{background:#2a3a4a;color:#e8e8e8}
+#area{position:fixed;top:38px;left:0;right:0;bottom:0;overflow:scroll;background:#0d1520}
+#paper{position:relative;width:3600px;height:2600px;background:radial-gradient(circle at 50% 50%,#111a28 0%,#0d1520 70%)}
+#svg{position:absolute;top:0;left:0;pointer-events:none}
+.c{position:absolute;background:#131d2b;border:1px solid #2a3a4a;border-radius:8px;overflow:hidden;box-shadow:0 3px 12px rgba(0,0,0,0.5);cursor:move;user-select:none;font-family:'Consolas',monospace;font-size:10px;z-index:10}
+.c:hover{box-shadow:0 5px 22px rgba(0,0,0,0.7);z-index:20}
+.c.drag{z-index:100;box-shadow:0 10px 40px rgba(0,0,0,0.9)}
+.c .hd{padding:5px 10px;font-size:11px;font-weight:600;color:#fff}
+.c .bd{padding:2px 0;line-height:1.8}
+.c .bd .r{padding:0 10px;white-space:nowrap}
+.c .bd .s{height:1px;background:#1e2a3a;margin:2px 10px}
+.mo{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.75);justify-content:center;align-items:center;z-index:2000}
+.mo.on{display:flex}
+.mo-b{background:#131d2b;border-radius:12px;padding:20px;max-width:560px;width:92%;max-height:80vh;overflow-y:auto;border:1px solid #2a3a4a;position:relative;cursor:default}
+.mo-x{position:absolute;top:8px;right:12px;background:none;border:none;color:#556;font-size:18px;cursor:pointer}
+.mo-x:hover{color:#e8e8e8}
+.mo-t{font-size:16px;color:#e8e8e8;font-weight:600}
+.mo-st{font-size:11px;color:#556;margin-bottom:10px;margin-top:2px}
+.md{display:inline-block;padding:2px 8px;background:#1a2332;color:#60a5fa;border-radius:4px;font-size:10px;cursor:pointer;margin:1px 2px}
+.md:hover{background:#2a3a4a;color:#93c5fd}
+</style>
+</head>
+<body>
+<div class="bar"><h1>✦ 联网预测回滚流程</h1><span class="h">拖拽框↔移动 · 滚动↔平移 · Ctrl+滚轮↔缩放 · 双击↔内部 · 布局自动保存</span><div class="sp"></div><button onclick="resetAll()">⟲ 重置布局</button></div>
+<div id="area"><div id="paper"><svg id="svg"></svg></div></div>
+<div class="mo" id="mo" onclick="closeM(event)"><div class="mo-b" onclick="event.stopPropagation()"><button class="mo-x" onclick="closeM()">✕</button><div id="moBody"></div></div></div>
+<script>
+const COL={pub:'#34d399',pri:'#f87171',pro:'#fbbf24',evt:'#60a5fa'};
+const MODS=[
+  ['remotectrl','#d97706','RemoteBattleController','联网PVP控制器',0,['pub','+ LogicUpdate()','+ ExecuteInput(Queue<Frame>)','+ ReCalculate(input,lastInput)→int'],['','s'],['pri','- _predictInputQueue : Queue<Frame>','pri','- _predictMatchQueue : Queue<MatchEntity>','pri','- RemoteFrameBuffer (10000帧)','pri','- _inputLock (线程锁)'],],
+  ['send','#475569','① SendInput','发送本地输入',0,['pub','NetUpdate() 网络线程','→ 本地Input→KCP→Server','→ 同时加入_predictInputQueue','→ 预测执行(不等服务器)'],],
+  ['recv','#475569','② RecvFrame','接收服务器帧',0,['pub','NetUpdate() 网络线程','→ Server→KCP→解包','→ PVPFrame→FrameBuffer.Frame','→ Enqueue到_frameQueue'],],
+  ['recalc','#dc2626','③ ReCalculate','对比+回滚',0,['pub','逐帧遍历_frameQueue:','①服务器帧vs预测帧→CompareInput','②一致→✅确认,使用预测结果','③不一致→❌释放预测,needCacluate=true','','如果needCacluate:','→回滚到确认帧','→用服务器输入重新算','→重预测后续排队帧'],],
+  ['md5','#7c3aed','④ MD5校验','每200帧安全网',0,['pub','ConfirmMatch(matchEntity)','frame%200==0→SendCheckInfo','→所有玩家MD5发服务器','→服务器比对各客户端MD5','→不一致→触发告警/断线'],],
+  ['network','#7c3aed','RemoteBattleNetworkMgr','网络收发层',0,['pub','+ Send: Input→KCP→Server','+ TryRecivePackages→解包','+ SendCheckInfo(MD5)'],['','s'],['pri','- KcpClient / TcpSocketClient'],],
+  ['perf','#475569','性能指标','监控',0,['pub','+ PredictFrame — 当前预测帧号','+ RollbackCount — 回滚次数','+ RollbackCalcCount — 回滚重算帧数','+ LoseFrameCount — 丢帧次数','+ MaxLogicTick — 最长逻辑帧耗时'],],
+];
+MODS.forEach(m=>{let maxW=0;m.slice(5).forEach(r=>{if(r[1]==='s')return;let w=0;for(const ch of r[1])w+=ch>'ÿ'?1.7:1;w*=6.2;w+=20;if(w>maxW)maxW=w});m[4]=Math.max(150,Math.min(380,maxW))});
+const ARCS=[
+  ['send','remotectrl','dep','#34d399','入队'],
+  ['recv','remotectrl','dep','#60a5fa','入队'],
+  ['remotectrl','recalc','comp','#fbbf24','驱动'],
+  ['recalc','md5','dep','#34d399','200帧一次'],
+  ['remotectrl','network','dep','#60a5fa','收发'],
+  ['recv','network','dep','#60a5fa','解包→'],
+  ['send','network','dep','#60a5fa','封包→'],
+  ['remotectrl','perf','dep','#34d399','统计'],
+];
+const DEFAULT_XY={remotectrl:[120,20],send:[30,350],recv:[520,350],recalc:[120,680],md5:[550,680],network:[30,680],perf:[550,950]};
+const ORIG_XY=JSON.parse(JSON.stringify(DEFAULT_XY));
+const DEPS={
+  remotectrl:{t:'RemoteBattleController',st:'联网PVP·预测+回滚+MD5',s:[{c:'#d97706',t:'核心队列',f:['_predictInputQueue:预测的Input帧','_predictMatchQueue:预测的MatchEntity','_frameQueue:待处理的服务器帧']},{c:'#dc2626',t:'回滚相关',f:['ReCalculate→逐帧对比','CompareInput→PredicatCompare','RollbackCount/RollbackCalcCount','ConfirmMatch→MD5校验']}],d:[{n:'ReCalculate',v:'核心逻辑',id:'recalc'},{n:'网络层',v:'收发',id:'network'}]},
+  send:{t:'① 发本地输入',st:'网络线程·KCP发送',s:[{c:'#475569',t:'流程',f:['取本地Input→序列化→KCP','同时加入_predictInputQueue','预测执行(不等服务器确认)','丢帧检测:CompareInput不一致→标记重发']}],d:[{n:'RemoteBattleController',v:'→',id:'remotectrl'}]},
+  recv:{t:'② 收服务器帧',st:'网络线程·解包→frameQueue',s:[{c:'#475569',t:'流程',f:['KCP包→解Protobuf','PVPFrame→FrameBuffer.Frame','Enqueue到_frameQueue','消费:LogicUpdate取→ExecuteInput']}],d:[{n:'RemoteBattleController',v:'→',id:'remotectrl'}]},
+  recalc:{t:'③ ReCalculate',st:'对比+回滚核心',s:[{c:'#dc2626',t:'步骤',f:['while(input.Count>0){','①取服务器帧 deque','②对比预测:CompareInput','③一致→确认✅','④不一致→释放预测❌needCacluate=true','}','needCacluate→回滚确认帧→重算→重预测后续帧']}],d:[{n:'RemoteBattleController',v:'被调用',id:'remotectrl'},{n:'MD5校验',v:'→',id:'md5'}]},
+  md5:{t:'④ MD5校验',st:'每200帧·安全网',s:[{c:'#7c3aed',t:'流程',f:['frame%MD5CheckFrames(200)==0','SendCheckInfo(matchEntity,player)','所有玩家+AI→序列化→MD5→发Server','Server比对→不一致→告警/断线']}],d:[]},
+  network:{t:'RemoteBattleNetworkController',st:'KCP+Protobuf·收发层',s:[{c:'#7c3aed',t:'收发',f:['Send:Input→封Protobuf→KCP→Server','Recv:Server→KCP→解Protobuf→Frame','KCP模式:nodelay=1,interval=10ms','降级:TCP SocketClient']}],d:[]},
+  perf:{t:'性能指标',st:'实时监控·帧同步健康度',s:[{c:'#475569',t:'指标',f:['RollbackCount—回滚次数(越低越好)','LoseFrameCount—丢帧(不一致)次数','MaxLogicTick—最长逻辑帧耗时(ms)','PredictFrame—当前预测领先多少帧']}],d:[]},
+};
+const STORAGE_KEY='uml_network';
+function loadLayout(){try{const raw=localStorage.getItem(STORAGE_KEY);if(raw){const saved=JSON.parse(raw);Object.keys(saved).forEach(id=>{if(DEFAULT_XY[id])DEFAULT_XY[id]=saved[id]})}}catch(e){}}
+function saveLayout(){try{const obj={};Object.keys(POS).forEach(id=>{obj[id]=[POS[id].x,POS[id].y]});localStorage.setItem(STORAGE_KEY,JSON.stringify(obj))}catch(e){}}
+loadLayout();
+const area=document.getElementById('area'),paper=document.getElementById('paper'),svg=document.getElementById('svg'),POS={};
+function calcH(rows){let h=30;rows.forEach(r=>h+=r[1]==='s'?4:18);return h+6}
+MODS.forEach(m=>{const id=m[0],col=m[1],lb=m[2],tg=m[3],w=m[4],rows=m.slice(5);const h=calcH(rows),xy=DEFAULT_XY[id];POS[id]={x:xy[0],y:xy[1],w,h};const div=document.createElement('div');div.className='c';div.id='c'+id;div.style.left=xy[0]+'px';div.style.top=xy[1]+'px';div.style.width=w+'px';const hd=document.createElement('div');hd.className='hd';hd.style.background=col;let hdHtml=lb;if(tg)hdHtml+=`<span style="font-size:8px;background:rgba(0,0,0,0.25);padding:0 7px;border-radius:8px;opacity:0.8;float:right">${tg}</span>`;hd.innerHTML=hdHtml;div.appendChild(hd);const bd=document.createElement('div');bd.className='bd';rows.forEach(r=>{if(r[1]==='s'){const s=document.createElement('div');s.className='s';bd.appendChild(s)}else{const d=document.createElement('div');d.className='r';d.textContent=r[1];d.style.color=COL[r[0]]||'#94a3b8';bd.appendChild(d)}});div.appendChild(bd);div.addEventListener('dblclick',e=>{e.stopPropagation();openM(id)});let dr=0,sx,sy,ox,oy;div.addEventListener('mousedown',e=>{if(e.button!==0)return;dr=1;sx=e.clientX;sy=e.clientY;ox=POS[id].x;oy=POS[id].y;div.classList.add('drag');e.preventDefault()});document.addEventListener('mousemove',e=>{if(!dr)return;const dx=e.clientX-sx,dy=e.clientY-sy;POS[id].x=ox+dx;POS[id].y=oy+dy;div.style.left=POS[id].x+'px';div.style.top=POS[id].y+'px';drawLines()});document.addEventListener('mouseup',()=>{if(dr){dr=0;div.classList.remove('drag');saveLayout()}});paper.appendChild(div)});
+function btm(id){const p=POS[id];return{x:p.x+p.w/2,y:p.y+p.h}}
+function tp(id){const p=POS[id];return{x:p.x+p.w/2,y:p.y+2}}
+function drawLines(){let def='',path='';const marker=(t,c)=>{const mi=t+c.replace('#','');if(def.includes(mi))return mi;let m;if(t==='assoc')m=`<polygon points="0,0 9,4.5 0,9" fill="${c}"/>`;else if(t==='agg')m=`<polygon points="0,4.5 5,0 10,4.5 5,9" fill="none" stroke="${c}" stroke-width="1.5"/>`;else if(t==='comp')m=`<polygon points="0,4.5 5,0 10,4.5 5,9" fill="${c}"/>`;else m=`<polygon points="0,0 9,4.5 0,9" fill="${c}"/>`;def+=`<marker id="${mi}" markerWidth="12" markerHeight="12" refX="${t==='agg'||t==='comp'?11:9}" refY="4.5" orient="auto">${m}</marker>`;return mi};ARCS.forEach(a=>{const f=btm(a[0]),t=tp(a[1]),my=(f.y+t.y)/2;const mi=marker(a[2],a[3]);const dash=a[2]==='dep'?'stroke-dasharray="6,4"':'';const sw=a[2]==='comp'||a[2]==='agg'?2.5:1.5;path+=`<path d="M ${f.x} ${f.y} C ${f.x} ${my}, ${t.x} ${my}, ${t.x} ${t.y}" stroke="${a[3]}" stroke-width="${sw}" fill="none" marker-end="url(#${mi})" ${dash} opacity="0.85"/>`;if(a[4]){var tw=a[4].length*7+10;path+='<rect x="'+((f.x+t.x)/2-tw/2)+'" y="'+(my-18)+'" width="'+tw+'" height="16" rx="3" fill="#0d1520" opacity="0.9"/>';path+='<text x="'+(f.x+t.x)/2+'" y="'+(my-6)+'" text-anchor="middle" fill="'+a[3]+'" font-size="13" font-family="sans-serif" font-weight="700" opacity="1">'+a[4]+'</text>'}});svg.innerHTML=`<defs>${def}</defs>${path}`;svg.setAttribute('width',3600);svg.setAttribute('height',2600)}
+let zoom=1;area.addEventListener('wheel',e=>{if(!e.ctrlKey&&!e.metaKey)return;e.preventDefault();zoom=Math.max(0.3,Math.min(2.5,zoom*(e.deltaY>0?0.92:1.08)));paper.style.transform=`scale(${zoom})`;paper.style.transformOrigin='0 0'});
+function resetAll(){localStorage.removeItem(STORAGE_KEY);Object.keys(ORIG_XY).forEach(id=>{const p=ORIG_XY[id];DEFAULT_XY[id]=[p[0],p[1]];POS[id]={...POS[id],x:p[0],y:p[1]};const el=document.getElementById('c'+id);if(el){el.style.left=p[0]+'px';el.style.top=p[1]+'px'}});zoom=1;paper.style.transform='scale(1)';paper.style.transformOrigin='0 0';drawLines();area.scrollTo(0,0);centerView()}
+function centerView(){let minX=9999,minY=9999,maxX=0,maxY=0;MODS.forEach(m=>{const id=m[0],p=POS[id];if(!p)return;if(p.x<minX)minX=p.x;if(p.y<minY)minY=p.y;if(p.x+p.w>maxX)maxX=p.x+p.w;if(p.y+p.h>maxY)maxY=p.y+p.h});const cw=maxX-minX,ch=maxY-minY;const vw=area.clientWidth,vh=area.clientHeight;area.scrollLeft=Math.max(0,(cw+80-vw)/2);area.scrollTop=Math.max(0,(ch+60-vh)/2)}
+function openM(id){const d=DEPS[id];if(!d)return;let h=`<div class="mo-t">${d.t}</div><div class="mo-st">${d.st}</div>`;d.s.forEach(g=>{h+=`<div style="margin-bottom:6px;background:#0d1520;border-radius:6px;border-left:3px solid ${g.c};overflow:hidden"><div style="padding:4px 10px;font-size:12px;font-weight:600;color:${g.c}">${g.t}</div><div style="padding:2px 10px 6px;font-family:Consolas,monospace;font-size:10px;line-height:1.7;color:#94a3b8">`;g.f.forEach(f=>{h+=`<div>${f}</div>`});h+='</div></div>'});if(d.d&&d.d.length){h+=`<div style="padding:4px 0;border-top:1px solid #2a3a4a"><span style="font-size:9px;color:#556">🔗 关联</span><br>`;d.d.forEach(dp=>{h+=`<span class="md" onclick="openM('${dp.id}')">${dp.n}: ${dp.v}</span> `});h+='</div>'}document.getElementById('moBody').innerHTML=h;document.getElementById('mo').classList.add('on')}
+function closeM(e){if(e&&e.target!==document.getElementById('mo'))return;document.getElementById('mo').classList.remove('on')}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeM()});
+setTimeout(()=>{drawLines();centerView()},100);
+</script></body></html>

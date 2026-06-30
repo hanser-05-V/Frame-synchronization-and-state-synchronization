@@ -1,0 +1,10 @@
+# 排除框架源码（仅推送笔记）
+Common/
+Framework/
+Script/
+Project/
+
+# 排除临时文件
+.claude/
+*.meta
+*.tmp

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<title>ECS 实体组件系统</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0d1520;font-family:'Segoe UI',sans-serif;height:100vh;overflow:hidden}
+.bar{position:fixed;top:0;left:0;right:0;height:38px;z-index:999;display:flex;align-items:center;gap:10px;padding:0 12px;background:rgba(13,21,32,0.95);border-bottom:1px solid #1e2a3a}
+.bar h1{font-size:14px;color:#e8e8e8;font-weight:400}
+.bar .h{font-size:11px;color:#556;flex:1}
+.bar .sp{flex:1}
+.bar button{padding:2px 10px;background:#1e2a3a;border:1px solid #2a3a4a;border-radius:4px;color:#94a3b8;cursor:pointer;font-size:11px;white-space:nowrap}
+.bar button:hover{background:#2a3a4a;color:#e8e8e8}
+#area{position:fixed;top:38px;left:0;right:0;bottom:0;overflow:scroll;background:#0d1520}
+#paper{position:relative;width:3600px;height:2400px;background:radial-gradient(circle at 50% 50%,#111a28 0%,#0d1520 70%)}
+#svg{position:absolute;top:0;left:0;pointer-events:none}
+.c{position:absolute;background:#131d2b;border:1px solid #2a3a4a;border-radius:8px;overflow:hidden;box-shadow:0 3px 12px rgba(0,0,0,0.5);cursor:move;user-select:none;font-family:'Consolas',monospace;font-size:10px;z-index:10}
+.c:hover{box-shadow:0 5px 22px rgba(0,0,0,0.7);z-index:20}
+.c.drag{z-index:100;box-shadow:0 10px 40px rgba(0,0,0,0.9)}
+.c .hd{padding:5px 10px;font-size:11px;font-weight:600;color:#fff}
+.c .bd{padding:2px 0;line-height:1.8}
+.c .bd .r{padding:0 10px;white-space:nowrap}
+.c .bd .s{height:1px;background:#1e2a3a;margin:2px 10px}
+.mo{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.75);justify-content:center;align-items:center;z-index:2000}
+.mo.on{display:flex}
+.mo-b{background:#131d2b;border-radius:12px;padding:20px;max-width:560px;width:92%;max-height:80vh;overflow-y:auto;border:1px solid #2a3a4a;position:relative;cursor:default}
+.mo-x{position:absolute;top:8px;right:12px;background:none;border:none;color:#556;font-size:18px;cursor:pointer}
+.mo-x:hover{color:#e8e8e8}
+.mo-t{font-size:16px;color:#e8e8e8;font-weight:600}
+.mo-st{font-size:11px;color:#556;margin-bottom:10px;margin-top:2px}
+.md{display:inline-block;padding:2px 8px;background:#1a2332;color:#60a5fa;border-radius:4px;font-size:10px;cursor:pointer;margin:1px 2px}
+.md:hover{background:#2a3a4a;color:#93c5fd}
+</style>
+</head>
+<body>
+<div class="bar"><h1>✦ ECS 实体组件系统</h1><span class="h">拖拽框↔移动 · 滚动↔平移 · Ctrl+滚轮↔缩放 · 双击↔内部 · 布局自动保存</span><div class="sp"></div><button onclick="resetAll()">⟲ 重置布局</button></div>
+<div id="area"><div id="paper"><svg id="svg"></svg></div></div>
+<div class="mo" id="mo" onclick="closeM(event)"><div class="mo-b" onclick="event.stopPropagation()"><button class="mo-x" onclick="closeM()">✕</button><div id="moBody"></div></div></div>
+<script>
+const COL={pub:'#34d399',pri:'#f87171',pro:'#fbbf24',evt:'#60a5fa'};
+const MODS=[
+  ['entity','#2563eb','Entity (基类)','序列化·拷贝·MD5',0,['pub','+ CalculateMD5() → 哈希','+ CopyTo(Entity) → 深拷贝','+ Release() → 归还对象池'],],
+  ['matchentity','#059669','MatchEntity','比赛全局·15+组件',0,['pub','+ frame:int / deltaTime:Fixed','+ time:Fixed / timeScale:Fixed','+ playerList:List<PlayerEntity>','+ ballEntity:BallEntity'],['','s'],['pub','组件: state/runtime/effect/camera','pub','组件: audio/event/givenup/guide'],],
+  ['playerentity','#d97706','PlayerEntity','球员·~20组件',0,['pub','+ transform:TransformComponent','+ input:InputComponent','+ property:PropertyComponent','+ skill:SkillComponent','+ animation:AnimationComponent','+ buff:BuffComponent'],],
+  ['ballentity','#475569','BallEntity','球实体',0,['pub','+ transform / physics / state'],],
+  ['components','#475569','组件体系 (partial)','各司其职',0,['pub','TransformComponent—位置朝向(Fixed)','pub','InputComponent—当前帧输入','pub','StateComponent—状态机状态','pub','PropertyComponent—属性值','pub','AnimationComponent—动画参数','pub','SkillComponent—技能状态'],],
+  ['systems','#dc2626','30+ System','按序执行',0,['pub','MoveSystem—移动','ShootSystem—投篮','PassSystem—传球','BlockSystem—盖帽','ReboundSystem—篮板','AnimationSystem—动画','更多:System/→State/→Event/→Buff'],],
+];
+MODS.forEach(m=>{let maxW=0;m.slice(5).forEach(r=>{if(r[1]==='s')return;let w=0;for(const ch of r[1])w+=ch>'ÿ'?1.7:1;w*=6.2;w+=20;if(w>maxW)maxW=w});m[4]=Math.max(150,Math.min(360,maxW))});
+const ARCS=[
+  ['matchentity','entity','comp','#60a5fa','继承'],
+  ['playerentity','entity','comp','#60a5fa','继承'],
+  ['ballentity','entity','comp','#60a5fa','继承'],
+  ['matchentity','playerentity','comp','#fbbf24','包含'],
+  ['matchentity','ballentity','comp','#fbbf24','包含'],
+  ['playerentity','components','dep','#34d399','挂载'],
+  ['systems','playerentity','dep','#34d399','处理'],
+  ['systems','ballentity','dep','#34d399','处理'],
+];
+const DEFAULT_XY={entity:[30,20],matchentity:[30,280],playerentity:[550,20],ballentity:[550,380],components:[30,700],systems:[550,700]};
+const ORIG_XY=JSON.parse(JSON.stringify(DEFAULT_XY));
+const DEPS={
+  entity:{t:'Entity (基类)',st:'所有实体的抽象基类·序列化/拷贝/MD5',s:[{c:'#2563eb',t:'方法',f:['CalculateMD5()→游戏状态哈希','CopyTo(Entity)→深拷贝(回滚用)','Release()→归还对象池']}],d:[{n:'MatchEntity',v:'子类',id:'matchentity'},{n:'PlayerEntity',v:'子类',id:'playerentity'}]},
+  matchentity:{t:'MatchEntity',st:'比赛全局状态·15+组件',s:[{c:'#059669',t:'字段',f:['frame:int—当前帧号','deltaTime:Fixed(33ms)','time:Fixed—累计时间','playerList:List<PlayerEntity>','ballEntity:BallEntity']},{c:'#fbbf24',t:'组件(15+)',f:['state/runtimeProperty/effect','camera/hoop/audio','matchEvent/givenup/guide','notice/passerbyKing/areaBattle']}],d:[{n:'Entity',v:'继承',id:'entity'},{n:'PlayerEntity',v:'包含',id:'playerentity'}]},
+  playerentity:{t:'PlayerEntity',st:'单个球员·~20组件',s:[{c:'#d97706',t:'组件',f:['TransformComponent—位置朝向','InputComponent—当前帧输入','PropertyComponent—属性值','SkillComponent—技能','AnimationComponent—动画','BuffComponent—Buff/Debuff']}],d:[{n:'Entity',v:'继承',id:'entity'}]},
+  ballentity:{t:'BallEntity',st:'球实体',s:[{c:'#475569',t:'组件',f:['transform—位置/朝向','physics—速度/加速度','state—Attach/Pass/Shoot/Physical']}],d:[{n:'Entity',v:'继承',id:'entity'}]},
+  components:{t:'组件体系',st:'Entity的组成单元·各司其职',s:[{c:'#475569',t:'设计原则',f:['组合优于继承→自由搭配组件','确定性→所有组件可序列化','拷贝→CopyTo手写(非反射快10-50倍)','对象池→预创建6个MatchEntity']}],d:[{n:'PlayerEntity',v:'挂载',id:'playerentity'}]},
+  systems:{t:'30+ System',st:'按[EntitySystem]注册顺序执行',s:[{c:'#dc2626',t:'分类',f:['移动:Move/Distance/Defense/Physis','投篮:Shoot/Pass/Block/Rebound/Steal','属性:Buff/Attribute/Property','动画:Animation/Effect/Celebration','其他:Event/Audio/Random/Check/Debug']}],d:[{n:'PlayerEntity',v:'处理',id:'playerentity'}]},
+};
+const STORAGE_KEY='uml_ecs';
+function loadLayout(){try{const raw=localStorage.getItem(STORAGE_KEY);if(raw){const saved=JSON.parse(raw);Object.keys(saved).forEach(id=>{if(DEFAULT_XY[id])DEFAULT_XY[id]=saved[id]})}}catch(e){}}
+function saveLayout(){try{const obj={};Object.keys(POS).forEach(id=>{obj[id]=[POS[id].x,POS[id].y]});localStorage.setItem(STORAGE_KEY,JSON.stringify(obj))}catch(e){}}
+loadLayout();
+const area=document.getElementById('area'),paper=document.getElementById('paper'),svg=document.getElementById('svg'),POS={};
+function calcH(rows){let h=30;rows.forEach(r=>h+=r[1]==='s'?4:18);return h+6}
+MODS.forEach(m=>{const id=m[0],col=m[1],lb=m[2],tg=m[3],w=m[4],rows=m.slice(5);const h=calcH(rows),xy=DEFAULT_XY[id];POS[id]={x:xy[0],y:xy[1],w,h};const div=document.createElement('div');div.className='c';div.id='c'+id;div.style.left=xy[0]+'px';div.style.top=xy[1]+'px';div.style.width=w+'px';const hd=document.createElement('div');hd.className='hd';hd.style.background=col;let hdHtml=lb;if(tg)hdHtml+=`<span style="font-size:8px;background:rgba(0,0,0,0.25);padding:0 7px;border-radius:8px;opacity:0.8;float:right">${tg}</span>`;hd.innerHTML=hdHtml;div.appendChild(hd);const bd=document.createElement('div');bd.className='bd';rows.forEach(r=>{if(r[1]==='s'){const s=document.createElement('div');s.className='s';bd.appendChild(s)}else{const d=document.createElement('div');d.className='r';d.textContent=r[1];d.style.color=COL[r[0]]||'#94a3b8';bd.appendChild(d)}});div.appendChild(bd);div.addEventListener('dblclick',e=>{e.stopPropagation();openM(id)});let dr=0,sx,sy,ox,oy;div.addEventListener('mousedown',e=>{if(e.button!==0)return;dr=1;sx=e.clientX;sy=e.clientY;ox=POS[id].x;oy=POS[id].y;div.classList.add('drag');e.preventDefault()});document.addEventListener('mousemove',e=>{if(!dr)return;const dx=e.clientX-sx,dy=e.clientY-sy;POS[id].x=ox+dx;POS[id].y=oy+dy;div.style.left=POS[id].x+'px';div.style.top=POS[id].y+'px';drawLines()});document.addEventListener('mouseup',()=>{if(dr){dr=0;div.classList.remove('drag');saveLayout()}});paper.appendChild(div)});
+function btm(id){const p=POS[id];return{x:p.x+p.w/2,y:p.y+p.h}}
+function tp(id){const p=POS[id];return{x:p.x+p.w/2,y:p.y+2}}
+function drawLines(){let def='',path='';const marker=(t,c)=>{const mi=t+c.replace('#','');if(def.includes(mi))return mi;let m;if(t==='assoc')m=`<polygon points="0,0 9,4.5 0,9" fill="${c}"/>`;else if(t==='agg')m=`<polygon points="0,4.5 5,0 10,4.5 5,9" fill="none" stroke="${c}" stroke-width="1.5"/>`;else if(t==='comp')m=`<polygon points="0,4.5 5,0 10,4.5 5,9" fill="${c}"/>`;else m=`<polygon points="0,0 9,4.5 0,9" fill="${c}"/>`;def+=`<marker id="${mi}" markerWidth="12" markerHeight="12" refX="${t==='agg'||t==='comp'?11:9}" refY="4.5" orient="auto">${m}</marker>`;return mi};ARCS.forEach(a=>{const f=btm(a[0]),t=tp(a[1]),my=(f.y+t.y)/2;const mi=marker(a[2],a[3]);const dash=a[2]==='dep'?'stroke-dasharray="6,4"':'';const sw=a[2]==='comp'||a[2]==='agg'?2.5:1.5;path+=`<path d="M ${f.x} ${f.y} C ${f.x} ${my}, ${t.x} ${my}, ${t.x} ${t.y}" stroke="${a[3]}" stroke-width="${sw}" fill="none" marker-end="url(#${mi})" ${dash} opacity="0.85"/>`;if(a[4]){var tw=a[4].length*7+10;path+='<rect x="'+((f.x+t.x)/2-tw/2)+'" y="'+(my-18)+'" width="'+tw+'" height="16" rx="3" fill="#0d1520" opacity="0.9"/>';path+='<text x="'+(f.x+t.x)/2+'" y="'+(my-6)+'" text-anchor="middle" fill="'+a[3]+'" font-size="13" font-family="sans-serif" font-weight="700" opacity="1">'+a[4]+'</text>'}});svg.innerHTML=`<defs>${def}</defs>${path}`;svg.setAttribute('width',3600);svg.setAttribute('height',2400)}
+let zoom=1;area.addEventListener('wheel',e=>{if(!e.ctrlKey&&!e.metaKey)return;e.preventDefault();zoom=Math.max(0.3,Math.min(2.5,zoom*(e.deltaY>0?0.92:1.08)));paper.style.transform=`scale(${zoom})`;paper.style.transformOrigin='0 0'});
+function resetAll(){localStorage.removeItem(STORAGE_KEY);Object.keys(ORIG_XY).forEach(id=>{const p=ORIG_XY[id];DEFAULT_XY[id]=[p[0],p[1]];POS[id]={...POS[id],x:p[0],y:p[1]};const el=document.getElementById('c'+id);if(el){el.style.left=p[0]+'px';el.style.top=p[1]+'px'}});zoom=1;paper.style.transform='scale(1)';paper.style.transformOrigin='0 0';drawLines();area.scrollTo(0,0);centerView()}
+function centerView(){let minX=9999,minY=9999,maxX=0,maxY=0;MODS.forEach(m=>{const id=m[0],p=POS[id];if(!p)return;if(p.x<minX)minX=p.x;if(p.y<minY)minY=p.y;if(p.x+p.w>maxX)maxX=p.x+p.w;if(p.y+p.h>maxY)maxY=p.y+p.h});const cw=maxX-minX,ch=maxY-minY;const vw=area.clientWidth,vh=area.clientHeight;area.scrollLeft=Math.max(0,(cw+80-vw)/2);area.scrollTop=Math.max(0,(ch+60-vh)/2)}
+function openM(id){const d=DEPS[id];if(!d)return;let h=`<div class="mo-t">${d.t}</div><div class="mo-st">${d.st}</div>`;d.s.forEach(g=>{h+=`<div style="margin-bottom:6px;background:#0d1520;border-radius:6px;border-left:3px solid ${g.c};overflow:hidden"><div style="padding:4px 10px;font-size:12px;font-weight:600;color:${g.c}">${g.t}</div><div style="padding:2px 10px 6px;font-family:Consolas,monospace;font-size:10px;line-height:1.7;color:#94a3b8">`;g.f.forEach(f=>{h+=`<div>${f}</div>`});h+='</div></div>'});if(d.d&&d.d.length){h+=`<div style="padding:4px 0;border-top:1px solid #2a3a4a"><span style="font-size:9px;color:#556">🔗 关联</span><br>`;d.d.forEach(dp=>{h+=`<span class="md" onclick="openM('${dp.id}')">${dp.n}: ${dp.v}</span> `});h+='</div>'}document.getElementById('moBody').innerHTML=h;document.getElementById('mo').classList.add('on')}
+function closeM(e){if(e&&e.target!==document.getElementById('mo'))return;document.getElementById('mo').classList.remove('on')}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeM()});
+setTimeout(()=>{drawLines();centerView()},100);
+</script></body></html>

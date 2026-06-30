@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<title>Input 位域布局图</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0d1520;font-family:'Segoe UI',sans-serif;height:100vh;overflow:hidden}
+
+.bar{
+  position:fixed;top:0;left:0;right:0;height:38px;z-index:999;
+  display:flex;align-items:center;gap:10px;padding:0 12px;
+  background:rgba(13,21,32,0.95);border-bottom:1px solid #1e2a3a
+}
+.bar h1{font-size:14px;color:#e8e8e8;font-weight:400}
+.bar .h{font-size:11px;color:#556;flex:1}
+.bar .sp{flex:1}
+.bar button{padding:2px 10px;background:#1e2a3a;border:1px solid #2a3a4a;border-radius:4px;color:#94a3b8;cursor:pointer;font-size:11px;white-space:nowrap}
+.bar button:hover{background:#2a3a4a;color:#e8e8e8}
+
+#area{
+  position:fixed;top:38px;left:0;right:0;bottom:0;
+  overflow:scroll;background:#0d1520
+}
+#paper{
+  position:relative;
+  width:3600px;height:2600px;
+  background:radial-gradient(circle at 50% 50%,#111a28 0%,#0d1520 70%);
+}
+#svg{position:absolute;top:0;left:0;pointer-events:none}
+
+.c{
+  position:absolute;background:#131d2b;border:1px solid #2a3a4a;border-radius:8px;overflow:hidden;
+  box-shadow:0 3px 12px rgba(0,0,0,0.5);cursor:move;user-select:none;
+  font-family:'Consolas',monospace;font-size:10px;z-index:10
+}
+.c:hover{box-shadow:0 5px 22px rgba(0,0,0,0.7);z-index:20}
+.c.drag{z-index:100;box-shadow:0 10px 40px rgba(0,0,0,0.9)}
+
+.c .hd{padding:5px 10px;font-size:11px;font-weight:600;color:#fff}
+.c .bd{padding:2px 0;line-height:1.8}
+.c .bd .r{padding:0 10px;white-space:nowrap}
+.c .bd .s{height:1px;background:#1e2a3a;margin:2px 10px}
+
+.mo{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.75);justify-content:center;align-items:center;z-index:2000}
+.mo.on{display:flex}
+.mo-b{background:#131d2b;border-radius:12px;padding:20px;max-width:560px;width:92%;max-height:80vh;overflow-y:auto;border:1px solid #2a3a4a;position:relative;cursor:default}
+.mo-x{position:absolute;top:8px;right:12px;background:none;border:none;color:#556;font-size:18px;cursor:pointer}
+.mo-x:hover{color:#e8e8e8}
+.mo-t{font-size:16px;color:#e8e8e8;font-weight:600}
+.mo-st{font-size:11px;color:#556;margin-bottom:10px;margin-top:2px}
+.md{display:inline-block;padding:2px 8px;background:#1a2332;color:#60a5fa;border-radius:4px;font-size:10px;cursor:pointer;margin:1px 2px}
+.md:hover{background:#2a3a4a;color:#93c5fd}
+</style>
+</head>
+<body>
+
+<div class="bar">
+  <h1>✦ Input 位域布局</h1>
+  <span class="h">拖拽框↔移动 · 滚动↔平移 · Ctrl+滚轮↔缩放 · 双击↔内部 · 布局自动保存</span>
+  <div class="sp"></div>
+  <button onclick="resetAll()">⟲ 重置布局</button>
+</div>
+
+<div id="area">
+  <div id="paper">
+    <svg id="svg"></svg>
+  </div>
+</div>
+
+<div class="mo" id="mo" onclick="closeM(event)">
+  <div class="mo-b" onclick="event.stopPropagation()">
+    <button class="mo-x" onclick="closeM()">✕</button>
+    <div id="moBody"></div>
+  </div>
+</div>
+
+<script>
+const COL = {pub:'#34d399',pri:'#f87171',pro:'#fbbf24',evt:'#60a5fa'};
+
+const MODS = [
+  ['input','#059669','FrameBuffer.Input','32-bit struct',0,
+    ['pub','_raw : uint (底层存储)'],
+    ['','s'],
+    ['pub','+ pos : byte — 玩家位置 (4bit, 31-28)'],
+    ['pub','+ yaw : byte — 移动方向 (8bit, 27-20)'],
+    ['pub','+ realBtn : byte — 按键bitmask (7bit, 19-13)'],
+    ['pub','+ flag : byte — 身份标记 (5bit, 12-8)'],
+    ['pub','+ emoji : byte — 表情ID (4bit, 7-4)'],
+    ['pub','+ giveup : byte — 投降标记 (4bit, 3-0)'],
+    ['','s'],
+    ['pub','+ Compare(Input) / PredictCompare(Input)'],
+    ['pub','+ CompareIgnoreOffset(Input) / HasGM()'],
+  ],
+  ['bitlayout','#2563eb','32-bit 位域布局','字段→位区间',0,
+    ['pub','┌──────┬────────────┬───────────┬───────┬────────┬──────────┐'],
+    ['pub','│ pos  │    yaw     │    btn    │ flag  │ emoji  │  giveup  │'],
+    ['pub','│ 4bit │   8bit     │   7bit    │ 5bit  │ 4bit   │  4bit    │'],
+    ['pub','├──────┴────────────┴───────────┴───────┴────────┴──────────┤'],
+    ['pub','│ 31..28    27..20     19..13    12..8   7..4      3..0    │'],
+    ['pub','├──────────────────────────────────────────────────────────┤'],
+    ['pub','│ 0xF0...   0x0FF0...  0x000FE... 0x1F00  0xF0     0x0F    │'],
+    ['','s'],
+    ['pub',' pos 特殊: 0xF → 255 (无效玩家哨兵)'],
+    ['pub',' yaw 复用: 高3bit存帧差值offset (部分模式)'],
+  ],
+  ['framebuffer','#475569','FrameBuffer.Frame','一帧=7个Input',0,
+    ['pub','+ frame : int — 帧序号'],
+    ['pub','+ playerCount : int — 实际玩家数'],
+    ['','s'],
+    ['pub','+ i0,i1,i2,i3,i4,i5,i6 : Input'],
+    ['pub','+ this[int] { get; set; } — 索引器'],
+    ['pub','+ SetInputByPos(pos, Input)'],
+    ['pub','+ GetInputByPos(pos, ref Input) → bool'],
+    ['','s'],
+    ['pri','空槽: pos=255 或 pos=7 标记为无效'],
+  ],
+];
+
+MODS.forEach(m => {
+  let maxW = 0;
+  m.slice(5).forEach(r => {
+    if (r[1] === 's') return;
+    let w = 0;
+    for (const ch of r[1]) w += (ch > 'ÿ' ? 1.7 : 1);
+    w *= 6.2; w += 20;
+    if (w > maxW) maxW = w;
+  });
+  m[4] = Math.max(150, Math.min(380, maxW));
+});
+
+const ARCS = [
+  ['framebuffer','input','comp','#fbbf24','包含'],
+  ['input','bitlayout','dep','#34d399','映射'],
+];
+
+const DEFAULT_XY = {
+  bitlayout:[120,20],
+  input:[550,20],
+  framebuffer:[120,420],
+};
+const ORIG_XY = JSON.parse(JSON.stringify(DEFAULT_XY));
+
+const DEPS = {
+  input:{t:'FrameBuffer.Input',st:'帧同步最小数据单元 · 4字节 · 32-bit压缩',
+    s:[
+      {c:'#059669',t:'字段 (公开属性)',f:['pos : 4bit — 玩家位置, 0-6有效, 0xF→255哨兵','yaw : 8bit — 移动方向(0-24), 高3bit复用存offset','realBtn : 7bit — 按键bitmask, bit0=按键1...','flag : 5bit — PLAYER(1)|NP(2)|GM(4)','emoji : 4bit — 表情ID, 0=无, 实际ID=emoji-1','giveup : 4bit — GivenUp(1)|Require(2)|Accept(4)|Deny(8)']},
+      {c:'#34d399',t:'方法',f:['Compare → _raw==other._raw 精确对比','PredictCompare → 跳过GM标记的预测对比(网络用)','CompareIgnoreOffset → 忽略yaw高3bit offset','HasGM → flag中是否有GM标记']},
+    ],
+    d:[{n:'32-bit位域',v:'位运算存取',id:'bitlayout'},{n:'FrameBuffer.Frame',v:'被包含',id:'framebuffer'}]},
+  bitlayout:{t:'32-bit 位域布局',st:'Input 结构体的内存布局 · 32个bit分成6个字段',
+    s:[
+      {c:'#2563eb',t:'位区间',f:['pos:  31..28 (4bit) 掩码=0xF0000000','yaw:  27..20 (8bit) 掩码=0x0FF00000','btn:  19..13 (7bit) 掩码=0x000FE000','flag: 12..8  (5bit) 掩码=0x00001F00','emoji: 7..4  (4bit) 掩码=0x000000F0','giveup: 3..0(4bit) 掩码=0x0000000F']},
+      {c:'#fbbf24',t:'特殊设计',f:['pos=0xF作为哨兵(255) → 空槽标记 因为真实pos仅0~6','yaw高3bit复用 → 部分模式存帧差值offset 因为yaw≤24<32 (5bit够用)']},
+    ],
+    d:[{n:'FrameBuffer.Input',v:'被描述',id:'input'}]},
+  framebuffer:{t:'FrameBuffer.Frame',st:'一帧完整数据 · 所有玩家的Input集合',
+    s:[
+      {c:'#475569',t:'字段',f:['frame : int — 帧序号 (从0开始递增)','playerCount : int — 实际玩家数 (2~7)','i0..i6 : Input — 最多7个玩家的Input','空槽: pos==255 表示该槽无玩家']},
+      {c:'#34d399',t:'方法',f:['this[int] — 按序号索引 (0~playerCount-1)','SetInputByPos(pos,Input) — 按玩家pos写入','GetInputByPos(pos,ref Input) — 按玩家pos读取']},
+    ],
+    d:[{n:'FrameBuffer.Input',v:'包含7个',id:'input'}]},
+};
+
+const STORAGE_KEY = 'uml_layout_input';
+function loadLayout() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const saved = JSON.parse(raw);
+      Object.keys(saved).forEach(id => { if (DEFAULT_XY[id]) DEFAULT_XY[id] = saved[id]; });
+    }
+  } catch(e) {}
+}
+function saveLayout() {
+  try {
+    const obj = {};
+    Object.keys(POS).forEach(id => { obj[id] = [POS[id].x, POS[id].y]; });
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(obj));
+  } catch(e) {}
+}
+loadLayout();
+
+const area = document.getElementById('area');
+const paper = document.getElementById('paper');
+const svg = document.getElementById('svg');
+const POS = {};
+
+function calcH(rows) {
+  let h = 30;
+  rows.forEach(r => h += r[1]==='s' ? 4 : 18);
+  return h + 6;
+}
+
+MODS.forEach(m => {
+  const id=m[0], col=m[1], lb=m[2], tg=m[3], w=m[4], rows=m.slice(5);
+  const h = calcH(rows);
+  const xy = DEFAULT_XY[id];
+  POS[id] = {x:xy[0], y:xy[1], w, h};
+
+  const div = document.createElement('div');
+  div.className = 'c';
+  div.id = 'c'+id;
+  div.style.left = xy[0]+'px';
+  div.style.top = xy[1]+'px';
+  div.style.width = w+'px';
+
+  const hd = document.createElement('div');
+  hd.className = 'hd'; hd.style.background = col;
+  let hdHtml = lb;
+  if (tg) hdHtml += `<span style="font-size:8px;background:rgba(0,0,0,0.25);padding:0 7px;border-radius:8px;opacity:0.8;float:right">${tg}</span>`;
+  hd.innerHTML = hdHtml;
+  div.appendChild(hd);
+
+  const bd = document.createElement('div');
+  bd.className = 'bd';
+  rows.forEach(r => {
+    if (r[1] === 's') {
+      const s = document.createElement('div'); s.className='s'; bd.appendChild(s);
+    } else {
+      const d = document.createElement('div');
+      d.className = 'r';
+      d.textContent = r[1];
+      d.style.color = COL[r[0]] || '#94a3b8';
+      bd.appendChild(d);
+    }
+  });
+  div.appendChild(bd);
+
+  div.addEventListener('dblclick', e => { e.stopPropagation(); openM(id); });
+
+  let dr=0, sx,sy, ox,oy;
+  div.addEventListener('mousedown', e => {
+    if (e.button !== 0) return;
+    dr=1; sx=e.clientX; sy=e.clientY;
+    ox=POS[id].x; oy=POS[id].y;
+    div.classList.add('drag');
+    e.preventDefault();
+  });
+  document.addEventListener('mousemove', e => {
+    if (!dr) return;
+    const dx = e.clientX - sx, dy = e.clientY - sy;
+    POS[id].x = ox + dx; POS[id].y = oy + dy;
+    div.style.left = POS[id].x + 'px';
+    div.style.top = POS[id].y + 'px';
+    drawLines();
+  });
+  document.addEventListener('mouseup', () => {
+    if (dr) { dr=0; div.classList.remove('drag'); saveLayout(); }
+  });
+
+  paper.appendChild(div);
+});
+
+function btm(id) { const p=POS[id]; return {x:p.x+p.w/2, y:p.y+p.h}; }
+function tp(id) { const p=POS[id]; return {x:p.x+p.w/2, y:p.y+2}; }
+
+function drawLines() {
+  let def = '', path = '';
+  const marker = (t,c) => {
+    const mi = t+c.replace('#','');
+    if (def.includes(mi)) return mi;
+    let m;
+    if (t==='assoc') m=`<polygon points="0,0 9,4.5 0,9" fill="${c}"/>`;
+    else if (t==='agg') m=`<polygon points="0,4.5 5,0 10,4.5 5,9" fill="none" stroke="${c}" stroke-width="1.5"/>`;
+    else if (t==='comp') m=`<polygon points="0,4.5 5,0 10,4.5 5,9" fill="${c}"/>`;
+    else m=`<polygon points="0,0 9,4.5 0,9" fill="${c}"/>`;
+    def += `<marker id="${mi}" markerWidth="12" markerHeight="12" refX="${t==='agg'||t==='comp'?11:9}" refY="4.5" orient="auto">${m}</marker>`;
+    return mi;
+  };
+  ARCS.forEach(a => {
+    const f=btm(a[0]), t=tp(a[1]), my=(f.y+t.y)/2;
+    const mi = marker(a[2], a[3]);
+    const dash = a[2]==='dep'?'stroke-dasharray="6,4"':'';
+    const sw = a[2]==='comp'||a[2]==='agg'?2.5:1.5;
+    path += `<path d="M ${f.x} ${f.y} C ${f.x} ${my}, ${t.x} ${my}, ${t.x} ${t.y}" stroke="${a[3]}" stroke-width="${sw}" fill="none" marker-end="url(#${mi})" ${dash} opacity="0.85"/>`;
+    if (a[4]) { var tw = a[4].length * 7 + 10; path += '<rect x="' + ((f.x + t.x) / 2 - tw / 2) + '" y="' + (my - 18) + '" width="' + tw + '" height="16" rx="3" fill="#0d1520" opacity="0.9"/>'; path += '<text x="' + (f.x + t.x) / 2 + '" y="' + (my - 6) + '" text-anchor="middle" fill="' + a[3] + '" font-size="13" font-family="sans-serif" font-weight="700" opacity="1">' + a[4] + '</text>'; }
+  });
+  svg.innerHTML = `<defs>${def}</defs>${path}`;
+  svg.setAttribute('width', 3600);
+  svg.setAttribute('height', 2600);
+}
+
+let zoom = 1;
+area.addEventListener('wheel', e => {
+  if (!e.ctrlKey && !e.metaKey) return;
+  e.preventDefault();
+  zoom = Math.max(0.3, Math.min(2.5, zoom * (e.deltaY > 0 ? 0.92 : 1.08)));
+  paper.style.transform = `scale(${zoom})`;
+  paper.style.transformOrigin = '0 0';
+});
+
+function resetAll() {
+  localStorage.removeItem(STORAGE_KEY);
+  Object.keys(ORIG_XY).forEach(id => {
+    const p = ORIG_XY[id];
+    DEFAULT_XY[id] = [p[0], p[1]];
+    POS[id] = {...POS[id], x:p[0], y:p[1]};
+    const el = document.getElementById('c'+id);
+    if (el) { el.style.left = p[0]+'px'; el.style.top = p[1]+'px'; }
+  });
+  zoom = 1; paper.style.transform = 'scale(1)'; paper.style.transformOrigin = '0 0';
+  drawLines();
+  area.scrollTo(0, 0);
+  centerView();
+}
+
+function centerView() {
+  let minX=9999, minY=9999, maxX=0, maxY=0;
+  MODS.forEach(m => {
+    const id=m[0], p=POS[id];
+    if (!p) return;
+    if (p.x < minX) minX = p.x;
+    if (p.y < minY) minY = p.y;
+    if (p.x+p.w > maxX) maxX = p.x+p.w;
+    if (p.y+p.h > maxY) maxY = p.y+p.h;
+  });
+  const cw = maxX - minX, ch = maxY - minY;
+  const vw = area.clientWidth, vh = area.clientHeight;
+  area.scrollLeft = Math.max(0, (cw + 80 - vw) / 2);
+  area.scrollTop = Math.max(0, (ch + 60 - vh) / 2);
+}
+
+function openM(id) {
+  const d = DEPS[id]; if (!d) return;
+  let h = `<div class="mo-t">${d.t}</div><div class="mo-st">${d.st}</div>`;
+  d.s.forEach(g => {
+    h += `<div style="margin-bottom:6px;background:#0d1520;border-radius:6px;border-left:3px solid ${g.c};overflow:hidden">`;
+    h += `<div style="padding:4px 10px;font-size:12px;font-weight:600;color:${g.c}">${g.t}</div>`;
+    h += `<div style="padding:2px 10px 6px;font-family:Consolas,monospace;font-size:10px;line-height:1.7;color:#94a3b8">`;
+    g.f.forEach(f => { h += `<div>${f}</div>`; });
+    h += '</div></div>';
+  });
+  if (d.d && d.d.length) {
+    h += `<div style="padding:4px 0;border-top:1px solid #2a3a4a"><span style="font-size:9px;color:#556;text-transform:uppercase;letter-spacing:1px">🔗 关联</span><br>`;
+    d.d.forEach(dp => { h += `<span class="md" onclick="openM('${dp.id}')">${dp.n}: ${dp.v}</span> `; });
+    h += '</div>';
+  }
+  document.getElementById('moBody').innerHTML = h;
+  document.getElementById('mo').classList.add('on');
+}
+function closeM(e) { if (e && e.target !== document.getElementById('mo')) return; document.getElementById('mo').classList.remove('on'); }
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeM(); });
+
+setTimeout(() => { drawLines(); centerView(); }, 100);
+</script>
+</body>
+</html>

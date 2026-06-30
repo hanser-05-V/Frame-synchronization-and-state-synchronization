@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>帧同步笔记 — 图索引</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #0f1923; font-family: 'Segoe UI', system-ui, sans-serif; padding: 40px; }
+  .header { text-align: center; margin-bottom: 40px; }
+  .header h1 { font-size: 28px; color: #e8e8e8; font-weight: 300; letter-spacing: 2px; }
+  .header p { font-size: 14px; color: #667; margin-top: 6px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 24px; max-width: 1200px; margin: 0 auto; }
+  .card { background: #1a2332; border-radius: 16px; overflow: hidden; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 4px 16px rgba(0,0,0,0.3); }
+  .card:hover { transform: translateY(-3px); box-shadow: 0 8px 32px rgba(0,0,0,0.5); }
+  .card-body { padding: 24px; }
+  .card h2 { font-size: 18px; color: #e8e8e8; font-weight: 500; margin-bottom: 6px; }
+  .card .note { font-size: 12px; color: #667; margin-bottom: 10px; }
+  .card .desc { font-size: 13px; color: #94a3b8; line-height: 1.6; margin-bottom: 16px; }
+  .card .btn { display: inline-block; padding: 10px 28px; background: #3b82f6; color: #fff; text-decoration: none; border-radius: 8px; font-size: 14px; font-weight: 500; border: none; cursor: pointer; }
+  .card .btn:hover { background: #2563eb; }
+  .tag { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; margin-bottom: 10px; }
+  .tag-class { background: #1e3a5f; color: #60a5fa; }
+  .tag-flow { background: #1a3c2e; color: #34d399; }
+  .tag-seq { background: #3a2a1a; color: #fbbf24; }
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>✦ 帧同步笔记 · 图索引</h1>
+  <p>双击 HTML 在浏览器打开 · 纯 SVG 矢量图 · 可无限放大 · 拖拽/双击/缩放</p>
+</div>
+<div class="grid">
+
+  <div class="card">
+    <div class="card-body">
+      <div><span class="tag tag-class">类图</span></div>
+      <h2>Input 位域布局图</h2>
+      <div class="note">01-帧同步核心 001 笔记</div>
+      <div class="desc">32-bit 位域分配+位运算拆解，FrameBuffer.Input 的最小数据单元设计</div>
+      <a class="btn" href="./001-Input位域布局图.html">🔗 打开</a>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-body">
+      <div><span class="tag tag-class">类图 + 流程图</span></div>
+      <h2>FrameBuffer 环形缓冲区</h2>
+      <div class="note">01-帧同步核心 002 笔记</div>
+      <div class="desc">环形缓冲区设计 + SyncFrame/TryGetFrame 读写协议 + LocalFrameBuffer/RemoteFrameBuffer 子类差异</div>
+      <a class="btn" href="./002-FrameBuffer环形缓冲区.html">🔗 打开</a>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-body">
+      <div><span class="tag tag-seq">时序图</span></div>
+      <h2>FrameEngine 双线程模型</h2>
+      <div class="note">01-帧同步核心 003 笔记</div>
+      <div class="desc">逻辑线程 + 网络线程 + 主线程的三线协作模型，30FPS 心跳驱动</div>
+      <a class="btn" href="./003-FrameEngine双线程模型.html">🔗 打开</a>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-body">
+      <div><span class="tag tag-class">类图</span></div>
+      <h2>FixedMath 定点数学库</h2>
+      <div class="note">02-定点数学库 001/002 笔记</div>
+      <div class="desc">FixedNumber(32.16) + FixedMath(查表) + FixedVector2/3 + FixedQuaternion 完整类关系</div>
+      <a class="btn" href="./004-定点数类图.html">🔗 打开</a>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-body">
+      <div><span class="tag tag-flow">流程图</span></div>
+      <h2>单机帧同步全链路</h2>
+      <div class="note">03-单机流程 001/002 笔记</div>
+      <div class="desc">①GetInput→②AssembleFrame→③SyncFrame→④LogicUpdate→⑤Confirm+View→⑥RenderUpdate 六步全链路</div>
+      <a class="btn" href="./005-单机帧同步流程图.html">🔗 打开</a>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-body">
+      <div><span class="tag tag-flow">流程图</span></div>
+      <h2>联网预测回滚流程</h2>
+      <div class="note">04-联网流程 001/002/003 笔记</div>
+      <div class="desc">①发输入→②收服务器帧→③ReCalculate对比→回滚重预测→④MD5校验，完整联网同步流程</div>
+      <a class="btn" href="./006-联网预测回滚流程图.html">🔗 打开</a>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-body">
+      <div><span class="tag tag-class">类图</span></div>
+      <h2>ECS 实体组件系统</h2>
+      <div class="note">05-ECS与战斗系统 001/002 笔记</div>
+      <div class="desc">Entity→MatchEntity/PlayerEntity/BallEntity + Component体系 + 30+ System 执行顺序</div>
+      <a class="btn" href="./007-ECS实体类图.html">🔗 打开</a>
+    </div>
+  </div>
+
+</div>
+<div style="text-align:center;margin-top:40px;font-size:12px;color:#445;">
+  目录：charts-output/ · 笔记在 Note/ · 零外部依赖，纯内联 SVG
+</div>
+</body>
+</html>

@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<title>FrameEngine 双线程模型</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0d1520;font-family:'Segoe UI',sans-serif;height:100vh;overflow:hidden}
+.bar{position:fixed;top:0;left:0;right:0;height:38px;z-index:999;display:flex;align-items:center;gap:10px;padding:0 12px;background:rgba(13,21,32,0.95);border-bottom:1px solid #1e2a3a}
+.bar h1{font-size:14px;color:#e8e8e8;font-weight:400}
+.bar .h{font-size:11px;color:#556;flex:1}
+.bar .sp{flex:1}
+.bar button{padding:2px 10px;background:#1e2a3a;border:1px solid #2a3a4a;border-radius:4px;color:#94a3b8;cursor:pointer;font-size:11px;white-space:nowrap}
+.bar button:hover{background:#2a3a4a;color:#e8e8e8}
+#area{position:fixed;top:38px;left:0;right:0;bottom:0;overflow:scroll;background:#0d1520}
+#paper{position:relative;width:3600px;height:2400px;background:radial-gradient(circle at 50% 50%,#111a28 0%,#0d1520 70%)}
+#svg{position:absolute;top:0;left:0;pointer-events:none}
+.c{position:absolute;background:#131d2b;border:1px solid #2a3a4a;border-radius:8px;overflow:hidden;box-shadow:0 3px 12px rgba(0,0,0,0.5);cursor:move;user-select:none;font-family:'Consolas',monospace;font-size:10px;z-index:10}
+.c:hover{box-shadow:0 5px 22px rgba(0,0,0,0.7);z-index:20}
+.c.drag{z-index:100;box-shadow:0 10px 40px rgba(0,0,0,0.9)}
+.c .hd{padding:5px 10px;font-size:11px;font-weight:600;color:#fff}
+.c .bd{padding:2px 0;line-height:1.8}
+.c .bd .r{padding:0 10px;white-space:nowrap}
+.c .bd .s{height:1px;background:#1e2a3a;margin:2px 10px}
+.mo{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.75);justify-content:center;align-items:center;z-index:2000}
+.mo.on{display:flex}
+.mo-b{background:#131d2b;border-radius:12px;padding:20px;max-width:560px;width:92%;max-height:80vh;overflow-y:auto;border:1px solid #2a3a4a;position:relative;cursor:default}
+.mo-x{position:absolute;top:8px;right:12px;background:none;border:none;color:#556;font-size:18px;cursor:pointer}
+.mo-x:hover{color:#e8e8e8}
+.mo-t{font-size:16px;color:#e8e8e8;font-weight:600}
+.mo-st{font-size:11px;color:#556;margin-bottom:10px;margin-top:2px}
+.md{display:inline-block;padding:2px 8px;background:#1a2332;color:#60a5fa;border-radius:4px;font-size:10px;cursor:pointer;margin:1px 2px}
+.md:hover{background:#2a3a4a;color:#93c5fd}
+</style>
+</head>
+<body>
+
+<div class="bar">
+  <h1>✦ FrameEngine 双线程模型</h1>
+  <span class="h">拖拽框↔移动 · 滚动↔平移 · Ctrl+滚轮↔缩放 · 双击↔内部 · 布局自动保存</span>
+  <div class="sp"></div>
+  <button onclick="resetAll()">⟲ 重置布局</button>
+</div>
+
+<div id="area">
+  <div id="paper">
+    <svg id="svg"></svg>
+  </div>
+</div>
+
+<div class="mo" id="mo" onclick="closeM(event)">
+  <div class="mo-b" onclick="event.stopPropagation()">
+    <button class="mo-x" onclick="closeM()">✕</button>
+    <div id="moBody"></div>
+  </div>
+</div>
+
+<script>
+const COL = {pub:'#34d399',pri:'#f87171',pro:'#fbbf24',evt:'#60a5fa'};
+
+const MODS = [
+  ['frameengine','#2563eb','FrameEngine','30FPS心跳引擎',0,
+    ['pub','+ StartEngine(frameInterval, multiThread)'],
+    ['pub','+ StopEngine() / Pause {get;set}'],
+    ['pub','+ RegisterFrameUpdateListener(Action)'],
+    ['pub','+ RegisterNetUpdateListener(Action)'],
+    ['','s'],
+    ['pub','+ static frameInterval : FixedNumber (33ms)'],
+    ['pub','+ timeScale {get;set} (默认1.0)'],
+    ['','s'],
+    ['pri','- _logicThread : Thread'],
+    ['pri','- _netThread : Thread'],
+    ['pri','- _threadStop / _pause : bool'],
+  ],
+  ['logicthread','#059669','逻辑线程 LogicThread','后台·IsBackground',0,
+    ['pub','while (!_threadStop) {'],
+    ['pub','  if (!Pause)'],
+    ['pub','    _frameUpdateListeners();'],
+    ['pub','  Thread.Sleep(1);'],
+    ['pub','}'],
+    ['','s'],
+    ['pub','回调: BattleManager.EngineUpdate()'],
+    ['pub','→ IBattleController.LogicUpdate()'],
+    ['pub','→ 按33ms间隔执行逻辑帧'],
+  ],
+  ['netthread','#d97706','网络线程 NetThread','后台·IsBackground',0,
+    ['pub','while (!_threadStop) {'],
+    ['pub','  if (!Pause)'],
+    ['pub','    _netUpdateListeners();'],
+    ['pub','  Thread.Sleep(1);'],
+    ['pub','}'],
+    ['','s'],
+    ['pub','回调: RemoteBattleNetworkController'],
+    ['pub','→ Send: Input→KCP→Server'],
+    ['pub','→ Recv: Server→KCP→_frameQueue'],
+  ],
+  ['mainthread','#7c3aed','Unity主线程','Unity·60FPS',0,
+    ['pub','RenderUpdate() — 每帧渲染'],
+    ['pub','→ 读取MatchEntity快照'],
+    ['pub','→ 插值渲染 (不等逻辑帧)'],
+    ['','s'],
+    ['pub','allowMultiThread=false时:'],
+    ['pub','手动调 FrameEngine.Update()'],
+    ['pub','单线程fallback (编辑器调试)'],
+  ],
+  ['battlemanager','#475569','BattleManager','MonoBehaviour',0,
+    ['pub','+ EngineUpdate() — 注册到逻辑线程'],
+    ['pub','+ NetUpdate() — 注册到网络线程'],
+    ['pub','+ RenderUpdate() — 主线程Update'],
+    ['','s'],
+    ['pub','确定游戏模式 → 创建Controller'],
+    ['pub','LocalBattleController / RemoteBattleController'],
+  ],
+  ['battlesetting','#475569','BattleSetting','静态常量',0,
+    ['pub','+ FrameInterval = 33 (ms)'],
+    ['pub','+ FramePerSecond = 30'],
+    ['pub','+ MD5CheckFrames = 200'],
+    ['pub','+ UseLogicThread (bool)'],
+  ],
+];
+
+MODS.forEach(m => {
+  let maxW = 0;
+  m.slice(5).forEach(r => {
+    if (r[1] === 's') return;
+    let w = 0;
+    for (const ch of r[1]) w += (ch > 'ÿ' ? 1.7 : 1);
+    w *= 6.2; w += 20;
+    if (w > maxW) maxW = w;
+  });
+  m[4] = Math.max(150, Math.min(380, maxW));
+});
+
+const ARCS = [
+  ['frameengine','logicthread','comp','#fbbf24','创建'],
+  ['frameengine','netthread','comp','#fbbf24','创建'],
+  ['logicthread','battlemanager','dep','#34d399','回调'],
+  ['netthread','battlemanager','dep','#34d399','回调'],
+  ['battlemanager','battlesetting','dep','#34d399','读取'],
+  ['battlemanager','mainthread','dep','#60a5fa','Render'],
+];
+
+const DEFAULT_XY = {
+  frameengine:[120,20],
+  logicthread:[30,300],
+  netthread:[280,300],
+  mainthread:[530,300],
+  battlemanager:[200,600],
+  battlesetting:[550,600],
+};
+const ORIG_XY = JSON.parse(JSON.stringify(DEFAULT_XY));
+
+const DEPS = {
+  frameengine:{t:'FrameEngine',st:'帧同步心跳引擎 · 30FPS固定时钟 · 逻辑/网络线程分离',
+    s:[
+      {c:'#2563eb',t:'生命周期',f:['StartEngine(frameInterval, allowMultiThread) → 启动双线程','StopEngine() → Join线程 + 清理EntitySystem','Pause — 暂停/恢复所有回调']},
+      {c:'#34d399',t:'回调注册',f:['RegisterFrameUpdateListener(Action) — 逻辑更新','RegisterNetUpdateListener(Action) — 网络收发']},
+      {c:'#fbbf24',t:'时间控制',f:['static frameInterval = 33ms (30FPS)','timeScale — 时间缩放(默认1.0) ← 注意不是暂停']},
+      {c:'#f87171',t:'内部线程',f:['_logicThread: Thread(IsBackground=true)','_netThread: Thread(IsBackground=true)','_threadStop: 停止标志','Thread.Sleep(1) — 出让CPU时间片']},
+    ],
+    d:[{n:'逻辑线程',v:'创建·启动',id:'logicthread'},{n:'网络线程',v:'创建·启动',id:'netthread'}]},
+  logicthread:{t:'逻辑线程 LogicThreadUpdate',st:'后台线程 · while(!_threadStop) · Thread.Sleep(1)',
+    s:[
+      {c:'#059669',t:'运行逻辑',f:['while (!_threadStop) {','  if (!Pause) _frameUpdateListeners();','  Thread.Sleep(1); ← 出让CPU(非精确1ms)','}']},
+      {c:'#34d399',t:'实际回调链',f:['_frameUpdateListeners → BattleManager.EngineUpdate()','→ IBattleController.LogicUpdate()','→ while(时间差>=33ms) 跑一帧逻辑','→ MatchController.LogicUpdate() → 状态机+系统']},
+      {c:'#f87171',t:'关键细节',f:['帧间隔精确控制不在FrameEngine，在LogicUpdate内部用while(>=33ms)累加实现','Thread.Sleep(1)不是精确1ms定时器——Windows调度粒度~15ms']},
+    ],
+    d:[{n:'FrameEngine',v:'被创建',id:'frameengine'},{n:'BattleManager',v:'注册回调',id:'battlemanager'}]},
+  netthread:{t:'网络线程 NetThreadUpdate',st:'后台线程 · while(!_threadStop) · 收发包',
+    s:[
+      {c:'#d97706',t:'运行逻辑',f:['while (!_threadStop) {','  if (!Pause) _netUpdateListeners();','  Thread.Sleep(1);','}']},
+      {c:'#34d399',t:'实际回调链',f:['_netUpdateListeners → BattleManager.NetUpdate()','→ RemoteBattleNetworkController','→ Send: 本地Input → KCP → Server','→ Recv: Server → KCP → _frameQueue']},
+      {c:'#f87171',t:'线程安全',f:['FrameEngine本身不做锁','真正的锁在RemoteBattleController._inputLock','FrameBuffer读写假设不跨线程调同一帧']},
+    ],
+    d:[{n:'FrameEngine',v:'被创建',id:'frameengine'},{n:'BattleManager',v:'注册回调',id:'battlemanager'}]},
+  mainthread:{t:'Unity主线程',st:'渲染更新 · 独立于逻辑线程 · 不等待',
+    s:[
+      {c:'#7c3aed',t:'RenderUpdate',f:['每帧读取MatchEntity快照','插值渲染(不等逻辑帧完成)','→ MatchView.RenderUpdate()','→ 逐PlayerView更新位置/动画','Pause时 → PauseView() 画面凝固']},
+      {c:'#fbbf24',t:'单线程模式',f:['allowMultiThread=false时：','逻辑不走独立线程','手动调FrameEngine.Update()','编辑器调试用fallback']},
+    ],
+    d:[{n:'BattleManager',v:'Renderer',id:'battlemanager'}]},
+  battlemanager:{t:'BattleManager',st:'MonoBehaviour · 战斗总入口',
+    s:[
+      {c:'#475569',t:'三类Update',f:['EngineUpdate() — 注册到FrameEngine逻辑线程','NetUpdate() — 注册到FrameEngine网络线程','RenderUpdate() — Unity主线程Update']},
+      {c:'#34d399',t:'Controller创建',f:['LocalBattleController(单机)','RemoteBattleController(联网)','ObserverBattleController(观战)','DemoBattleController(回放)']},
+    ],
+    d:[{n:'FrameEngine',v:'注册→',id:'frameengine'}]},
+  battlesetting:{t:'BattleSetting',st:'静态常量类',
+    s:[
+      {c:'#475569',t:'关键常量',f:['FrameInterval = 33 (ms/帧)','FramePerSecond = 30','MD5CheckFrames = 200 (校验频率)','MaxConfirmedMatchEntityCacheCount = 6']},
+    ],
+    d:[{n:'BattleManager',v:'被读取',id:'battlemanager'}]},
+};
+
+const STORAGE_KEY = 'uml_layout_frameengine';
+function loadLayout() {
+  try { const raw = localStorage.getItem(STORAGE_KEY); if (raw) { const saved = JSON.parse(raw); Object.keys(saved).forEach(id => { if (DEFAULT_XY[id]) DEFAULT_XY[id] = saved[id]; }); } } catch(e) {}
+}
+function saveLayout() {
+  try { const obj = {}; Object.keys(POS).forEach(id => { obj[id] = [POS[id].x, POS[id].y]; }); localStorage.setItem(STORAGE_KEY, JSON.stringify(obj)); } catch(e) {}
+}
+loadLayout();
+
+const area = document.getElementById('area');
+const paper = document.getElementById('paper');
+const svg = document.getElementById('svg');
+const POS = {};
+
+function calcH(rows) { let h = 30; rows.forEach(r => h += r[1]==='s' ? 4 : 18); return h + 6; }
+
+MODS.forEach(m => {
+  const id=m[0], col=m[1], lb=m[2], tg=m[3], w=m[4], rows=m.slice(5);
+  const h = calcH(rows);
+  const xy = DEFAULT_XY[id];
+  POS[id] = {x:xy[0], y:xy[1], w, h};
+  const div = document.createElement('div');
+  div.className = 'c'; div.id = 'c'+id;
+  div.style.left = xy[0]+'px'; div.style.top = xy[1]+'px'; div.style.width = w+'px';
+  const hd = document.createElement('div');
+  hd.className = 'hd'; hd.style.background = col;
+  let hdHtml = lb;
+  if (tg) hdHtml += `<span style="font-size:8px;background:rgba(0,0,0,0.25);padding:0 7px;border-radius:8px;opacity:0.8;float:right">${tg}</span>`;
+  hd.innerHTML = hdHtml;
+  div.appendChild(hd);
+  const bd = document.createElement('div'); bd.className = 'bd';
+  rows.forEach(r => {
+    if (r[1] === 's') { const s = document.createElement('div'); s.className='s'; bd.appendChild(s); }
+    else { const d = document.createElement('div'); d.className = 'r'; d.textContent = r[1]; d.style.color = COL[r[0]] || '#94a3b8'; bd.appendChild(d); }
+  });
+  div.appendChild(bd);
+  div.addEventListener('dblclick', e => { e.stopPropagation(); openM(id); });
+  let dr=0, sx,sy, ox,oy;
+  div.addEventListener('mousedown', e => { if (e.button !== 0) return; dr=1; sx=e.clientX; sy=e.clientY; ox=POS[id].x; oy=POS[id].y; div.classList.add('drag'); e.preventDefault(); });
+  document.addEventListener('mousemove', e => { if (!dr) return; const dx = e.clientX - sx, dy = e.clientY - sy; POS[id].x = ox + dx; POS[id].y = oy + dy; div.style.left = POS[id].x + 'px'; div.style.top = POS[id].y + 'px'; drawLines(); });
+  document.addEventListener('mouseup', () => { if (dr) { dr=0; div.classList.remove('drag'); saveLayout(); } });
+  paper.appendChild(div);
+});
+
+function btm(id) { const p=POS[id]; return {x:p.x+p.w/2, y:p.y+p.h}; }
+function tp(id) { const p=POS[id]; return {x:p.x+p.w/2, y:p.y+2}; }
+
+function drawLines() {
+  let def = '', path = '';
+  const marker = (t,c) => {
+    const mi = t+c.replace('#','');
+    if (def.includes(mi)) return mi;
+    let m;
+    if (t==='assoc') m=`<polygon points="0,0 9,4.5 0,9" fill="${c}"/>`;
+    else if (t==='agg') m=`<polygon points="0,4.5 5,0 10,4.5 5,9" fill="none" stroke="${c}" stroke-width="1.5"/>`;
+    else if (t==='comp') m=`<polygon points="0,4.5 5,0 10,4.5 5,9" fill="${c}"/>`;
+    else m=`<polygon points="0,0 9,4.5 0,9" fill="${c}"/>`;
+    def += `<marker id="${mi}" markerWidth="12" markerHeight="12" refX="${t==='agg'||t==='comp'?11:9}" refY="4.5" orient="auto">${m}</marker>`;
+    return mi;
+  };
+  ARCS.forEach(a => {
+    const f=btm(a[0]), t=tp(a[1]), my=(f.y+t.y)/2;
+    const mi = marker(a[2], a[3]);
+    const dash = a[2]==='dep'?'stroke-dasharray="6,4"':'';
+    const sw = a[2]==='comp'||a[2]==='agg'?2.5:1.5;
+    path += `<path d="M ${f.x} ${f.y} C ${f.x} ${my}, ${t.x} ${my}, ${t.x} ${t.y}" stroke="${a[3]}" stroke-width="${sw}" fill="none" marker-end="url(#${mi})" ${dash} opacity="0.85"/>`;
+    if (a[4]) { var tw = a[4].length * 7 + 10; path += '<rect x="' + ((f.x + t.x) / 2 - tw / 2) + '" y="' + (my - 18) + '" width="' + tw + '" height="16" rx="3" fill="#0d1520" opacity="0.9"/>'; path += '<text x="' + (f.x + t.x) / 2 + '" y="' + (my - 6) + '" text-anchor="middle" fill="' + a[3] + '" font-size="13" font-family="sans-serif" font-weight="700" opacity="1">' + a[4] + '</text>'; }
+  });
+  svg.innerHTML = `<defs>${def}</defs>${path}`;
+  svg.setAttribute('width', 3600); svg.setAttribute('height', 2400);
+}
+
+let zoom = 1;
+area.addEventListener('wheel', e => {
+  if (!e.ctrlKey && !e.metaKey) return;
+  e.preventDefault();
+  zoom = Math.max(0.3, Math.min(2.5, zoom * (e.deltaY > 0 ? 0.92 : 1.08)));
+  paper.style.transform = `scale(${zoom})`; paper.style.transformOrigin = '0 0';
+});
+
+function resetAll() {
+  localStorage.removeItem(STORAGE_KEY);
+  Object.keys(ORIG_XY).forEach(id => {
+    const p = ORIG_XY[id];
+    DEFAULT_XY[id] = [p[0], p[1]];
+    POS[id] = {...POS[id], x:p[0], y:p[1]};
+    const el = document.getElementById('c'+id);
+    if (el) { el.style.left = p[0]+'px'; el.style.top = p[1]+'px'; }
+  });
+  zoom = 1; paper.style.transform = 'scale(1)'; paper.style.transformOrigin = '0 0';
+  drawLines(); area.scrollTo(0, 0); centerView();
+}
+function centerView() {
+  let minX=9999, minY=9999, maxX=0, maxY=0;
+  MODS.forEach(m => {
+    const id=m[0], p=POS[id];
+    if (!p) return;
+    if (p.x < minX) minX = p.x; if (p.y < minY) minY = p.y;
+    if (p.x+p.w > maxX) maxX = p.x+p.w; if (p.y+p.h > maxY) maxY = p.y+p.h;
+  });
+  const cw = maxX - minX, ch = maxY - minY;
+  const vw = area.clientWidth, vh = area.clientHeight;
+  area.scrollLeft = Math.max(0, (cw + 80 - vw) / 2);
+  area.scrollTop = Math.max(0, (ch + 60 - vh) / 2);
+}
+function openM(id) {
+  const d = DEPS[id]; if (!d) return;
+  let h = `<div class="mo-t">${d.t}</div><div class="mo-st">${d.st}</div>`;
+  d.s.forEach(g => {
+    h += `<div style="margin-bottom:6px;background:#0d1520;border-radius:6px;border-left:3px solid ${g.c};overflow:hidden">`;
+    h += `<div style="padding:4px 10px;font-size:12px;font-weight:600;color:${g.c}">${g.t}</div>`;
+    h += `<div style="padding:2px 10px 6px;font-family:Consolas,monospace;font-size:10px;line-height:1.7;color:#94a3b8">`;
+    g.f.forEach(f => { h += `<div>${f}</div>`; });
+    h += '</div></div>';
+  });
+  if (d.d && d.d.length) {
+    h += `<div style="padding:4px 0;border-top:1px solid #2a3a4a"><span style="font-size:9px;color:#556;text-transform:uppercase;letter-spacing:1px">🔗 关联</span><br>`;
+    d.d.forEach(dp => { h += `<span class="md" onclick="openM('${dp.id}')">${dp.n}: ${dp.v}</span> `; });
+    h += '</div>';
+  }
+  document.getElementById('moBody').innerHTML = h;
+  document.getElementById('mo').classList.add('on');
+}
+function closeM(e) { if (e && e.target !== document.getElementById('mo')) return; document.getElementById('mo').classList.remove('on'); }
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeM(); });
+setTimeout(() => { drawLines(); centerView(); }, 100);
+</script>
+</body>
+</html>
