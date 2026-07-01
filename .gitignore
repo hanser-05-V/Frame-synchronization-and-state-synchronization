@@ -1,10 +1,21 @@
-# 排除框架源码（仅推送笔记）
+# 排除框架源码
 Common/
 Framework/
 Script/
-Project/
+
+# 排除 Unity 生成文件
+Project/Frame Synchronization/Library/
+Project/Frame Synchronization/obj/
+Project/Frame Synchronization/Temp/
+Project/Frame Synchronization/Logs/
+Project/Frame Synchronization/UserSettings/
+Project/Frame Synchronization/.idea/
+Project/Frame Synchronization/*.csproj
+Project/Frame Synchronization/*.sln
+Project/Frame Synchronization/Assets/Scenes/
 
 # 排除临时文件
 .claude/
+.superpowers/
 *.meta
 *.tmp
