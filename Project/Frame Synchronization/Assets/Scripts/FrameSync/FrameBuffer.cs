@@ -11,7 +11,7 @@ namespace FrameSyncDemo
     {
         public const int CAPACITY = 256;
 
-        /// <summary>一帧中所有玩家的输入集合</summary>
+        /// <summary>一帧中所有玩家的输入集合</summary>  帧ID 玩家数量 玩家输入录入
         [System.Serializable]
         public struct Frame
         {
@@ -42,10 +42,10 @@ namespace FrameSyncDemo
         private int _maxWrittenFrame = -1;
         private int _lastReadFrame = -1;
 
-        public int MaxWrittenFrame => _maxWrittenFrame;
-        public int LastReadFrame => _lastReadFrame;
-        public int UsedCount => System.Math.Max(0, _maxWrittenFrame - _lastReadFrame + 1);
-        public int FreeCount => CAPACITY - UsedCount;
+        public int MaxWrittenFrame => _maxWrittenFrame; //写指针（写到了第几帧）
+        public int LastReadFrame => _lastReadFrame;   //读指针（消费到了第几帧）
+        public int UsedCount => System.Math.Max(0, _maxWrittenFrame - _lastReadFrame + 1); //以缓冲帧
+        public int FreeCount => CAPACITY - UsedCount; // 待分配帧
 
         public FrameBuffer()
         {

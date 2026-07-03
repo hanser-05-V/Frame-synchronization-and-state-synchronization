@@ -56,7 +56,7 @@ namespace FrameSyncDemo
 
         public void StartEngine()
         {
-            _startMs = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+            _startMs = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(); //记录引擎启动时的绝对时间戳
             _lastLogicMs = 0;
             _isRunning = true;
             Debug.Log($"[FrameEngine] 启动 — {_frameCountPerSecond}FPS ({_frameIntervalMs}ms/帧)");
@@ -84,7 +84,8 @@ namespace FrameSyncDemo
             long nowMs = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
             long elapsedMs = nowMs - _startMs;
 
-            int frameRun = 0;
+            int frameRun = 0; //追帧
+            //     当前总耗时 - 上一次逻辑帧时间 ≥ 单帧间隔
             while (elapsedMs - _lastLogicMs >= _frameIntervalMs)
             {
                 _lastLogicMs += _frameIntervalMs;
@@ -95,7 +96,7 @@ namespace FrameSyncDemo
             if (frameRun > 1)
             {
                 _catchupCount++;
-                OnCatchup?.Invoke(frameRun - 1);
+                OnCatchup?.Invoke(frameRun - 1); //追帧 回调
             }
         }
 
