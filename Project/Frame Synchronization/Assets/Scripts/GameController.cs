@@ -4,7 +4,7 @@ using UnityEngine.UI;
 namespace FrameSyncDemo
 {
     /// <summary>
-    /// 游戏控制器 — 方块控制 + Input收集 + 录制回放
+    /// 游戏控制器 — 方块控制 + Input收集 + 录回放
     /// 正确时序：FrameEngine.OnRequestInput(读键) → 执行帧 → OnFrameUpdate(更新位置)
     /// </summary>
     public class GameController : MonoBehaviour
@@ -35,8 +35,8 @@ namespace FrameSyncDemo
             // 绑定引擎
             _frameEngine.Initialize(_playerCount, 33);
             _frameEngine.OnRequestInput = ReadInputs;   // 引擎每帧从这里拉输入
-            _frameEngine.OnFrameUpdate += OnFrameUpdate; // 引擎每帧执行完通知这里
-            _frameEngine.OnCatchup += OnCatchup;
+            _frameEngine.OnFrameUpdate += OnFrameUpdate; // 引擎每帧执行完通知这里 逻辑层执行逻辑
+            _frameEngine.OnCatchup += OnCatchup; //追帧 回调
 
             // 创建方块
             _blocks = new GameObject[_playerCount];
