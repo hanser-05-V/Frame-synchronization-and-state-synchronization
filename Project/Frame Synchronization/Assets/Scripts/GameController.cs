@@ -21,6 +21,7 @@ namespace FrameSyncDemo
         private FixedInt[] _blockPosZ;
         private int _playerCount = 2;
         private bool _paused = false;
+        private NetworkClient _networkClient;
 
         private static readonly int[] DirX = { 0, 0, 1, 1, 1, 0, -1, -1, -1 };
         private static readonly int[] DirZ = { 0, 1, 1, 0, -1, -1, -1, 0, 1 };
@@ -81,6 +82,20 @@ namespace FrameSyncDemo
             FrameDebugger.Instance.targetFPS = _frameEngine.TargetFPS;
             FrameDebugger.Instance.frameIntervalMs = _frameEngine.FrameIntervalMs;
 
+            // ===== 网络初始化 =====
+            _networkClient = gameObject.GetComponent<NetworkClient>();
+            if (_networkClient == null)
+                _networkClient = gameObject.AddComponent<NetworkClient>();
+
+            // Editor 作为 P0(操控P1)，exe 作为 P1(操控P2)
+            // TODO: 当两个都是exe时，需通过命令行参数/配置文件区分localID
+            int localID = Application.isEditor ? 0 : 1;
+            NetworkConfig.LocalPlayerID = localID;
+
+            // 连接服务器（如果服务器没开，Connect 会超时约 21 秒）
+            // 先开服务器再启动 Unity 可避免等待
+            _networkClient.Connect(NetworkConfig.DEFAULT_IP, NetworkConfig.DEFAULT_PORT);
+
             _frameEngine.StartEngine();
         }
 
@@ -115,6 +130,28 @@ namespace FrameSyncDemo
                         inputs[p] = new FrameInput();
                 }
                 return inputs;
+            }
+
+            // 网络模式：P1本地+P2远程（或反过来）
+            if (_networkClient != null && _networkClient.IsConnected)
+            {
+                // 读本机键盘
+                var myInput = _networkClient.LocalPlayerIndex == 0
+                    ? ReadP1Input() : ReadP2Input();
+
+                // 从网络队列取对方 Input
+                uint remoteRaw;
+                bool hasRemote = _networkClient.TryGetRemoteInput(out remoteRaw);
+                var remoteInput = hasRemote ? FrameInput.FromRaw(remoteRaw) : new FrameInput();
+
+                // 发送本机 Input
+                _networkClient.SendInput(myInput._raw);
+
+                // 按 playerIndex 排序返回 [P1的Input, P2的Input]
+                var result = new FrameInput[2];
+                result[_networkClient.LocalPlayerIndex] = myInput;
+                result[_networkClient.RemotePlayerIndex] = remoteInput;
+                return result;
             }
 
             return new FrameInput[] { ReadP1Input(), ReadP2Input() };
