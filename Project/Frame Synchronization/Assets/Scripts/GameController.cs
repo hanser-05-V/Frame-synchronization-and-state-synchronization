@@ -14,9 +14,12 @@ namespace FrameSyncDemo
 
         [Header("方块设置")]
         [SerializeField] private float _moveSpeed = 5f;
+        [Header("材质")]
+        [SerializeField] private Material _blockMaterial;
+        [SerializeField] private Material _planeMaterial;
 
         private GameObject[] _blocks;
-        private Renderer[] _blockRenderers;
+        private MeshRenderer[] _blockRenderers;
         private FixedInt[] _blockPosX;
         private FixedInt[] _blockPosZ;
         private int _playerCount = 2;
@@ -41,7 +44,7 @@ namespace FrameSyncDemo
 
             // 创建方块
             _blocks = new GameObject[_playerCount];
-            _blockRenderers = new Renderer[_playerCount];
+            _blockRenderers = new MeshRenderer[_playerCount];
             _blockPosX = new FixedInt[_playerCount];
             _blockPosZ = new FixedInt[_playerCount];
 
@@ -55,8 +58,8 @@ namespace FrameSyncDemo
                 _blocks[i].name = i == 0 ? "P1_RedBlock" : "P2_BlueBlock";
                 _blocks[i].transform.position = new Vector3(i == 0 ? -3 : 3, 0.5f, 0);
                 _blocks[i].transform.localScale = new Vector3(1, 1, 1);
-
-                _blockRenderers[i] = _blocks[i].GetComponent<Renderer>();
+                _blocks[i].GetComponent<MeshRenderer>().material = _blockMaterial;
+                _blockRenderers[i] = _blocks[i].GetComponent<MeshRenderer>();
                 if (_blockRenderers[i] != null)
                     _blockRenderers[i].material.color = i == 0 ? p1Color : p2Color;
 
@@ -70,6 +73,9 @@ namespace FrameSyncDemo
             ground.transform.SetParent(transform);
             ground.transform.position = Vector3.zero;
             ground.transform.localScale = new Vector3(2, 1, 2);
+            
+            MeshRenderer groundRenderer = ground.GetComponent<MeshRenderer>();
+            groundRenderer.material = _planeMaterial;
             ground.GetComponent<Renderer>().material.color = new Color(0.15f, 0.15f, 0.18f);
 
             // FrameDebugger
@@ -249,6 +255,12 @@ namespace FrameSyncDemo
                 if (_paused) _frameEngine.Pause();
                 else _frameEngine.Resume();
             }
+
+            if(Input.GetKeyDown(KeyCode.Escape))
+            {
+                Application.Quit();
+            }
+
         }
 
         // ===== 输入读取 =====
