@@ -56,13 +56,18 @@ namespace FrameSyncDemo
             }
         }
 
-        public void SendInput(uint raw)
+        public void SendInput(uint raw) { SendInput(raw, -1); }
+
+        /// <summary>发送输入 + 本地帧号（8字节协议，帧号用于服务器转发确认）</summary>
+        public void SendInput(uint raw, int localFrameID)
         {
             if (!_isConnected || _stream == null) return;
             try
             {
-                byte[] data = System.BitConverter.GetBytes(raw);
-                _stream.Write(data, 0, 4);
+                byte[] data = new byte[8];
+                System.BitConverter.GetBytes(raw).CopyTo(data, 0);
+                System.BitConverter.GetBytes(localFrameID).CopyTo(data, 4);
+                _stream.Write(data, 0, 8);
             }
             catch (System.Exception e)
             {
@@ -71,19 +76,16 @@ namespace FrameSyncDemo
             }
         }
 
-        public bool TryGetRemoteInput(out uint raw)
-        {
-            return _remoteInputs.TryDequeue(out raw);
-        }
+        public bool TryGetRemoteInput(out uint raw) => _remoteInputs.TryDequeue(out raw);
 
         private void RecvLoop()
         {
-            byte[] buffer = new byte[4];
+            byte[] buffer = new byte[8];
             while (_running && _isConnected)
             {
                 try
                 {
-                    int bytesRead = _stream.Read(buffer, 0, 4);
+                    int bytesRead = _stream.Read(buffer, 0, 8);
                     if (bytesRead <= 0) break;
 
                     uint raw = System.BitConverter.ToUInt32(buffer, 0);
@@ -105,9 +107,6 @@ namespace FrameSyncDemo
             _tcp?.Close();
         }
 
-        private void OnApplicationQuit()
-        {
-            _running = false;
-        }
+        private void OnApplicationQuit() { _running = false; }
     }
 }

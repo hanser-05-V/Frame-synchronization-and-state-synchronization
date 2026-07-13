@@ -10,11 +10,12 @@ namespace FrameSyncServer
     {
         static List<TcpClient> _clients = new List<TcpClient>();
         static object _lock = new object();
+        static int[] _confirmedFrames = new int[2];
 
         static void Main(string[] args)
         {
             Console.WriteLine("==================================");
-            Console.WriteLine(" 帧同步转发服务器");
+            Console.WriteLine(" 帧同步转发服务器 (8字节协议)");
             Console.WriteLine("==================================");
             Console.WriteLine(" 选择模式：");
             Console.WriteLine("   0 = 正常模式 (无延迟)");
@@ -52,10 +53,17 @@ namespace FrameSyncServer
             while (true) { Thread.Sleep(1000); }
         }
 
+        struct Packet
+        {
+            public uint raw;
+            public int frameID;
+            public int senderIdx;
+        }
+
         static void RecvLoop(int clientIdx, TcpClient client, int delay)
         {
-            byte[] buffer = new byte[4];
-            var sendQueue = new Queue<uint>();
+            byte[] buffer = new byte[8];
+            var sendQueue = new Queue<Packet>();
             object queueLock = new object();
             bool running = true;
 
@@ -66,16 +74,16 @@ namespace FrameSyncServer
                 {
                     Thread.Sleep(delay > 0 ? delay : 5);
 
-                    List<uint> batch = new List<uint>();
+                    List<Packet> batch = new List<Packet>();
                     lock (queueLock)
                     {
                         while (sendQueue.Count > 0)
                             batch.Add(sendQueue.Dequeue());
                     }
 
-                    // 把积压的包一次性全发出去——客户端收到后会while追帧，瞬移
-                    foreach (var raw in batch)
-                        Broadcast(raw, client);
+                    // 把积压的包一次性全发出去
+                    foreach (var pkt in batch)
+                        Broadcast(pkt.raw, pkt.senderIdx, pkt.frameID);
                 }
             });
             sendThread.IsBackground = true;
@@ -86,10 +94,12 @@ namespace FrameSyncServer
                 var stream = client.GetStream();
                 while (true)
                 {
-                    int bytesRead = stream.Read(buffer, 0, 4);
+                    int bytesRead = stream.Read(buffer, 0, 8);
                     if (bytesRead <= 0) break;
                     uint raw = BitConverter.ToUInt32(buffer, 0);
-                    lock (queueLock) { sendQueue.Enqueue(raw); }
+                    int frameID = BitConverter.ToInt32(buffer, 4);
+                    _confirmedFrames[clientIdx] = frameID;
+                    lock (queueLock) { sendQueue.Enqueue(new Packet { raw = raw, frameID = frameID, senderIdx = clientIdx }); }
                 }
             }
             catch (Exception e)
@@ -99,15 +109,17 @@ namespace FrameSyncServer
             running = false;
         }
 
-        static void Broadcast(uint raw, TcpClient sender)
+        static void Broadcast(uint raw, int senderIdx, int frameID)
         {
-            byte[] data = BitConverter.GetBytes(raw);
+            byte[] data = new byte[8];
+            BitConverter.GetBytes(raw).CopyTo(data, 0);
+            BitConverter.GetBytes(_confirmedFrames[senderIdx]).CopyTo(data, 4);
             lock (_lock)
             {
                 foreach (var c in _clients)
                 {
-                    if (c == sender) continue;
-                    try { c.GetStream().Write(data, 0, 4); }
+                    if (c == _clients[senderIdx]) continue;
+                    try { c.GetStream().Write(data, 0, 8); }
                     catch { }
                 }
             }
