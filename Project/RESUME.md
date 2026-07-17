@@ -30,6 +30,8 @@
 | 帅老大理解检验：✅2条核心洞察 + ❌5条纠偏（错误必须指出铁律） | ✅ |
 | 💜小爱笔记：问题#2 追加写入 `Project\项目实现中遇到的问题记录.md`（含纠偏表） | ✅ |
 | 双仓库推送 GitHub（会话文件夹首次入库，支持家中续档） | ✅ |
+| 双机同步铁律写入 CLAUDE.md/AGENTS.md（启动先pull + 五类节点必push） | ✅ |
+| 参考源码私有仓 `hanser-05-V/Frame` 入库推送（Common+Framework+Script，90MB/3790文件） | ✅ |
 
 ---
 
@@ -67,11 +69,16 @@
 ## 家中电脑恢复步骤
 
 ```
-① 两个仓库放到相同盘符路径（CLAUDE.md 中路径写死为 E:\）：
+① 三个仓库放到相同盘符路径（CLAUDE.md 中路径写死为 E:\）：
    git clone https://github.com/hanser-05-V/Frame-synchronization-and-state-synchronization.git E:\帧同步
    git clone https://github.com/hanser-05-V/Ls_Claude_Agents.git E:\LS_Claude_Agents
-   （已 clone 过则两边各自 git pull）
-② 在 E:\帧同步 打开 Claude Code，输入 /Ls
+   git clone https://github.com/hanser-05-V/Frame.git E:\Frame        ← 参考源码（Private）
+   （已 clone 过则各自 git pull）
+② 参考源码复制进主项目（主仓 .gitignore 已排除这三个目录，不会污染）：
+   cp -r E:\Frame\Common E:\帧同步\
+   cp -r E:\Frame\Framework E:\帧同步\
+   cp -r E:\Frame\Script E:\帧同步\
+③ 在 E:\帧同步 打开 Claude Code，输入 /Ls
    → 主脑自动读取 任务墙 / RESUME / 路线规划 并汇报，无缝续档
 ```
 

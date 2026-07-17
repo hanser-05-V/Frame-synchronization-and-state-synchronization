@@ -40,6 +40,10 @@ E:\LS_Claude_Agents\帧同步_20260717_1536\
 |----------|------------|
 | `E:\帧同步` | `hanser-05-V/Frame-synchronization-and-state-synchronization` |
 | `E:\LS_Claude_Agents` | `hanser-05-V/Ls_Claude_Agents` |
+| `E:\Frame`（参考源码，只读） | `hanser-05-V/Frame`（**必须保持 Private**） |
+
+参考源码（Common/Framework/Script，街篮2）不入主仓（.gitignore 排除，防公开泄露）；
+家中首次恢复：clone `Frame` 后把三个目录复制到 `E:\帧同步\` 下即可，后续基本不变。
 
 推送前先 `git pull --rebase`；出现冲突立即停下汇报帅老大，**一律禁止 force push**。
 若家中盘符不是 E:\，需同步修改本文件与 CLAUDE.md 中的写死路径。
