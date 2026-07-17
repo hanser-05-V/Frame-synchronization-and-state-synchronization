@@ -31,6 +31,8 @@ namespace FrameSyncDemo
 
         // 冷启动保护
         private int _realDataArrived;
+        private int _coldStartSkipped;        // 冷启动跳过的预测帧数
+        private int _validatedOk;             // 验证通过的帧数
         private const int SKIP_INITIAL_FRAMES = 5;
 
         public bool HasPendingRollback => _pendingErrorFrame >= 0;
@@ -43,6 +45,8 @@ namespace FrameSyncDemo
             _predictionHistory = new Dictionary<int, FrameInput>(capacity);
             _pendingErrorFrame = -1;
             _realDataArrived = 0;
+            _coldStartSkipped = 0;
+            _validatedOk = 0;
         }
 
         /// <summary>
@@ -64,12 +68,19 @@ namespace FrameSyncDemo
                     {
                         _predictionHistory.Remove(predictedFrame);
 
-                        if (predictedValue._raw != realDataRaw)
+                        // 冷启动：预测值还是默认 0x00000000，跳过不验证
+                        if (predictedValue._raw == 0)
+                        {
+                            _coldStartSkipped++;
+                            // 每 50 帧输出一次状态
+                            if ((_coldStartSkipped + _validatedOk) % 50 == 0)
+                                Debug.Log($"[PredictionSystem] ... 已跳过{_coldStartSkipped}条冷启动预测, " +
+                                    $"队列剩余{_predictedFrameQueue.Count}, 已验证{_validatedOk}条");
+                        }
+                        else if (predictedValue._raw != realDataRaw)
                         {
                             // ❌ 预测错了 → 这个帧及之后的所有预测全部作废
                             _pendingErrorFrame = predictedFrame;
-
-                            // 不是 _lastPredictedFrame 的值，是触发这轮回滚的值
                             _correctRemoteRaw = realDataRaw;
 
                             // 清空整个队列+字典（后续预测全部被污染）
@@ -83,7 +94,11 @@ namespace FrameSyncDemo
                         }
                         else
                         {
-                            Debug.Log($"[PredictionSystem] ✅ 帧{predictedFrame}预测正确");
+                            _validatedOk++;
+                            // 每 20 条输出一次（避免刷屏）
+                            if (_validatedOk % 20 == 1)
+                                Debug.Log($"[PredictionSystem] ✅ 帧{predictedFrame}预测正确 " +
+                                    $"(累计{_validatedOk}条, 队列{_predictedFrameQueue.Count})");
                         }
                     }
                 }
@@ -95,12 +110,7 @@ namespace FrameSyncDemo
             {
                 // ── 无数据 → 预测：假设对方和上一帧一样 ──
                 _predictionHistory[frameID] = _lastRemoteInput;
-
-                // 只有收到过真实数据后（_lastRemoteInput != 默认值）才入队验证
-                // 避免初始 0x00000000 的预测和真实非零数据对比导致必然失败
-                if (_realDataArrived > 0)
-                    _predictedFrameQueue.Enqueue(frameID);
-
+                _predictedFrameQueue.Enqueue(frameID);
                 return _lastRemoteInput;
             }
         }
