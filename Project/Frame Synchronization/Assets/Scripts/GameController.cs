@@ -158,8 +158,9 @@ namespace FrameSyncDemo
                 uint remoteRaw;
                 bool hasRemote = _networkClient.TryGetRemoteInput(out remoteRaw);
 
-                // 预测对手输入（有真实数据就用真实数据，没有就预测）
-                FrameInput remoteInput = _predictionSystem.PredictRemote(hasRemote, remoteRaw);
+                // 预测对手输入（含验证+回滚标记）
+                int currentFrame = _frameEngine.CurrentFrame - 1;
+                FrameInput remoteInput = _predictionSystem.PredictRemote(hasRemote, remoteRaw, currentFrame);
 
                 // 发送本机 Input + 本地帧号（8字节协议）
                 _networkClient.SendInput(myInput._raw, _frameEngine.CurrentFrame - 1);
@@ -199,8 +200,16 @@ namespace FrameSyncDemo
                     i == 0 ? new Color(0.9f, 0.2f, 0.2f) : new Color(0.2f, 0.4f, 0.9f));
             }
 
-            // (预测验证已简化：不做帧号匹配，只做纯预测)
-            // 后续可以在 FrameBuffer 层面做更精确的帧号对齐验证
+            // 检查是否有待处理的回滚（预测错误触发）
+            if (_predictionSystem != null && _predictionSystem.HasPendingRollback
+                && (FrameDebugger.Instance == null || !FrameDebugger.Instance.isPlayingBack))
+            {
+                if (_predictionSystem.TryConsumeRollback(out int errorFrame, out uint correctRemoteRaw))
+                {
+                    Debug.Log($"[Rollback] 帧{errorFrame}预测错误，开始回滚纠正");
+                    DoRollback(errorFrame, correctRemoteRaw);
+                }
+            }
 
             // 回放结束自动暂停
             if (FrameDebugger.Instance != null && FrameDebugger.Instance.isPlayingBack &&
@@ -336,9 +345,9 @@ namespace FrameSyncDemo
             _blocks[1].transform.position = new Vector3(3, 0.5f, 0);
         }
 
-        // ===== 回滚逻辑（当前简化版 — 不做帧验证，保留 DoRollback 供后续完善）=====
+        // ===== 回滚逻辑 =====
 
-        /// <summary>执行回滚：恢复快照 → 从 safeFrame+1 逐帧重跑到 currentFrame</summary>
+        /// <summary>执行回滚：恢复快照 → 重跑 errorFrame..currentFrame → 继续预测</summary>
         private void DoRollback(int errorFrame, uint correctRemoteRaw)
         {
             int safeFrame = errorFrame - 1;
@@ -355,6 +364,9 @@ namespace FrameSyncDemo
             int localIdx = _networkClient != null ? _networkClient.LocalPlayerIndex : 0;
             int remoteIdx = _networkClient != null ? _networkClient.RemotePlayerIndex : 1;
 
+            // 当前已知正确的远程输入（回滚期间持续使用）
+            uint knownCorrectRemoteRaw = correctRemoteRaw;
+
             for (int i = safeFrame + 1; i <= currentFrame; i++)
             {
                 FrameInput[] inputs = new FrameInput[2];
@@ -366,13 +378,20 @@ namespace FrameSyncDemo
                 else
                     inputs[localIdx] = localIdx == 0 ? ReadP1Input() : ReadP2Input();
 
-                // 远程Input：只有 errorFrame 用正确值，其他用 buffer 中的预测值
-                if (i == errorFrame)
-                    inputs[remoteIdx] = FrameInput.FromRaw(correctRemoteRaw);
-                else if (_frameEngine.Buffer.PeekFrame(i, out frameData))
-                    inputs[remoteIdx] = frameData.inputs[remoteIdx];
+                // 远程Input：从 errorFrame 开始全部用正确的值
+                // （因为 errorFrame 及之后的预测都基于错误假设，全被清除了）
+                if (i >= errorFrame)
+                {
+                    // 尝试从队列取更新的远程数据（可能在回滚期间有新数据到达）
+                    uint fresherRaw;
+                    if (_networkClient.TryGetRemoteInput(out fresherRaw))
+                        knownCorrectRemoteRaw = fresherRaw;
+                    inputs[remoteIdx] = FrameInput.FromRaw(knownCorrectRemoteRaw);
+                }
                 else
-                    inputs[remoteIdx] = new FrameInput();
+                {
+                    inputs[remoteIdx] = frameData.inputs[remoteIdx];
+                }
 
                 // 执行位置更新
                 for (int p = 0; p < inputs.Length; p++)
@@ -390,7 +409,8 @@ namespace FrameSyncDemo
                 _predictionSystem.TakeSnapshot(i, _blockPosX, _blockPosZ);
             }
 
-            Debug.Log($"[Rollback] 回滚完成: safe={safeFrame} → 重放帧{safeFrame+1}..{currentFrame}");
+            Debug.Log($"[Rollback] 回滚完成: safe={safeFrame} → 重放帧{safeFrame+1}..{currentFrame} " +
+                $"(纠正远程Input: {correctRemoteRaw:X8})");
         }
 
         private void OnDestroy()
