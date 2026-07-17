@@ -95,7 +95,12 @@ namespace FrameSyncDemo
             {
                 // ── 无数据 → 预测：假设对方和上一帧一样 ──
                 _predictionHistory[frameID] = _lastRemoteInput;
-                _predictedFrameQueue.Enqueue(frameID);
+
+                // 只有收到过真实数据后（_lastRemoteInput != 默认值）才入队验证
+                // 避免初始 0x00000000 的预测和真实非零数据对比导致必然失败
+                if (_realDataArrived > 0)
+                    _predictedFrameQueue.Enqueue(frameID);
+
                 return _lastRemoteInput;
             }
         }

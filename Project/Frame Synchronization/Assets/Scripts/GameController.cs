@@ -351,13 +351,27 @@ namespace FrameSyncDemo
         private void DoRollback(int errorFrame, uint correctRemoteRaw)
         {
             int safeFrame = errorFrame - 1;
-            if (safeFrame < 0) return;
 
-            if (!_predictionSystem.RestoreSnapshot(safeFrame, ref _blockPosX, ref _blockPosZ))
+            // 尝试找到有效的快照帧（从 safeFrame 往回找）
+            int foundFrame = -1;
+            for (int f = safeFrame; f >= 0; f--)
             {
-                Debug.LogError("[Rollback] 快照恢复失败");
-                return;
+                if (_predictionSystem.RestoreSnapshot(f, ref _blockPosX, ref _blockPosZ))
+                {
+                    foundFrame = f;
+                    break;
+                }
             }
+
+            if (foundFrame < 0)
+            {
+                // 没有任何快照 → 回退到初始位置
+                Debug.LogWarning("[Rollback] 无有效快照，重置到初始位置");
+                ResetPositions();
+                foundFrame = 0;
+            }
+
+            safeFrame = foundFrame;
 
             int currentFrame = _frameEngine.CurrentFrame;
             FixedInt speed = FixedInt.FromFloat(_moveSpeed * 0.033f);
