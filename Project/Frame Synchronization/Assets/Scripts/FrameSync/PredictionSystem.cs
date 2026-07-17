@@ -1,29 +1,28 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace FrameSyncDemo
 {
     /// <summary>
-    /// 本地预测 + 回滚纠正系统（v7 — 全量预测验证）
+    /// 本地预测 + 回滚纠正系统（v8 — FIFO逐个验证）
     ///
     /// 核心逻辑：
-    ///   1. 每帧无数据时 → 记录"本帧用了预测值X"
-    ///   2. 真实数据到达时 → 遍历所有未验证预测帧，任意一个预测值 ≠ 真实值 → 回滚
-    ///   3. 回滚 → 恢复快照（最早错误帧-1），重跑全部后续帧
-    ///   4. 跳过前3帧（避免初始 0x00000000 误判）
+    ///   1. 无数据 → 记录预测帧到队列尾部
+    ///   2. 有数据 → 弹出队列头部的最早预测帧，对比验证
+    ///   3. 错 → 回滚（最早错误帧-1 → 重跑后续全部帧）
+    ///   4. 对 → 移除该条预测，下一条真实数据验证下一个预测
     ///
-    /// v7 改动（vs v6）：
-    ///   - 不再只验证 _lastPredictedFrame，改为验证全部 _predictionHistory
-    ///   - 找到最早的不匹配预测帧触发回滚
-    ///   - SKIP_INITIAL_FRAMES 从 10 降到 3
-    ///   - 验证后不移除已验证的预测记录（留给后续帧继续验证）
+    /// 关键原则：一条真实数据 = 验证一条预测（FIFO 1:1）
     /// </summary>
     public class PredictionSystem
     {
         private SnapshotBuffer _snapshotBuffer;
         private FrameInput _lastRemoteInput = default;
 
-        // 所有未验证的预测帧 [localFrameID → 预测值]
+        // 未验证预测帧队列 [localFrameID]
+        private Queue<int> _predictedFrameQueue;
+        // 预测值存储 [localFrameID → 预测值]
         private Dictionary<int, FrameInput> _predictionHistory;
 
         // 待处理回滚
@@ -31,9 +30,8 @@ namespace FrameSyncDemo
         private uint _correctRemoteRaw;
 
         // 冷启动保护
-        private int _totalFrames;
         private int _realDataArrived;
-        private const int SKIP_INITIAL_FRAMES = 3;
+        private const int SKIP_INITIAL_FRAMES = 5;
 
         public bool HasPendingRollback => _pendingErrorFrame >= 0;
 
@@ -41,9 +39,9 @@ namespace FrameSyncDemo
         {
             _snapshotBuffer = new SnapshotBuffer(capacity);
             _lastRemoteInput = new FrameInput();
+            _predictedFrameQueue = new Queue<int>(64);
             _predictionHistory = new Dictionary<int, FrameInput>(capacity);
             _pendingErrorFrame = -1;
-            _totalFrames = 0;
             _realDataArrived = 0;
         }
 
@@ -57,48 +55,36 @@ namespace FrameSyncDemo
                 FrameInput realInput = FrameInput.FromRaw(realDataRaw);
                 _realDataArrived++;
 
-                // 验证：真实数据是否和已经记录的任何预测值不同？
-                if (_realDataArrived > SKIP_INITIAL_FRAMES && _predictionHistory.Count > 0)
+                // FIFO 逐个验证：每条真实数据只验证最早的一条未验证预测
+                if (_realDataArrived > SKIP_INITIAL_FRAMES && _predictedFrameQueue.Count > 0)
                 {
-                    int earliestWrong = int.MaxValue;
-                    foreach (var kv in _predictionHistory)
+                    int predictedFrame = _predictedFrameQueue.Dequeue();
+
+                    if (_predictionHistory.TryGetValue(predictedFrame, out var predictedValue))
                     {
-                        if (kv.Value._raw != realDataRaw)
+                        _predictionHistory.Remove(predictedFrame);
+
+                        if (predictedValue._raw != realDataRaw)
                         {
-                            if (kv.Key < earliestWrong)
-                                earliestWrong = kv.Key;
+                            // ❌ 预测错了 → 这个帧及之后的所有预测全部作废
+                            _pendingErrorFrame = predictedFrame;
+
+                            // 不是 _lastPredictedFrame 的值，是触发这轮回滚的值
+                            _correctRemoteRaw = realDataRaw;
+
+                            // 清空整个队列+字典（后续预测全部被污染）
+                            int cleared = _predictedFrameQueue.Count + _predictionHistory.Count;
+                            _predictedFrameQueue.Clear();
+                            _predictionHistory.Clear();
+
+                            Debug.Log($"[PredictionSystem] ❌ 帧{predictedFrame}预测错误: " +
+                                $"预测={predictedValue._raw:X8}, 实际={realDataRaw:X8}, " +
+                                $"已清除{cleared}条被污染的预测");
                         }
-                    }
-
-                    if (earliestWrong < int.MaxValue)
-                    {
-                        // ❌ 找到最早预测错误的帧 → 回滚
-                        _pendingErrorFrame = earliestWrong;
-                        _correctRemoteRaw = realDataRaw;
-
-                        // 清除 earliestWrong 及之后所有预测（被污染了）
-                        var toRemove = new List<int>();
-                        foreach (var kv in _predictionHistory)
-                            if (kv.Key >= earliestWrong)
-                                toRemove.Add(kv.Key);
-                        foreach (var key in toRemove)
-                            _predictionHistory.Remove(key);
-
-                        Debug.Log($"[PredictionSystem] ❌ 帧{earliestWrong}预测错误: " +
-                            $"预测={_predictionHistory.Count + toRemove.Count}条记录, 实际={realDataRaw:X8}");
-                    }
-                    else
-                    {
-                        // ✅ 所有预测都正确 → 移除已验证的早于当前帧的记录
-                        var verified = new List<int>();
-                        foreach (var kv in _predictionHistory)
-                            if (kv.Key < frameID)
-                                verified.Add(kv.Key);
-                        foreach (var key in verified)
-                            _predictionHistory.Remove(key);
-
-                        if (verified.Count > 0)
-                            Debug.Log($"[PredictionSystem] ✅ {verified.Count}条预测验证通过");
+                        else
+                        {
+                            Debug.Log($"[PredictionSystem] ✅ 帧{predictedFrame}预测正确");
+                        }
                     }
                 }
 
@@ -107,9 +93,9 @@ namespace FrameSyncDemo
             }
             else
             {
-                // ── 无数据 → 预测 ──
+                // ── 无数据 → 预测：假设对方和上一帧一样 ──
                 _predictionHistory[frameID] = _lastRemoteInput;
-                _totalFrames++;
+                _predictedFrameQueue.Enqueue(frameID);
                 return _lastRemoteInput;
             }
         }
