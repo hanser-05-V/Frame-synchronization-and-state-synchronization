@@ -19,7 +19,15 @@ namespace FrameSyncDemo
         private NetworkStream _stream;
         private Thread _recvThread;
         private volatile bool _running = false;
-        private ConcurrentQueue<uint> _remoteInputs = new ConcurrentQueue<uint>();
+
+        /// <summary>FIFO 远程输入队列（值+帧号配对）</summary>
+        private ConcurrentQueue<RemotePacket> _remoteInputs = new ConcurrentQueue<RemotePacket>();
+
+        private struct RemotePacket
+        {
+            public uint raw;
+            public int remoteFrameID;
+        }
 
         public bool IsConnected => _isConnected;
         public int LocalPlayerIndex => _localPlayerIndex;
@@ -58,7 +66,6 @@ namespace FrameSyncDemo
 
         public void SendInput(uint raw) { SendInput(raw, -1); }
 
-        /// <summary>发送输入 + 本地帧号（8字节协议，帧号用于服务器转发确认）</summary>
         public void SendInput(uint raw, int localFrameID)
         {
             if (!_isConnected || _stream == null) return;
@@ -76,7 +83,31 @@ namespace FrameSyncDemo
             }
         }
 
-        public bool TryGetRemoteInput(out uint raw) => _remoteInputs.TryDequeue(out raw);
+        /// <summary>取远程输入（FIFO），附带远程帧号</summary>
+        public bool TryGetRemoteInput(out uint raw, out int remoteFrameID)
+        {
+            if (_remoteInputs.TryDequeue(out var pkt))
+            {
+                raw = pkt.raw;
+                remoteFrameID = pkt.remoteFrameID;
+                return true;
+            }
+            raw = 0;
+            remoteFrameID = -1;
+            return false;
+        }
+
+        /// <summary>仅取 raw（无帧号，兼容旧调用）</summary>
+        public bool TryGetRemoteInput(out uint raw)
+        {
+            if (_remoteInputs.TryDequeue(out var pkt))
+            {
+                raw = pkt.raw;
+                return true;
+            }
+            raw = 0;
+            return false;
+        }
 
         private void RecvLoop()
         {
@@ -89,7 +120,9 @@ namespace FrameSyncDemo
                     if (bytesRead <= 0) break;
 
                     uint raw = System.BitConverter.ToUInt32(buffer, 0);
-                    _remoteInputs.Enqueue(raw);
+                    int remoteFrameID = System.BitConverter.ToInt32(buffer, 4);
+
+                    _remoteInputs.Enqueue(new RemotePacket { raw = raw, remoteFrameID = remoteFrameID });
                 }
                 catch (System.Exception)
                 {

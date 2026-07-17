@@ -113,7 +113,7 @@ namespace FrameSyncServer
         {
             byte[] data = new byte[8];
             BitConverter.GetBytes(raw).CopyTo(data, 0);
-            BitConverter.GetBytes(_confirmedFrames[senderIdx]).CopyTo(data, 4);
+            BitConverter.GetBytes(frameID).CopyTo(data, 4);
             lock (_lock)
             {
                 foreach (var c in _clients)

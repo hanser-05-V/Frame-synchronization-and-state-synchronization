@@ -95,6 +95,9 @@ namespace FrameSyncDemo
             if (_networkClient == null)
                 _networkClient = gameObject.AddComponent<NetworkClient>();
 
+            // 设置引擎网络模式（联网时抑制自动 MarkRead）
+            _frameEngine.IsNetworkMode = true;
+
             // ===== 预测系统初始化 =====
             _predictionSystem = new PredictionSystem();
             _predictionSystem.Init();
@@ -153,13 +156,11 @@ namespace FrameSyncDemo
 
                 // 从网络队列取真实远程Input
                 uint remoteRaw;
-                bool hasRemote = _networkClient.TryGetRemoteInput(out remoteRaw);
+                int remoteFrameID;
+                bool hasRemote = _networkClient.TryGetRemoteInput(out remoteRaw, out remoteFrameID);
 
-                // 预测对手输入（帧号精确匹配）
-                // FrameEngine.CurrentFrame 在 ExecuteOneFrame 中已 +1 自增
-                // 所以当前正执行的帧号 = CurrentFrame - 1
-                FrameInput remoteInput = _predictionSystem.PredictRemote(
-                    hasRemote, remoteRaw, _frameEngine.CurrentFrame - 1);
+                // 预测对手输入（有真实数据就用真实数据，没有就预测）
+                FrameInput remoteInput = _predictionSystem.PredictRemote(hasRemote, remoteRaw);
 
                 // 发送本机 Input + 本地帧号（8字节协议）
                 _networkClient.SendInput(myInput._raw, _frameEngine.CurrentFrame - 1);
@@ -199,15 +200,8 @@ namespace FrameSyncDemo
                     i == 0 ? new Color(0.9f, 0.2f, 0.2f) : new Color(0.2f, 0.4f, 0.9f));
             }
 
-            // 检查是否有待处理的回滚（真实数据到达后预测系统发现上一帧错误）
-            if (_predictionSystem != null && (FrameDebugger.Instance == null || !FrameDebugger.Instance.isPlayingBack))
-            {
-                if (_predictionSystem.TryConsumeRollback(out int errorFrame, out uint correctRemoteRaw))
-                {
-                    Debug.Log($"[Rollback] 帧{errorFrame}预测错误，开始回滚纠正");
-                    DoRollback(errorFrame, correctRemoteRaw);
-                }
-            }
+            // (预测验证已简化：不做帧号匹配，只做纯预测)
+            // 后续可以在 FrameBuffer 层面做更精确的帧号对齐验证
 
             // 回放结束自动暂停
             if (FrameDebugger.Instance != null && FrameDebugger.Instance.isPlayingBack &&
@@ -345,11 +339,12 @@ namespace FrameSyncDemo
 
         // ===== 回滚逻辑 =====
 
-        /// <summary>执行回滚：恢复快照 → 用正确Input重放 → 继续</summary>
+        /// <summary>执行回滚：恢复快照 → 从 safeFrame+1 逐帧重跑到 currentFrame → 继续</summary>
         private void DoRollback(int errorFrame, uint correctRemoteRaw)
         {
             int safeFrame = errorFrame - 1;
             if (safeFrame < 0) return;
+
             // ① 从快照恢复 safeFrame 的状态
             if (!_predictionSystem.RestoreSnapshot(safeFrame, ref _blockPosX, ref _blockPosZ))
             {
@@ -357,45 +352,52 @@ namespace FrameSyncDemo
                 return;
             }
 
-            // ② 重新执行 errorFrame（用正确的Input替换预测值）
+            int currentFrame = _frameEngine.CurrentFrame;
             FixedInt speed = FixedInt.FromFloat(_moveSpeed * 0.033f);
-
-            // 确定 errorFrame 的正确Input
-            FrameInput correctedRemote = FrameInput.FromRaw(correctRemoteRaw);
-            FrameInput[] correctInputs = new FrameInput[2];
-
             int localIdx = _networkClient != null ? _networkClient.LocalPlayerIndex : 0;
             int remoteIdx = _networkClient != null ? _networkClient.RemotePlayerIndex : 1;
 
-            // 本地Input从 FrameBuffer 取（本地Input是真实的，无误）
-            if (_frameEngine.Buffer.GetFrame(errorFrame, out var errorFrameData))
+            // ② 从 safeFrame+1 到 currentFrame 逐帧重跑
+            for (int i = safeFrame + 1; i <= currentFrame; i++)
             {
-                correctInputs[localIdx] = errorFrameData.inputs[localIdx];
-            }
-            else
-            {
-                // 回退：用当前本地输入
-                correctInputs[localIdx] = localIdx == 0 ? ReadP1Input() : ReadP2Input();
-            }
-            correctInputs[remoteIdx] = correctedRemote; // ⭐ 用正确的远程Input
+                FrameInput[] inputs = new FrameInput[2];
 
-            // 执行正确的一帧
-            for (int i = 0; i < correctInputs.Length; i++)
-            {
-                byte dir = correctInputs[i].moveDir;
-                if (dir > 0 && dir <= 8)
+                // 本地Input从 FrameBuffer 取（本地Input是真实的）
+                if (_frameEngine.Buffer.GetFrame(i, out var frameData))
+                    inputs[localIdx] = frameData.inputs[localIdx];
+                else
+                    inputs[localIdx] = localIdx == 0 ? ReadP1Input() : ReadP2Input();
+
+                // 远程Input：
+                //   i == errorFrame → 用传入的正确值
+                //   i != errorFrame → 从 FrameBuffer 取（当时用的就是预测值，但没办法更精确了）
+                //   ⚠ 这里是一个简化：只有 errorFrame 这一帧的远程Input被纠正
+                //     其他帧（errorFrame+1..currentFrame）只能用预测值重跑
+                if (i == errorFrame)
+                    inputs[remoteIdx] = FrameInput.FromRaw(correctRemoteRaw);
+                else if (i < currentFrame)
+                    inputs[remoteIdx] = frameData.inputs[remoteIdx]; // 已存在于buffer中
+                else
+                    inputs[remoteIdx] = new FrameInput(); // currentFrame还没写完？给空
+
+                // 执行位置更新
+                for (int p = 0; p < inputs.Length; p++)
                 {
-                    _blockPosX[i] += speed * FixedInt.FromInt(DirX[dir]);
-                    _blockPosZ[i] += speed * FixedInt.FromInt(DirZ[dir]);
+                    byte dir = inputs[p].moveDir;
+                    if (dir > 0 && dir <= 8)
+                    {
+                        _blockPosX[p] += speed * FixedInt.FromInt(DirX[dir]);
+                        _blockPosZ[p] += speed * FixedInt.FromInt(DirZ[dir]);
+                    }
                 }
+
+                // 更新Transform + 覆盖快照
+                _blocks[0].transform.position = new Vector3(_blockPosX[0].ToFloat(), 0.5f, _blockPosZ[0].ToFloat());
+                _blocks[1].transform.position = new Vector3(_blockPosX[1].ToFloat(), 0.5f, _blockPosZ[1].ToFloat());
+                _predictionSystem.TakeSnapshot(i, _blockPosX, _blockPosZ);
             }
 
-            // ③ 更新方块Transform + 覆盖错误快照
-            _blocks[0].transform.position = new Vector3(_blockPosX[0].ToFloat(), 0.5f, _blockPosZ[0].ToFloat());
-            _blocks[1].transform.position = new Vector3(_blockPosX[1].ToFloat(), 0.5f, _blockPosZ[1].ToFloat());
-            _predictionSystem.TakeSnapshot(errorFrame, _blockPosX, _blockPosZ);
-
-            Debug.Log($"[Rollback] 回滚完成: safe={safeFrame} → 重放帧{errorFrame} (纠正远程Input: {correctRemoteRaw:X8})");
+            Debug.Log($"[Rollback] 回滚完成: safe={safeFrame} → 重放帧{safeFrame+1}..{currentFrame} (纠正帧{errorFrame}远程Input)");
         }
 
         private void OnDestroy()

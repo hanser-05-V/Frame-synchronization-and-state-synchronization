@@ -23,6 +23,7 @@ namespace FrameSyncDemo
         private long _pausedTime = 0;  // 暂停时的时间戳
         private FrameBuffer _frameBuffer;
         private int _playerCount;
+        private bool _isNetworkMode = false;  // 联网模式下抑制自动 MarkRead
 
         // ----- 回调 -----
         /// <summary>每帧执行前，请求输入。GameController 注册此回调来提供玩家输入。</summary>
@@ -33,6 +34,9 @@ namespace FrameSyncDemo
         public event Action<int> OnCatchup;
 
         // ----- 属性 -----
+        /// <summary>网络模式（联网时抑制自动 MarkRead）</summary>
+        public bool IsNetworkMode { get => _isNetworkMode; set => _isNetworkMode = value; }
+
         public int CurrentFrame => _currentFrame;
         public float ElapsedTime => _elapsedTime;
         public int CatchupCount => _catchupCount;
@@ -125,8 +129,9 @@ namespace FrameSyncDemo
             // ④ 通知逻辑层（GameController 在这里更新方块位置）
             OnFrameUpdate?.Invoke(frameID, inputs);
 
-            // ④.5 标记消费（延迟4帧，模拟网络缓冲的"待消费"效果）
-            _frameBuffer.MarkRead(frameID - 4);
+            // ④.5 标记消费（单机模式：延迟4帧模拟缓冲；联网模式：由服务器确认驱动）
+            if (!_isNetworkMode)
+                _frameBuffer.MarkRead(frameID - 4);
 
             // ⑤ 同步 FrameDebugger
             FrameDebugger.Instance?.UpdateFrame(frameID, inputs, _frameBuffer.GetSnapshot(),
