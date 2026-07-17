@@ -11,6 +11,8 @@ E:\LS_Claude_Agents\帧同步_20260717_1536\
 
 ### 启动流程
 
+0. **先拉取双仓库再读档**（双机同步铁律，防止在旧状态上工作）：
+   `git -C "E:\帧同步" pull` + `git -C "E:\LS_Claude_Agents" pull`
 1. 读取 `E:\LS_Claude_Agents\帧同步_20260717_1536\任务墙.md` — 获取当前所有任务状态
 2. 读取 `E:\LS_Claude_Agents\帧同步_20260717_1536\RESUME.md` — 获取当前进度
 3. 读取 `E:\LS_Claude_Agents\帧同步_20260717_1536\路线规划_街篮帧同步最小实现.md` — 获取开发路线
@@ -23,6 +25,24 @@ E:\LS_Claude_Agents\帧同步_20260717_1536\
 - 会话记录 → `E:\LS_Claude_Agents\帧同步_20260717_1536\agent_会话记录\`
 - 进度更新 → `E:\LS_Claude_Agents\帧同步_20260717_1536\RESUME.md`
 - 路线规划更新 → `E:\LS_Claude_Agents\帧同步_20260717_1536\路线规划_街篮帧同步最小实现.md`
+
+### 双机同步铁律（公司 ↔ 家）
+
+帅老大要求：**任一电脑随时能从 GitHub 拉到最新工作状态并继续推进。** 以下时机必须立即 commit + push（双仓库）：
+
+1. 任务墙状态变化（任务开始 / 完成 / 阻塞 / 拍板决策）
+2. 新增交接文件、RESUME 进度更新
+3. 代码修改通过审查后
+4. 笔记写入后
+5. 会话结束或帅老大说"暂停 / 下班"时（无论进行到哪一步）
+
+| 本地路径 | GitHub 远程 |
+|----------|------------|
+| `E:\帧同步` | `hanser-05-V/Frame-synchronization-and-state-synchronization` |
+| `E:\LS_Claude_Agents` | `hanser-05-V/Ls_Claude_Agents` |
+
+推送前先 `git pull --rebase`；出现冲突立即停下汇报帅老大，**一律禁止 force push**。
+若家中盘符不是 E:\，需同步修改本文件与 AGENTS.md 中的写死路径。
 
 ### 禁止
 
