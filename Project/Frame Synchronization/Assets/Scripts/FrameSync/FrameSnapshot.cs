@@ -10,6 +10,8 @@ namespace FrameSyncDemo
         public FixedInt player1Y; // Y = Z轴（Unity中Z为纵深）
         public FixedInt player2X;
         public FixedInt player2Y;
+
+        public bool IsValid => frameID >= 0;
     }
 
     /// <summary>

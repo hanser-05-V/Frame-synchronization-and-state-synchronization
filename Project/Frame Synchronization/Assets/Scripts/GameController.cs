@@ -28,6 +28,14 @@ namespace FrameSyncDemo
         private NetworkClient _networkClient;
         private PredictionSystem _predictionSystem;
 
+        // 帧对齐方案：远端帧号 → 本地帧号 偏移
+        private int _remoteFrameOffset = int.MinValue;
+
+        // 待处理回滚标记（OnFrameUpdate/ReadInputs 标记，LateUpdate 消费）
+        private bool _pendingRollback = false;
+        private int _pendingRollbackErrorFrame = 0;
+        private uint _pendingRollbackCorrectRaw = 0;
+
         private static readonly int[] DirX = { 0, 0, 1, 1, 1, 0, -1, -1, -1 };
         private static readonly int[] DirZ = { 0, 1, 1, 0, -1, -1, -1, 0, 1 };
 
@@ -147,23 +155,60 @@ namespace FrameSyncDemo
                 return inputs;
             }
 
-            // 网络模式：P1本地+P2远程（或反过来）
+            // 网络模式：P1本地+P2远程（或反过来）—— 帧对齐方案
             if (_networkClient != null && _networkClient.IsConnected)
             {
                 // 读本机键盘
                 var myInput = _networkClient.LocalPlayerIndex == 0
                     ? ReadP1Input() : ReadP2Input();
 
-                // 从网络队列取真实远程Input
-                uint remoteRaw;
-                bool hasRemote = _networkClient.TryGetRemoteInput(out remoteRaw);
-
-                // 预测对手输入（含验证+回滚标记）
                 int currentFrame = _frameEngine.CurrentFrame - 1;
-                FrameInput remoteInput = _predictionSystem.PredictRemote(hasRemote, remoteRaw, currentFrame);
 
-                // 发送本机 Input + 本地帧号（8字节协议）
-                _networkClient.SendInput(myInput._raw, _frameEngine.CurrentFrame - 1);
+                // ① 把 FIFO 积压包全部转入 dict（线程安全：ConcurrentQueue.TryDequeue + 主线程写 dict）
+                _networkClient.DrainQueueToDict();
+
+                // ② 首包锚定：建立远端帧号 → 本地帧号的偏移
+                if (_remoteFrameOffset == int.MinValue)
+                {
+                    int minRemote = _networkClient.GetMinRemoteFrameID();
+                    if (minRemote >= 0)
+                    {
+                        _remoteFrameOffset = currentFrame - minRemote;
+                        Debug.Log($"[GameController] 首包锚定: localFrame={currentFrame}, minRemote={minRemote}, offset={_remoteFrameOffset}");
+                    }
+                }
+
+                // ③ 帧对齐查找远端输入
+                FrameInput remoteInput;
+                if (_remoteFrameOffset != int.MinValue)
+                {
+                    int remoteTarget = currentFrame - _remoteFrameOffset;
+                    uint actualRaw;
+                    bool hasActual = _networkClient.TryGetRemoteInputAt(remoteTarget, out actualRaw);
+
+                    int? errorFrame;
+                    uint correctRaw;
+                    remoteInput = _predictionSystem.ResolveRemote(currentFrame, actualRaw, hasActual, out errorFrame, out correctRaw);
+
+                    // 标记回滚
+                    if (errorFrame.HasValue)
+                    {
+                        _pendingRollback = true;
+                        _pendingRollbackErrorFrame = errorFrame.Value;
+                        _pendingRollbackCorrectRaw = correctRaw;
+                        Debug.Log($"[GameController] 标记回滚: errorFrame={errorFrame.Value} correctRaw={correctRaw:X8}");
+                    }
+                }
+                else
+                {
+                    // 偏移未建立 → 预测（无真实数据）
+                    int? dummyError;
+                    uint dummyCorrect;
+                    remoteInput = _predictionSystem.ResolveRemote(currentFrame, 0, false, out dummyError, out dummyCorrect);
+                }
+
+                // ④ 发送本机 Input + 本地帧号（8字节协议）
+                _networkClient.SendInput(myInput._raw, currentFrame);
 
                 // 按 playerIndex 排序返回 [P1的Input, P2的Input]
                 var result = new FrameInput[2];
@@ -200,17 +245,6 @@ namespace FrameSyncDemo
                     i == 0 ? new Color(0.9f, 0.2f, 0.2f) : new Color(0.2f, 0.4f, 0.9f));
             }
 
-            // 检查是否有待处理的回滚（预测错误触发）
-            if (_predictionSystem != null && _predictionSystem.HasPendingRollback
-                && (FrameDebugger.Instance == null || !FrameDebugger.Instance.isPlayingBack))
-            {
-                if (_predictionSystem.TryConsumeRollback(out int errorFrame, out uint correctRemoteRaw))
-                {
-                    Debug.Log($"[Rollback] 帧{errorFrame}预测错误，开始回滚纠正");
-                    DoRollback(errorFrame, correctRemoteRaw);
-                }
-            }
-
             // 回放结束自动暂停
             if (FrameDebugger.Instance != null && FrameDebugger.Instance.isPlayingBack &&
                 FrameDebugger.Instance.playbackFrame >= FrameDebugger.Instance.recordedFrameCount)
@@ -228,6 +262,7 @@ namespace FrameSyncDemo
 
         private void HandlePlayback(int frameID, int playerCount)
         {
+            // TODO: 回放结束判定逻辑待实现（当前由 FrameDebugger.UpdateFrame 内部 playbackFrame 计数控制）
             // 回放的停止由 FrameDebugger.UpdateFrame() 内部的 playbackFrame 计数控制
             // 不能用全局 frameID 对比 — 那会瞬间判定"已播完"
         }
@@ -347,7 +382,7 @@ namespace FrameSyncDemo
 
         // ===== 回滚逻辑 =====
 
-        /// <summary>执行回滚：恢复快照 → 重跑 errorFrame..currentFrame → 继续预测</summary>
+        /// <summary>帧对齐回滚：恢复快照 → 按帧从 dict 取远端真实值 → 重放 → 继续预测</summary>
         private void DoRollback(int errorFrame, uint correctRemoteRaw)
         {
             int safeFrame = errorFrame - 1;
@@ -373,38 +408,39 @@ namespace FrameSyncDemo
 
             safeFrame = foundFrame;
 
-            int currentFrame = _frameEngine.CurrentFrame;
+            // 回滚终点 = 最新已执行帧号（FrameEngine 在当前帧执行前已 _currentFrame++）
+            int lastExecutedFrame = _frameEngine.CurrentFrame - 1;
             FixedInt speed = FixedInt.FromFloat(_moveSpeed * 0.033f);
             int localIdx = _networkClient != null ? _networkClient.LocalPlayerIndex : 0;
             int remoteIdx = _networkClient != null ? _networkClient.RemotePlayerIndex : 1;
 
-            // 当前已知正确的远程输入（回滚期间持续使用）
-            uint knownCorrectRemoteRaw = correctRemoteRaw;
-
-            for (int i = safeFrame + 1; i <= currentFrame; i++)
+            for (int i = safeFrame + 1; i <= lastExecutedFrame; i++)
             {
                 FrameInput[] inputs = new FrameInput[2];
 
-                // 本地Input从 FrameBuffer 取
+                // 本地Input：只从 FrameBuffer 取（禁止现场读键盘！）
                 FrameBuffer.Frame frameData;
                 if (_frameEngine.Buffer.GetFrame(i, out frameData))
-                    inputs[localIdx] = frameData.inputs[localIdx];
-                else
-                    inputs[localIdx] = localIdx == 0 ? ReadP1Input() : ReadP2Input();
-
-                // 远程Input：从 errorFrame 开始全部用正确的值
-                // （因为 errorFrame 及之后的预测都基于错误假设，全被清除了）
-                if (i >= errorFrame)
                 {
-                    // 尝试从队列取更新的远程数据（可能在回滚期间有新数据到达）
-                    uint fresherRaw;
-                    if (_networkClient.TryGetRemoteInput(out fresherRaw))
-                        knownCorrectRemoteRaw = fresherRaw;
-                    inputs[remoteIdx] = FrameInput.FromRaw(knownCorrectRemoteRaw);
+                    inputs[localIdx] = frameData.inputs[localIdx];
                 }
                 else
                 {
-                    inputs[remoteIdx] = frameData.inputs[remoteIdx];
+                    Debug.LogError($"[Rollback] 帧{i}本地Input缺失，中止回滚");
+                    return;
+                }
+
+                // 远程Input：帧对齐从 dict 取该帧真实值（不偷队列！）
+                int remoteTarget = i - _remoteFrameOffset;
+                uint actualRaw;
+                if (_networkClient.TryGetRemoteInputAt(remoteTarget, out actualRaw))
+                {
+                    inputs[remoteIdx] = FrameInput.FromRaw(actualRaw);
+                }
+                else
+                {
+                    // 未命中 → 用已知最新纠正值作为预测
+                    inputs[remoteIdx] = FrameInput.FromRaw(correctRemoteRaw);
                 }
 
                 // 执行位置更新
@@ -423,8 +459,34 @@ namespace FrameSyncDemo
                 _predictionSystem.TakeSnapshot(i, _blockPosX, _blockPosZ);
             }
 
-            Debug.Log($"[Rollback] 回滚完成: safe={safeFrame} → 重放帧{safeFrame+1}..{currentFrame} " +
+            Debug.Log($"[Rollback] 回滚完成: safe={safeFrame} → 重放帧{safeFrame+1}..{lastExecutedFrame} " +
                 $"(纠正远程Input: {correctRemoteRaw:X8})");
+        }
+
+        // ===== LateUpdate — 帧对齐维护 + 回滚消费 =====
+        private void LateUpdate()
+        {
+            if (_networkClient == null || !_networkClient.IsConnected) return;
+
+            // 排水：FIFO → dict（兜底，ReadInputs 已做过一次）
+            _networkClient.DrainQueueToDict();
+
+            // 清理过期远端输入（保留最近 ~120 帧 ≈ 4 秒缓冲）
+            if (_remoteFrameOffset != int.MinValue)
+            {
+                int minKeepRemote = (_frameEngine.CurrentFrame - _remoteFrameOffset) - 120;
+                if (minKeepRemote > 0)
+                    _networkClient.CleanupRemoteInputs(minKeepRemote);
+            }
+
+            // 消费待处理回滚
+            if (_pendingRollback &&
+                (FrameDebugger.Instance == null || !FrameDebugger.Instance.isPlayingBack))
+            {
+                _pendingRollback = false;
+                Debug.Log($"[Rollback] 帧{_pendingRollbackErrorFrame}预测错误，开始回滚纠正");
+                DoRollback(_pendingRollbackErrorFrame, _pendingRollbackCorrectRaw);
+            }
         }
 
         private void OnDestroy()
