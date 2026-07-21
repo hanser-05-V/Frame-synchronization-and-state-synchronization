@@ -32,6 +32,8 @@ namespace FrameSyncDemo
         public event Action<int, FrameInput[]> OnFrameUpdate;
         /// <summary>追帧回调</summary>
         public event Action<int> OnCatchup;
+        /// <summary>帧后置回调 — 物理/碰撞等需要先执行完OnFrameUpdate再处理</summary>
+        public event Action<int, FrameInput[]> OnPostFrameUpdate;
 
         // ----- 属性 -----
         /// <summary>网络模式（联网时抑制自动 MarkRead）</summary>
@@ -126,10 +128,13 @@ namespace FrameSyncDemo
             // ③ 更新运行时间
             _elapsedTime = _lastLogicMs / 1000f;
 
-            // ④ 通知逻辑层（GameController 在这里更新方块位置）
+            // ④ 通知逻辑层（GameController 在这里更新方块/球员位置）
             OnFrameUpdate?.Invoke(frameID, inputs);
 
-            // ④.5 标记消费（单机模式：延迟4帧模拟缓冲；联网模式：由服务器确认驱动）
+            // ④.5 OnPostFrameUpdate — 物理/碰撞等需要先走完OnFrameUpdate再处理
+            OnPostFrameUpdate?.Invoke(frameID, inputs);
+
+            // ④.75 标记消费（单机模式：延迟4帧模拟缓冲；联网模式：由服务器确认驱动）
             if (!_isNetworkMode)
                 _frameBuffer.MarkRead(frameID - 4);
 

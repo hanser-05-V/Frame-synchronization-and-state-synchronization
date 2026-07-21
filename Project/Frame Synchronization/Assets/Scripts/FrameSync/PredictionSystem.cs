@@ -128,9 +128,9 @@ namespace FrameSyncDemo
             {
                 frameID = frameID,
                 player1X = posX[0],
-                player1Y = posZ[0],
+                player1Z = posZ[0],
                 player2X = posX[1],
-                player2Y = posZ[1]
+                player2Z = posZ[1]
             };
             _snapshotBuffer.AddSnapshot(snap);
         }
@@ -140,9 +140,9 @@ namespace FrameSyncDemo
             if (!_snapshotBuffer.HasSnapshot(frameID)) return false;
             var snap = _snapshotBuffer.GetSnapshot(frameID);
             posX[0] = snap.player1X;
-            posZ[0] = snap.player1Y;
+            posZ[0] = snap.player1Z;
             posX[1] = snap.player2X;
-            posZ[1] = snap.player2Y;
+            posZ[1] = snap.player2Z;
             return true;
         }
     }

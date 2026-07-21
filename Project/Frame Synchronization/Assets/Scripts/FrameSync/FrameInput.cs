@@ -1,3 +1,5 @@
+using System;
+
 namespace FrameSyncDemo
 {
     /// <summary>
@@ -7,7 +9,13 @@ namespace FrameSyncDemo
     /// 位域布局:
     ///   bit 31-16: 保留
     ///   bit 15-8:  moveDir (8方向, 0=停止, 1-8=8方向)
-    ///   bit 7-0:   buttons  (bitmask, 每个bit=一个按键)
+    ///   bit 7-0:   buttons (bitmask)
+    ///     bit 0 (0x01): Shoot    — 投篮
+    ///     bit 1 (0x02): Pass     — 传球
+    ///     bit 2 (0x04): Steal    — 抢断
+    ///     bit 3 (0x08): Block    — 盖帽
+    ///     bit 4 (0x10): Sprint   — 冲刺
+    ///     bit 5-7: 保留
     /// </summary>
     [System.Serializable]
     public struct FrameInput
@@ -38,6 +46,42 @@ namespace FrameSyncDemo
             _raw = 0;
             this.moveDir = moveDir;
             this.buttons = buttons;
+        }
+
+        // ----- 扩展按键属性（阶段1+）-----
+        /// <summary>投篮按键</summary>
+        public bool shoot
+        {
+            get { return (_raw & 0x01) != 0; }
+            set { _raw = value ? (_raw | 0x01) : (_raw & ~0x01u); }
+        }
+
+        /// <summary>传球按键</summary>
+        public bool pass
+        {
+            get { return (_raw & 0x02) != 0; }
+            set { _raw = value ? (_raw | 0x02) : (_raw & ~0x02u); }
+        }
+
+        /// <summary>抢断按键</summary>
+        public bool steal
+        {
+            get { return (_raw & 0x04) != 0; }
+            set { _raw = value ? (_raw | 0x04) : (_raw & ~0x04u); }
+        }
+
+        /// <summary>盖帽按键</summary>
+        public bool block
+        {
+            get { return (_raw & 0x08) != 0; }
+            set { _raw = value ? (_raw | 0x08) : (_raw & ~0x08u); }
+        }
+
+        /// <summary>冲刺按键</summary>
+        public bool sprint
+        {
+            get { return (_raw & 0x10) != 0; }
+            set { _raw = value ? (_raw | 0x10) : (_raw & ~0x10u); }
         }
 
         public void Reset()
