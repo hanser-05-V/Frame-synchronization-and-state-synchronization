@@ -138,10 +138,10 @@ namespace FrameSyncDemo
             lr.endWidth = _lineWidth;
             lr.startColor = _lineColor;
             lr.endColor = _lineColor;
-            if (_lineMaterial != null)
-                lr.material = _lineMaterial;
-            else
-                lr.material = new Material(Shader.Find("Sprites/Default"));
+            // 使用内置材质 — Unity 新建的 LineRenderer 默认有材质
+            lr.material = new Material(Shader.Find("Hidden/Internal-Colored"));
+            if (lr.material == null)
+                lr.sharedMaterial = null; // 让 LineRenderer 使用默认材质
         }
     }
 }
