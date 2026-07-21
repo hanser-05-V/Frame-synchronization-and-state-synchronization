@@ -24,11 +24,11 @@ namespace FrameSyncDemo
         public int holderPlayerIndex = -1;  // 持有者 -1=无持有者
 
         // ----- 初始化 -----
-        public void Reset(FixedVector3 startPos)
+        public void Reset(FixedVector3 startPos, bool startAirborne = false)
         {
             position = startPos;
             velocity = FixedVector3.Zero;
-            state = EState.Resetting;
+            state = startAirborne ? EState.Airborne : EState.Resetting;
             holderPlayerIndex = -1;
         }
     }

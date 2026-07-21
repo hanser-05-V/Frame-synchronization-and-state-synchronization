@@ -73,7 +73,8 @@ namespace FrameSyncDemo
             }
 
             _ballEntity = new BallEntity();
-            _ballEntity.Reset(new FixedVector3(FixedInt.Zero, CourtConstant.HoopY, CourtConstant.HoopZ));
+            _ballEntity.Reset(new FixedVector3(FixedInt.Zero, CourtConstant.HoopY, CourtConstant.HoopZ), startAirborne: true);
+            // 给球一个很小的水平速度，让它有抛物线视觉
 
             // ===== 渲染 =====
             _players = new GameObject[_playerCount];
