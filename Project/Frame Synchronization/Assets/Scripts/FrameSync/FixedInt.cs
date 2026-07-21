@@ -49,8 +49,8 @@ namespace FrameSyncDemo
         public static FixedInt operator +(FixedInt a, FixedInt b) => new FixedInt(a._raw + b._raw);
         public static FixedInt operator -(FixedInt a, FixedInt b) => new FixedInt(a._raw - b._raw);
         public static FixedInt operator -(FixedInt a) => new FixedInt(-a._raw);
-        public static FixedInt operator *(FixedInt a, FixedInt b) => new FixedInt((a._raw * b._raw) / SCALE);
-        public static FixedInt operator /(FixedInt a, FixedInt b) => new FixedInt((a._raw * SCALE) / b._raw);
+        public static FixedInt operator *(FixedInt a, FixedInt b) => new FixedInt((int)((long)a._raw * b._raw / SCALE));
+        public static FixedInt operator /(FixedInt a, FixedInt b) => new FixedInt((int)((long)a._raw * SCALE / b._raw));
 
         public static bool operator ==(FixedInt a, FixedInt b) => a._raw == b._raw;
         public static bool operator !=(FixedInt a, FixedInt b) => a._raw != b._raw;
