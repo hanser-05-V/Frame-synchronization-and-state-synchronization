@@ -53,6 +53,11 @@ namespace FrameSyncDemo
             _frameEngine.OnPostFrameUpdate += OnPostFrameUpdate;
             _frameEngine.OnCatchup += OnCatchup;
 
+            // ===== 阶段1：球场渲染 =====
+            var courtObj = new GameObject("BasketballCourt");
+            courtObj.transform.SetParent(transform);
+            courtObj.AddComponent<BasketballCourt>();
+
             // ===== 阶段1：球员 + 球 =====
             _playerEntities = new PlayerEntity[_playerCount];
             _playerFSMs = new PlayerStateMachine[_playerCount];
