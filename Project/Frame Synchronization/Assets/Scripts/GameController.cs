@@ -129,7 +129,7 @@ namespace FrameSyncDemo
         {
             if (_paused)
             {
-                return new FrameInput[] { new FrameInput(), new FrameInput() };
+                return new FrameInput[] { new FrameInput(), new FrameInput() };   
             }
 
             // 回放模式：从录制数据中按帧读取 Input，驱动方块实际移动
@@ -258,6 +258,9 @@ namespace FrameSyncDemo
             {
                 _predictionSystem.TakeSnapshot(frameID, _blockPosX, _blockPosZ);
             }
+
+            // MD5 脱同步检测 — 每200帧输出hash日志，双端对比确认状态一致
+            MD5Checker.CheckAndLog(frameID, _blockPosX, _blockPosZ);
         }
 
         private void HandlePlayback(int frameID, int playerCount)
