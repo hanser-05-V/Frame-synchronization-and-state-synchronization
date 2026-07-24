@@ -28,7 +28,7 @@ namespace FrameSyncDemo
         // ----- 属性 -----
         public FixedInt sqrMagnitude => x * x + y * y + z * z;
         public FixedInt sqrMagnitudeXZ => x * x + z * z;
-        public FixedInt magnitude => FixedMath.Sqrt(sqrMagnitude);
+        public FixedInt magnitude => FixedMath.Sqrt(sqrMagnitude);   //mo
         public FixedInt magnitudeXZ => FixedMath.Sqrt(sqrMagnitudeXZ);
 
         public FixedVector3 normalized

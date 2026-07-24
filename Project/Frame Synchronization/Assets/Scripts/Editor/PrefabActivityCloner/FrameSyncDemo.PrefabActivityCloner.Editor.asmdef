@@ -1,0 +1,12 @@
+{
+    "name": "FrameSyncDemo.PrefabActivityCloner.Editor",
+    "rootNamespace": "FrameSyncDemo.EditorTools.PrefabActivityCloner",
+    "references": [
+        "Unity.ugui"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "autoReferenced": true,
+    "noEngineReferences": false
+}
