@@ -12,10 +12,12 @@ Project/Frame Synchronization/UserSettings/
 Project/Frame Synchronization/.idea/
 Project/Frame Synchronization/*.csproj
 Project/Frame Synchronization/*.sln
-Project/Frame Synchronization/Assets/Scenes/
+Project/Frame Synchronization/Builds/
+Project/Frame Synchronization/Assets/Scenes/*
+!Project/Frame Synchronization/Assets/Scenes/SampleScene.unity
+!Project/Frame Synchronization/Assets/Scenes/SampleScene.unity.meta
 
 # 排除临时文件
 .claude/
 .superpowers/
-*.meta
 *.tmp
