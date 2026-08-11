@@ -20,6 +20,8 @@ namespace FrameSyncDemo
         private NetworkStream _stream;
         private Thread _recvThread;
         private volatile bool _running = false;
+        private int _latestRemoteFrameID = -1;
+        private int _latestDrainedRemoteFrameID = -1;
 
         /// <summary>FIFO 远程输入队列（值+帧号配对）</summary>
         private ConcurrentQueue<RemotePacket> _remoteInputs = new ConcurrentQueue<RemotePacket>();
@@ -36,6 +38,8 @@ namespace FrameSyncDemo
         public bool IsConnected => _isConnected;
         public int LocalPlayerIndex => _localPlayerIndex;
         public int RemotePlayerIndex => _localPlayerIndex == 0 ? 1 : 0;
+        public int LatestRemoteFrameID => Volatile.Read(ref _latestRemoteFrameID);
+        public int LatestDrainedRemoteFrameID => _latestDrainedRemoteFrameID;
 
         public void Connect(string ip, int port)
         {
@@ -45,6 +49,7 @@ namespace FrameSyncDemo
             try
             {
                 _tcp = new TcpClient();
+                NetworkTransportSettings.ConfigureLowLatency(_tcp);
                 _tcp.Connect(_serverIP, _serverPort);
                 _stream = _tcp.GetStream();
 
@@ -56,6 +61,8 @@ namespace FrameSyncDemo
                 _running = true;
 
                 _remoteInputDict = new Dictionary<int, uint>();
+                Volatile.Write(ref _latestRemoteFrameID, -1);
+                _latestDrainedRemoteFrameID = -1;
 
                 _recvThread = new Thread(RecvLoop);
                 _recvThread.IsBackground = true;
@@ -122,6 +129,8 @@ namespace FrameSyncDemo
             {
                 if (pkt.remoteFrameID < 0) continue;
                 _remoteInputDict[pkt.remoteFrameID] = pkt.raw;
+                if (pkt.remoteFrameID > _latestDrainedRemoteFrameID)
+                    _latestDrainedRemoteFrameID = pkt.remoteFrameID;
             }
         }
 
@@ -143,7 +152,7 @@ namespace FrameSyncDemo
                 _remoteInputDict.Remove(k);
         }
 
-        /// <summary>获取 dict 中最小的 remoteFrameID（用于首包锚定偏移计算），dict 为空返回 -1</summary>
+        /// <summary>兼容旧偏移方案的最小帧查询；共同起跑路径不再使用。</summary>
         public int GetMinRemoteFrameID()
         {
             if (_remoteInputDict.Count == 0) return -1;
@@ -160,12 +169,13 @@ namespace FrameSyncDemo
             {
                 try
                 {
-                    int bytesRead = _stream.Read(buffer, 0, 8);
-                    if (bytesRead <= 0) break;
+                    if (!NetworkStreamReader.TryReadExactly(_stream, buffer, buffer.Length))
+                        break;
 
                     uint raw = System.BitConverter.ToUInt32(buffer, 0);
                     int remoteFrameID = System.BitConverter.ToInt32(buffer, 4);
 
+                    Volatile.Write(ref _latestRemoteFrameID, remoteFrameID);
                     _remoteInputs.Enqueue(new RemotePacket { raw = raw, remoteFrameID = remoteFrameID });
                 }
                 catch (System.Exception)

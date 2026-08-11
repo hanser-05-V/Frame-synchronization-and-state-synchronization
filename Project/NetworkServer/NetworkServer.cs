@@ -40,17 +40,34 @@ namespace FrameSyncServer
             {
                 Console.WriteLine("[Server] 等待客户端 " + i + "...");
                 var client = listener.AcceptTcpClient();
+                ConfigureLowLatency(client);
                 lock (_lock) _clients.Add(client);
+                Console.WriteLine("[Server] 客户端 " + i + " 已连接，等待共同放行");
+            }
+
+            for (int i = 0; i < 2; i++)
+            {
+                var client = _clients[i];
                 client.GetStream().WriteByte((byte)i);
                 client.GetStream().Flush();
-                Console.WriteLine("[Server] 客户端 " + i + " 已连接");
+            }
+
+            for (int i = 0; i < 2; i++)
+            {
+                var client = _clients[i];
                 int idx = i;
                 new Thread(() => RecvLoop(idx, client, delayMs)).Start();
             }
 
-            Console.WriteLine("[Server] 2 客户端就绪，开始转发");
+            Console.WriteLine("[Server] 2 客户端共同放行，从逻辑帧 0 开始转发");
             Console.WriteLine("按 Ctrl+C 退出");
             while (true) { Thread.Sleep(1000); }
+        }
+
+        private static void ConfigureLowLatency(TcpClient client)
+        {
+            if (client == null) throw new ArgumentNullException("client");
+            client.NoDelay = true;
         }
 
         struct Packet
@@ -94,8 +111,7 @@ namespace FrameSyncServer
                 var stream = client.GetStream();
                 while (true)
                 {
-                    int bytesRead = stream.Read(buffer, 0, 8);
-                    if (bytesRead <= 0) break;
+                    if (!TryReadExactly(stream, buffer)) break;
                     uint raw = BitConverter.ToUInt32(buffer, 0);
                     int frameID = BitConverter.ToInt32(buffer, 4);
                     _confirmedFrames[clientIdx] = frameID;
@@ -107,6 +123,19 @@ namespace FrameSyncServer
                 Console.WriteLine("[Client" + clientIdx + "] 断开: " + e.Message);
             }
             running = false;
+        }
+
+        static bool TryReadExactly(NetworkStream stream, byte[] buffer)
+        {
+            int offset = 0;
+            while (offset < buffer.Length)
+            {
+                int bytesRead = stream.Read(buffer, offset, buffer.Length - offset);
+                if (bytesRead <= 0) return false;
+                offset += bytesRead;
+            }
+
+            return true;
         }
 
         static void Broadcast(uint raw, int senderIdx, int frameID)
