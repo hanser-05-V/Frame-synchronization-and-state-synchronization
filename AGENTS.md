@@ -2,9 +2,9 @@
 
 ## Project Structure & Module Organization
 
-This repository contains a Unity 2022.3.62f2 project under `Project/Frame Synchronization/`. Runtime C# code is in `Assets/Scripts/` and uses the `FrameSyncDemo` namespace. Keep deterministic frame logic, fixed-point math, snapshots, prediction, and buffering in `Assets/Scripts/FrameSync/`; socket transport and connection settings belong in `Assets/Scripts/Network/`; Unity editor extensions belong in `Assets/Scripts/Editor/`. Top-level controllers and debug UI remain directly under `Assets/Scripts/`. Materials and imported art live under `Assets/Material/` and `Assets/New Folder/`.
+This repository contains a Unity 2022.3.62f2 project under `Project/Frame Synchronization/`. Runtime C# code is in `Assets/Scripts/` and uses the `FrameSyncDemo` namespace. Keep generic frame timelines, fixed-point math, snapshots, prediction, rollback coordination, and synchronized frame buffers in `Assets/Scripts/FrameSync/`; deterministic basketball domain simulation belongs in `Assets/Scripts/Gameplay/`; local render-update input edge capture belongs in `Assets/Scripts/Input/`; socket transport and connection settings belong in `Assets/Scripts/Network/`; presentation-only interpolation, correction, replay sampling, and runtime control overlays belong in `Assets/Scripts/Presentation/`; Unity editor extensions belong in `Assets/Scripts/Editor/`. Top-level orchestration and legacy debug controllers remain directly under `Assets/Scripts/`.
 
-`Packages/` and `ProjectSettings/` are versioned Unity configuration. Do not commit generated `Library/`, `Temp/`, `Logs/`, `obj/`, `.idea/`, solution, or project files. `Assets/Scenes/` is currently ignored; coordinate any scene changes with maintainers before changing that rule.
+`Packages/` and `ProjectSettings/` are versioned Unity configuration. Do not commit generated `Library/`, `Temp/`, `Logs/`, `obj/`, `.idea/`, solution, project, or `Builds/` files. `Assets/Scenes/SampleScene.unity` is the versioned delivery scene; other scene files remain ignored unless maintainers explicitly coordinate an exception.
 
 ## Build, Test, and Development Commands
 
