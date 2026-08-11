@@ -11,11 +11,13 @@ namespace FrameSyncDemo
         public static void Update(BallEntity ball, FixedInt deltaTime)
         {
             if (ball.state != BallEntity.EState.Airborne &&
-                ball.state != BallEntity.EState.Free)
+                ball.state != BallEntity.EState.Free &&
+                ball.state != BallEntity.EState.Scored)
                 return;
 
             // Euler 积分: v += g * dt,  p += v * dt
             FixedInt dt = deltaTime;
+            FixedVector3 previousPosition = ball.position;
             var vel = ball.velocity;
             vel.y += CourtConstant.Gravity * dt;            // 重力
             ball.position += vel * dt;                       // 位移
@@ -30,14 +32,14 @@ namespace FrameSyncDemo
             }
 
             // 篮筐检测：球穿过篮筐平面 (y ≥ 3.05 且 下一帧 y < 3.05) 且在篮筐半径内
-            if (DetectScored(ball, dt))
+            if (DetectScored(ball, previousPosition))
             {
                 ball.state = BallEntity.EState.Scored;
             }
         }
 
         /// <summary>篮筐碰撞检测 — 球穿篮筐即为进球</summary>
-        private static bool DetectScored(BallEntity ball, FixedInt dt)
+        private static bool DetectScored(BallEntity ball, FixedVector3 previousPosition)
         {
             // 不在空中不检测
             if (ball.state != BallEntity.EState.Airborne)
@@ -50,8 +52,7 @@ namespace FrameSyncDemo
 
             // 上一帧位置 >= 篮筐高度 且 当前位置 < 篮筐高度
             // (从上方穿过篮筐平面)
-            var prevY = ball.position.y + ball.velocity.y * dt;
-            bool passedThrough = prevY._raw >= CourtConstant.HoopY._raw &&
+            bool passedThrough = previousPosition.y._raw >= CourtConstant.HoopY._raw &&
                                  ball.position.y._raw < CourtConstant.HoopY._raw;
 
             if (passedThrough && distXZ._raw <= (CourtConstant.HoopRadius * CourtConstant.HoopRadius)._raw)

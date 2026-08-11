@@ -8,13 +8,21 @@ namespace FrameSyncDemo
     {
         public int frameID;
 
-        // 玩家位置（XZ平面）
+        // 玩家位置
         public FixedInt player1X;
+        public FixedInt player1Y;
         public FixedInt player1Z;
         public FixedInt player2X;
+        public FixedInt player2Y;
         public FixedInt player2Z;
 
         // 玩家状态（阶段1扩展）
+        public FixedInt player1FacingX;
+        public FixedInt player1FacingY;
+        public FixedInt player1FacingZ;
+        public FixedInt player2FacingX;
+        public FixedInt player2FacingY;
+        public FixedInt player2FacingZ;
         public int player1State;        // PlayerEntity.EState
         public int player2State;
         public bool player1HasBall;

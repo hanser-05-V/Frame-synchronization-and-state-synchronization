@@ -10,16 +10,20 @@ namespace FrameSyncDemo
     ///   bit 31-16: 保留
     ///   bit 15-8:  moveDir (8方向, 0=停止, 1-8=8方向)
     ///   bit 7-0:   buttons (bitmask)
-    ///     bit 0 (0x01): Shoot    — 投篮
+    ///     bit 0 (0x01): ShootReleased — 投篮松开边沿
     ///     bit 1 (0x02): Pass     — 传球
     ///     bit 2 (0x04): Steal    — 抢断
     ///     bit 3 (0x08): Block    — 盖帽
     ///     bit 4 (0x10): Sprint   — 冲刺
-    ///     bit 5-7: 保留
+    ///     bit 5 (0x20): PickupPressed — 捡球按下边沿
+    ///     bit 6 (0x40): EndMatchPressed — 结束比赛按下边沿
+    ///     bit 7: 保留
     /// </summary>
     [System.Serializable]
     public struct FrameInput
     {
+        private const uint TransientActionMask = 0x61u;
+
         public uint _raw;
 
         /// <summary>移动方向: 0=停止, 1=上, 2=右上, 3=右, 4=右下, 5=下, 6=左下, 7=左, 8=左上</summary>
@@ -49,11 +53,18 @@ namespace FrameSyncDemo
         }
 
         // ----- 扩展按键属性（阶段1+）-----
-        /// <summary>投篮按键</summary>
+        /// <summary>投篮松开边沿的兼容别名</summary>
         public bool shoot
         {
             get { return (_raw & 0x01) != 0; }
             set { _raw = value ? (_raw | 0x01) : (_raw & ~0x01u); }
+        }
+
+        /// <summary>投篮松开边沿</summary>
+        public bool shootReleased
+        {
+            get { return shoot; }
+            set { shoot = value; }
         }
 
         /// <summary>传球按键</summary>
@@ -82,6 +93,24 @@ namespace FrameSyncDemo
         {
             get { return (_raw & 0x10) != 0; }
             set { _raw = value ? (_raw | 0x10) : (_raw & ~0x10u); }
+        }
+
+        /// <summary>捡球按下边沿</summary>
+        public bool pickupPressed
+        {
+            get { return (_raw & 0x20) != 0; }
+            set { _raw = value ? (_raw | 0x20) : (_raw & ~0x20u); }
+        }
+
+        public bool endMatchPressed
+        {
+            get { return (_raw & 0x40) != 0; }
+            set { _raw = value ? (_raw | 0x40) : (_raw & ~0x40u); }
+        }
+
+        public FrameInput ToPredictionInput()
+        {
+            return new FrameInput(_raw & ~TransientActionMask);
         }
 
         public void Reset()

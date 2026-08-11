@@ -29,6 +29,17 @@ namespace FrameSyncDemo
         // ----- 物理常量 -----
         public static readonly FixedInt Gravity = FixedInt.FromFloat(-9.8f);  // 重力 -9.8 m/s²
 
+        // ----- P0 持球挂点 -----
+        public static readonly FixedInt HeldBallHeight = FixedInt.FromFloat(1.2f);
+        public static readonly FixedInt HeldBallForwardOffset = FixedInt.FromFloat(0.5f);
+        public static readonly FixedInt PickupRadius = FixedInt.FromFloat(1.25f);
+
+        // ----- P0 投篮 -----
+        public static readonly FixedInt LogicDeltaTime = FixedInt.FromFloat(0.033f);
+        public static readonly FixedInt ShotReleaseHeight = FixedInt.FromFloat(1.5f);
+        public static readonly FixedInt ShotForwardOffset = FixedInt.FromFloat(0.35f);
+        public const int ShotFlightFrames = 30;
+
         // ----- 球场边界检测 -----
         public static FixedVector3 MakeSureInside(FixedVector3 pos)
         {

@@ -64,6 +64,17 @@ namespace FrameSyncDemo
         /// <summary>尝试转换到新状态，白名单检查</summary>
         public bool TryChangeState(PlayerEntity.EState newState)
         {
+            return TryChangeState(newState, true);
+        }
+
+        /// <summary>确定性重演使用：执行相同白名单转换，但不输出日志。</summary>
+        public bool TryChangeStateSilently(PlayerEntity.EState newState)
+        {
+            return TryChangeState(newState, false);
+        }
+
+        private bool TryChangeState(PlayerEntity.EState newState, bool emitLogs)
+        {
             if (_entity.state == newState)
                 return true;
 
@@ -75,11 +86,16 @@ namespace FrameSyncDemo
                     {
                         var oldState = _entity.state;
                         _entity.state = newState;
-                        Debug.Log($"[FSM] P{_entity.playerIndex}: {oldState} → {newState}");
+                        if (emitLogs)
+                            Debug.Log($"[FSM] P{_entity.playerIndex}: {oldState} → {newState}");
                         return true;
                     }
                 }
-                Debug.LogWarning($"[FSM] ⛔ P{_entity.playerIndex}: 禁止转换 {_entity.state} → {newState}");
+                if (emitLogs)
+                {
+                    Debug.LogWarning(
+                        $"[FSM] ⛔ P{_entity.playerIndex}: 禁止转换 {_entity.state} → {newState}");
+                }
                 return false;
             }
 
