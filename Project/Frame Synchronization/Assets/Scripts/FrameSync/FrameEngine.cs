@@ -17,6 +17,7 @@ namespace FrameSyncDemo
         [SerializeField] private int _currentFrame = 0;
         [SerializeField] private int _catchupCount = 0;
         [SerializeField] private float _elapsedTime = 0f;
+        private float _renderInterpolationAlpha = 0f;
 
         private long _lastLogicMs = 0;
         private long _startMs = 0;
@@ -46,6 +47,7 @@ namespace FrameSyncDemo
         public int FrameIntervalMs => _frameIntervalMs;
         public int TargetFPS => _frameCountPerSecond;
         public FrameBuffer Buffer => _frameBuffer;
+        public float RenderInterpolationAlpha => _renderInterpolationAlpha;
 
         public void Initialize(int playerCount, int frameIntervalMs = 33)
         {
@@ -57,6 +59,7 @@ namespace FrameSyncDemo
             _elapsedTime = 0f;
             _catchupCount = 0;
             _lastLogicMs = 0;
+            _renderInterpolationAlpha = 0f;
             _isRunning = false;
         }
 
@@ -64,6 +67,7 @@ namespace FrameSyncDemo
         {
             _startMs = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(); //记录引擎启动时的绝对时间戳
             _lastLogicMs = 0;
+            _renderInterpolationAlpha = 0f;
             _isRunning = true;
             Debug.Log($"[FrameEngine] 启动 — {_frameCountPerSecond}FPS ({_frameIntervalMs}ms/帧)");
         }
@@ -104,6 +108,12 @@ namespace FrameSyncDemo
                 _catchupCount++;
                 OnCatchup?.Invoke(frameRun - 1); //追帧 回调
             }
+
+            _renderInterpolationAlpha =
+                PresentationFrameInterpolator.CalculateAlpha(
+                    elapsedMs,
+                    _lastLogicMs,
+                    _frameIntervalMs);
         }
 
         /// <summary>执行一帧：收集输入 → 写缓冲 → 触发回调</summary>
