@@ -115,13 +115,8 @@ namespace FrameSyncDemo
         recordedInputs.Clear();
         recordedFrameCount = 0;
         playbackFrame = 0;
-        // 重置引擎帧号为0，让录制从帧0开始
-        var engine = Object.FindObjectOfType<FrameEngine>();
-        if (engine != null)
-            typeof(FrameEngine).GetField("_currentFrame",
-                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
-                ?.SetValue(engine, 0);
-        Debug.Log("[FrameDebugger] 开始录制 (帧号已重置为0)");
+        Debug.Log(
+            "[FrameDebugger] Legacy recording no longer resets the live frame timeline.");
     }
 
         public void StopRecording()
@@ -156,15 +151,9 @@ namespace FrameSyncDemo
             isPlayingBack = true;
             isRecording = false;
             playbackFrame = 0;
-            // 重置引擎帧号，让回放也从 0 开始
-            var engine = FindObjectOfType<FrameEngine>();
-            if (engine != null)
-            {
-                typeof(FrameEngine).GetField("_currentFrame",
-                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)?
-                    .SetValue(engine, 0);
-            }
-            Debug.Log($"[FrameDebugger] 开始回放 — {recordedFrameCount}帧 (帧号已重置)");
+            Debug.LogWarning(
+                "[FrameDebugger] Legacy playback is detached from the live world. " +
+                "Use F9 postgame highlights instead.");
         }
 
         public void StopPlayback()

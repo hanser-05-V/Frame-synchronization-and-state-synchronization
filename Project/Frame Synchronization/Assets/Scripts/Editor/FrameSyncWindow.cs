@@ -222,60 +222,10 @@ namespace FrameSyncDemo
 
         private void DrawPlaybackTab(FrameDebugger d)
         {
-            EditorGUILayout.LabelField("录放控制", EditorStyles.boldLabel);
-
-            var oldColor = GUI.backgroundColor;
-
-            // 录制按钮 — 录制时红色高亮
-            if (d.isRecording)
-                GUI.backgroundColor = new Color(0.9f, 0.3f, 0.3f);
-
-            string recordBtnText = d.isRecording ? "⏹ 停止录制" : "🔴 开始录制";
-            if (GUILayout.Button(recordBtnText, GUILayout.Height(30)))
-            {
-                if (d.isRecording)
-                    d.StopRecording();
-                else
-                    d.StartRecording();
-            }
-
-            GUI.backgroundColor = oldColor;
-
-            // 回放按钮 — 回放时绿色高亮，录制中或无数剧时禁用
-            EditorGUILayout.BeginHorizontal();
-            GUI.enabled = !d.isRecording && d.recordedInputs.Count > 0;
-
-            if (d.isPlayingBack)
-                GUI.backgroundColor = new Color(0.3f, 0.8f, 0.3f);
-
-            string playBtnText = d.isPlayingBack ? "■ 停止回放" : "▶ 回放";
-            if (GUILayout.Button(playBtnText, GUILayout.Height(30)))
-            {
-                if (d.isPlayingBack)
-                    d.StopPlayback();
-                else
-                    d.StartPlayback();
-            }
-
-            GUI.backgroundColor = oldColor;
-            GUI.enabled = true;
-
-            // 清空按钮
-            if (GUILayout.Button("🗑 清空录制", GUILayout.Height(30)))
-                d.ClearRecording();
-            EditorGUILayout.EndHorizontal();
-
-            EditorGUILayout.Space(8);
-            EditorGUILayout.LabelField($"录制帧数: {d.recordedFrameCount}");
-            EditorGUILayout.LabelField($"Input总数: {d.recordedInputs.Count}");
-            EditorGUILayout.LabelField($"玩家数: {d.recordedPlayerCount}");
-
-            if (d.isPlayingBack)
-            {
-                float progress = (float)d.playbackFrame / System.Math.Max(1, d.recordedFrameCount);
-                EditorGUI.ProgressBar(EditorGUILayout.GetControlRect(false, 20), progress,
-                    $"回放: {d.playbackFrame}/{d.recordedFrameCount}");
-            }
+            EditorGUILayout.LabelField("赛后精彩回放", EditorStyles.boldLabel);
+            EditorGUILayout.HelpBox(
+                "旧式本机录制/回放已停用。比赛中按 F9，系统会在稳定帧完成后进入赛后精彩片段回放。",
+                MessageType.Info);
         }
 
         private void DrawLogTab(FrameDebugger d)
