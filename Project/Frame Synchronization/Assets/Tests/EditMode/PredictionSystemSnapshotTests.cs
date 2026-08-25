@@ -21,6 +21,60 @@ namespace FrameSyncDemo.Tests
         }
 
         [Test]
+        public void FrameSnapshot_FromWorld_PreservesAllLegacyValues()
+        {
+            SimulationWorldState world = WorldStateCodec.Capture(
+                37,
+                CreatePlayers(),
+                CreateBall());
+
+            FrameSnapshot snapshot = FrameSnapshot.FromWorld(world);
+
+            Assert.AreEqual(world.frameID, snapshot.frameID);
+            Assert.AreEqual(world.player0.position.x, snapshot.player1X);
+            Assert.AreEqual(world.player0.position.y, snapshot.player1Y);
+            Assert.AreEqual(world.player0.position.z, snapshot.player1Z);
+            Assert.AreEqual(world.player1.position.x, snapshot.player2X);
+            Assert.AreEqual(world.player1.position.y, snapshot.player2Y);
+            Assert.AreEqual(world.player1.position.z, snapshot.player2Z);
+            Assert.AreEqual(world.player0.facing.x, snapshot.player1FacingX);
+            Assert.AreEqual(world.player0.facing.y, snapshot.player1FacingY);
+            Assert.AreEqual(world.player0.facing.z, snapshot.player1FacingZ);
+            Assert.AreEqual(world.player1.facing.x, snapshot.player2FacingX);
+            Assert.AreEqual(world.player1.facing.y, snapshot.player2FacingY);
+            Assert.AreEqual(world.player1.facing.z, snapshot.player2FacingZ);
+            Assert.AreEqual(world.player0.state, snapshot.player1State);
+            Assert.AreEqual(world.player1.state, snapshot.player2State);
+            Assert.AreEqual(world.player0.hasBall, snapshot.player1HasBall);
+            Assert.AreEqual(world.player1.hasBall, snapshot.player2HasBall);
+            Assert.AreEqual(world.ball.position.x, snapshot.ballPosX);
+            Assert.AreEqual(world.ball.position.y, snapshot.ballPosY);
+            Assert.AreEqual(world.ball.position.z, snapshot.ballPosZ);
+            Assert.AreEqual(world.ball.velocity.x, snapshot.ballVelX);
+            Assert.AreEqual(world.ball.velocity.y, snapshot.ballVelY);
+            Assert.AreEqual(world.ball.velocity.z, snapshot.ballVelZ);
+            Assert.AreEqual(world.ball.state, snapshot.ballState);
+            Assert.AreEqual(world.ball.holderPlayerIndex, snapshot.ballHolder);
+            Assert.AreEqual(world, snapshot.ToWorld());
+        }
+
+        [Test]
+        public void CaptureRestoreCapture_PreservesCanonicalHash()
+        {
+            PlayerEntity[] players = CreatePlayers();
+            BallEntity ball = CreateBall();
+            SimulationWorldState original = WorldStateCodec.Capture(37, players, ball);
+            MutateWorld(players, ball);
+
+            WorldStateCodec.Restore(original, players, ball);
+            SimulationWorldState restored = WorldStateCodec.Capture(37, players, ball);
+
+            Assert.AreEqual(
+                WorldHash.Compute(original, 37),
+                WorldHash.Compute(restored, 37));
+        }
+
+        [Test]
         public void TryGetWorldSnapshot_FrameDoesNotExist_ReturnsFalseWithInvalidSnapshot()
         {
             var prediction = new PredictionSystem();

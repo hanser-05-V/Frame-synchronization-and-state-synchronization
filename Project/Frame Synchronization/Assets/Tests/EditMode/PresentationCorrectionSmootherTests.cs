@@ -200,6 +200,46 @@ namespace FrameSyncDemo.Tests
         }
 
         [Test]
+        public void BeginCorrection_CustomMaximum_CompletesWithinOverride()
+        {
+            var smoother = new PresentationCorrectionSmoother(
+                0.1f,
+                0.2f,
+                10f,
+                2f);
+            Vector3 target = Vector3.zero;
+            smoother.BeginCorrection(
+                new Vector3(0.4f, 0f, 0f),
+                target,
+                0.05f);
+
+            Vector3 result = smoother.Evaluate(target, 0.025f);
+            result = smoother.Evaluate(target, 0.025f);
+
+            Assert.AreEqual(target, result);
+            Assert.IsFalse(smoother.IsCorrecting);
+        }
+
+        [Test]
+        public void BeginCorrection_CustomMaximum_SnapsWhenSpeedCannotConverge()
+        {
+            var smoother = new PresentationCorrectionSmoother(
+                0.1f,
+                0.2f,
+                10f,
+                2f);
+            Vector3 target = Vector3.zero;
+
+            smoother.BeginCorrection(
+                new Vector3(0.6f, 0f, 0f),
+                target,
+                0.05f);
+
+            Assert.IsFalse(smoother.IsCorrecting);
+            Assert.AreEqual(target, smoother.Evaluate(target, 0.016f));
+        }
+
+        [Test]
         public void BeginCorrection_ZeroOffset_DoesNotEnterCorrection()
         {
             var smoother = new PresentationCorrectionSmoother(0.1f);

@@ -1,7 +1,9 @@
 {
     "name": "FrameSyncDemo.Runtime",
     "rootNamespace": "FrameSyncDemo",
-    "references": [],
+    "references": [
+        "kcp2k.Core"
+    ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,

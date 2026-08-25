@@ -20,6 +20,7 @@ namespace FrameSyncDemo
         private Vector3 _displayVelocity;
         private Vector3 _startOffset;
         private Vector3 _initialRelativeVelocity;
+        private float _activeMaximumDurationSeconds;
         private float _activeDurationSeconds;
         private float _elapsedSeconds;
         private bool _hasDisplayState;
@@ -91,6 +92,34 @@ namespace FrameSyncDemo
             Vector3 currentDisplayPosition,
             Vector3 correctedTargetPosition)
         {
+            BeginCorrection(
+                currentDisplayPosition,
+                correctedTargetPosition,
+                _maximumDurationSeconds);
+        }
+
+        public void BeginCorrection(
+            Vector3 currentDisplayPosition,
+            Vector3 correctedTargetPosition,
+            float maximumDurationSeconds)
+        {
+            if (!IsFinite(maximumDurationSeconds) ||
+                maximumDurationSeconds <= 0f)
+            {
+                throw new ArgumentOutOfRangeException(
+                    nameof(maximumDurationSeconds));
+            }
+
+            float effectiveMaximumDuration = Mathf.Min(
+                maximumDurationSeconds,
+                _maximumDurationSeconds);
+            float effectiveMinimumDuration = Mathf.Min(
+                _minimumDurationSeconds,
+                effectiveMaximumDuration);
+            float effectiveSnapDistance = Mathf.Min(
+                _snapDistance,
+                _maximumCorrectionSpeed * effectiveMaximumDuration);
+            _activeMaximumDurationSeconds = effectiveMaximumDuration;
             if (!_hasDisplayState)
                 _displayVelocity = Vector3.zero;
 
@@ -109,7 +138,7 @@ namespace FrameSyncDemo
                 return;
             }
 
-            if (distance >= _snapDistance)
+            if (distance >= effectiveSnapDistance)
             {
                 IsCorrecting = false;
                 _hasDisplayState = false;
@@ -121,8 +150,8 @@ namespace FrameSyncDemo
                 1.5f * distance / _maximumCorrectionSpeed;
             _activeDurationSeconds = Mathf.Clamp(
                 speedLimitedDuration,
-                _minimumDurationSeconds,
-                _maximumDurationSeconds);
+                effectiveMinimumDuration,
+                effectiveMaximumDuration);
             _initialRelativeVelocity = Vector3.zero;
             _initializeCorrectionVelocity = true;
             IsCorrecting = true;
@@ -155,7 +184,8 @@ namespace FrameSyncDemo
                     _initialRelativeVelocity);
                 if (offsetVelocityDot > 0f)
                 {
-                    _activeDurationSeconds = _maximumDurationSeconds;
+                    _activeDurationSeconds =
+                        _activeMaximumDurationSeconds;
                 }
                 else if (offsetVelocityDot < 0f)
                 {
@@ -222,6 +252,7 @@ namespace FrameSyncDemo
             _displayVelocity = Vector3.zero;
             _startOffset = Vector3.zero;
             _initialRelativeVelocity = Vector3.zero;
+            _activeMaximumDurationSeconds = 0f;
             _activeDurationSeconds = 0f;
             _elapsedSeconds = 0f;
             _hasDisplayState = false;

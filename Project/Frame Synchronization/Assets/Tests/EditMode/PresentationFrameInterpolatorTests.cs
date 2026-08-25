@@ -8,6 +8,272 @@ namespace FrameSyncDemo.Tests
     public class PresentationFrameInterpolatorTests
     {
         [Test]
+        public void Evaluate_ViewWorld_InterpolatesExplicitTrackEndpoints()
+        {
+            var interpolator = new PresentationFrameInterpolator(2);
+            ViewWorldState view = CreateViewWorld(
+                predictedFrame: 11,
+                confirmedFrame: 8,
+                localFromX: -2,
+                localToX: 0,
+                remoteFromX: 4,
+                remoteToX: 2,
+                ballFromX: 5,
+                ballToX: 3,
+                ballState: BallEntity.EState.Airborne,
+                holderPlayerIndex: -1);
+            interpolator.Reset(view);
+            var positions = new Vector3[2];
+
+            interpolator.Evaluate(
+                0,
+                0.5f,
+                positions,
+                out PresentationBallSample ball);
+
+            Assert.AreEqual(new Vector3(-1f, 0.5f, 0f), positions[0]);
+            Assert.AreEqual(new Vector3(3f, 0.5f, 0f), positions[1]);
+            Assert.AreEqual(new Vector3(4f, 0f, 0f), ball.BasePosition);
+            Assert.AreEqual(-1, ball.AttachedPlayerIndex);
+        }
+
+        [Test]
+        public void Evaluate_ViewWorldIndependentAlphas_UseEachTrackClock()
+        {
+            var interpolator = new PresentationFrameInterpolator(2);
+            ViewWorldState view = CreateViewWorld(
+                predictedFrame: 11,
+                confirmedFrame: 8,
+                localFromX: -2,
+                localToX: 0,
+                remoteFromX: 4,
+                remoteToX: 2,
+                ballFromX: 5,
+                ballToX: 3,
+                ballState: BallEntity.EState.Airborne,
+                holderPlayerIndex: -1);
+            interpolator.Reset(view);
+            var positions = new Vector3[2];
+
+            interpolator.Evaluate(
+                0,
+                0.75f,
+                0.25f,
+                positions,
+                out PresentationBallSample ball);
+
+            Assert.AreEqual(new Vector3(-0.5f, 0.5f, 0f), positions[0]);
+            Assert.AreEqual(new Vector3(3.5f, 0.5f, 0f), positions[1]);
+            Assert.AreEqual(new Vector3(4.5f, 0f, 0f), ball.BasePosition);
+        }
+
+        [Test]
+        public void Evaluate_ViewWorldHeldBall_InheritsSelectedHolderEndpoint()
+        {
+            var interpolator = new PresentationFrameInterpolator(2);
+            ViewWorldState view = CreateViewWorld(
+                predictedFrame: 11,
+                confirmedFrame: 8,
+                localFromX: -2,
+                localToX: 0,
+                remoteFromX: 4,
+                remoteToX: 2,
+                ballFromX: 4,
+                ballToX: 2,
+                ballState: BallEntity.EState.Held,
+                holderPlayerIndex: 1);
+            interpolator.Reset(view);
+            var positions = new Vector3[2];
+
+            interpolator.Evaluate(
+                0,
+                0.5f,
+                positions,
+                out PresentationBallSample ball);
+
+            Assert.AreEqual(1, ball.AttachedPlayerIndex);
+            Assert.AreEqual(3f, ball.BasePosition.x, 0.0001f);
+        }
+
+        [Test]
+        public void Evaluate_ViewWorldRemoteHeldBall_UsesConfirmedClockForHolderAndBall()
+        {
+            var interpolator = new PresentationFrameInterpolator(2);
+            ViewWorldState view = CreateViewWorld(
+                predictedFrame: 11,
+                confirmedFrame: 8,
+                localFromX: -2,
+                localToX: 0,
+                remoteFromX: 4,
+                remoteToX: 2,
+                ballFromX: 4,
+                ballToX: 2,
+                ballState: BallEntity.EState.Held,
+                holderPlayerIndex: 1);
+            interpolator.Reset(view);
+            var positions = new Vector3[2];
+
+            interpolator.Evaluate(
+                0,
+                0.75f,
+                0.25f,
+                positions,
+                out PresentationBallSample ball);
+
+            Assert.AreEqual(new Vector3(-0.5f, 0.5f, 0f), positions[0]);
+            Assert.AreEqual(new Vector3(3.5f, 0.5f, 0f), positions[1]);
+            Assert.AreEqual(1, ball.AttachedPlayerIndex);
+            Assert.AreEqual(new Vector3(3.5f, 0f, 0f), ball.BasePosition);
+        }
+
+        [Test]
+        public void Evaluate_ViewWorldLocalHeldBall_UsesPredictedClockForHolderAndBall()
+        {
+            var interpolator = new PresentationFrameInterpolator(2);
+            ViewWorldState view = CreateViewWorld(
+                predictedFrame: 11,
+                confirmedFrame: 8,
+                localFromX: -2,
+                localToX: 0,
+                remoteFromX: 4,
+                remoteToX: 2,
+                ballFromX: -2,
+                ballToX: 0,
+                ballState: BallEntity.EState.Held,
+                holderPlayerIndex: 0,
+                ballSource: ViewSampleSource.Predicted);
+            interpolator.Reset(view);
+            var positions = new Vector3[2];
+
+            interpolator.Evaluate(
+                0,
+                0.75f,
+                0.25f,
+                positions,
+                out PresentationBallSample ball);
+
+            Assert.AreEqual(new Vector3(-0.5f, 0.5f, 0f), positions[0]);
+            Assert.AreEqual(new Vector3(3.5f, 0.5f, 0f), positions[1]);
+            Assert.AreEqual(0, ball.AttachedPlayerIndex);
+            Assert.AreEqual(new Vector3(-0.5f, 0f, 0f), ball.BasePosition);
+        }
+
+        [Test]
+        public void Evaluate_ViewWorldInvalidHolder_DoesNotPublishAttachment()
+        {
+            var interpolator = new PresentationFrameInterpolator(2);
+            ViewWorldState view = CreateViewWorld(
+                predictedFrame: 11,
+                confirmedFrame: 8,
+                localFromX: -2,
+                localToX: 0,
+                remoteFromX: 4,
+                remoteToX: 2,
+                ballFromX: 4,
+                ballToX: 2,
+                ballState: BallEntity.EState.Held,
+                holderPlayerIndex: 5);
+            interpolator.Reset(view);
+            var positions = new Vector3[2];
+
+            interpolator.Evaluate(
+                0,
+                0.5f,
+                positions,
+                out PresentationBallSample ball);
+
+            Assert.AreEqual(-1, ball.AttachedPlayerIndex);
+            Assert.IsFalse(ball.IsAttached);
+        }
+
+        [Test]
+        public void PushViewWorld_ConfirmedFrameDidNotAdvance_FreezesRemoteAndConfirmedBall()
+        {
+            var interpolator = new PresentationFrameInterpolator(2);
+            ViewWorldState first = CreateViewWorld(
+                predictedFrame: 11,
+                confirmedFrame: 8,
+                localFromX: -2,
+                localToX: 0,
+                remoteFromX: 4,
+                remoteToX: 2,
+                ballFromX: 5,
+                ballToX: 3,
+                ballState: BallEntity.EState.Airborne,
+                holderPlayerIndex: -1);
+            ViewWorldState stalledConfirmed = CreateViewWorld(
+                predictedFrame: 12,
+                confirmedFrame: 8,
+                localFromX: 0,
+                localToX: 2,
+                remoteFromX: 4,
+                remoteToX: 2,
+                ballFromX: 5,
+                ballToX: 3,
+                ballState: BallEntity.EState.Airborne,
+                holderPlayerIndex: -1);
+            interpolator.Reset(first);
+            interpolator.PushViewWorld(stalledConfirmed);
+            var positions = new Vector3[2];
+
+            interpolator.Evaluate(
+                0,
+                0f,
+                positions,
+                out PresentationBallSample atStart);
+            interpolator.Evaluate(
+                0,
+                0.5f,
+                positions,
+                out PresentationBallSample atHalf);
+
+            Assert.AreEqual(new Vector3(1f, 0.5f, 0f), positions[0]);
+            Assert.AreEqual(new Vector3(2f, 0.5f, 0f), positions[1]);
+            Assert.AreEqual(new Vector3(3f, 0f, 0f), atStart.BasePosition);
+            Assert.AreEqual(new Vector3(3f, 0f, 0f), atHalf.BasePosition);
+        }
+
+        [Test]
+        public void PushViewWorld_ConfirmedFrameAdvanced_PlaysNewRemoteIntervalOnce()
+        {
+            var interpolator = new PresentationFrameInterpolator(2);
+            ViewWorldState first = CreateViewWorld(
+                predictedFrame: 11,
+                confirmedFrame: 8,
+                localFromX: -2,
+                localToX: 0,
+                remoteFromX: 4,
+                remoteToX: 2,
+                ballFromX: 5,
+                ballToX: 3,
+                ballState: BallEntity.EState.Airborne,
+                holderPlayerIndex: -1);
+            ViewWorldState advanced = CreateViewWorld(
+                predictedFrame: 12,
+                confirmedFrame: 9,
+                localFromX: 0,
+                localToX: 2,
+                remoteFromX: 2,
+                remoteToX: 0,
+                ballFromX: 3,
+                ballToX: 1,
+                ballState: BallEntity.EState.Airborne,
+                holderPlayerIndex: -1);
+            interpolator.Reset(first);
+            interpolator.PushViewWorld(advanced);
+            var positions = new Vector3[2];
+
+            interpolator.Evaluate(
+                0,
+                0.5f,
+                positions,
+                out PresentationBallSample ball);
+
+            Assert.AreEqual(new Vector3(1f, 0.5f, 0f), positions[1]);
+            Assert.AreEqual(new Vector3(2f, 0f, 0f), ball.BasePosition);
+        }
+
+        [Test]
         public void Reset_AnyAlpha_ReturnsCapturedWorld()
         {
             PlayerEntity[] players = CreatePlayers();
@@ -21,6 +287,8 @@ namespace FrameSyncDemo.Tests
             Assert.AreEqual(new Vector3(-3f, 0.5f, 0f), playerPositions[0]);
             Assert.AreEqual(new Vector3(3f, 0.5f, 0f), playerPositions[1]);
             Assert.AreEqual(new Vector3(2f, 0f, 0f), ballPosition);
+            Assert.AreEqual(10, interpolator.DeepestFrameID);
+            Assert.AreEqual(10, interpolator.OldestFrameID);
             Assert.AreEqual(10, interpolator.PreviousFrameID);
             Assert.AreEqual(10, interpolator.CurrentFrameID);
             Assert.IsTrue(interpolator.IsReady);
@@ -53,7 +321,7 @@ namespace FrameSyncDemo.Tests
         }
 
         [Test]
-        public void PushLogicFrame_MultipleCatchupFrames_KeepsFinalTwoEndpoints()
+        public void PushLogicFrame_MultipleCatchupFrames_KeepsFinalFourEndpoints()
         {
             PlayerEntity[] players = CreatePlayers();
             BallEntity ball = CreateBall(FixedInt.Zero);
@@ -62,18 +330,26 @@ namespace FrameSyncDemo.Tests
             interpolator.Reset(10, players, ball);
 
             players[0].position.x = FixedInt.FromInt(-2);
+            players[1].position.x = FixedInt.FromInt(4);
             interpolator.PushLogicFrame(11, players, ball);
             players[0].position.x = FixedInt.FromInt(-1);
+            players[1].position.x = FixedInt.FromInt(5);
             interpolator.PushLogicFrame(12, players, ball);
             players[0].position.x = FixedInt.Zero;
+            players[1].position.x = FixedInt.FromInt(6);
             interpolator.PushLogicFrame(13, players, ball);
+            players[0].position.x = FixedInt.FromInt(1);
+            players[1].position.x = FixedInt.FromInt(7);
+            interpolator.PushLogicFrame(14, players, ball);
 
-            interpolator.Evaluate(0f, playerPositions, out _);
-            Assert.AreEqual(new Vector3(-1f, 0.5f, 0f), playerPositions[0]);
-            interpolator.Evaluate(1f, playerPositions, out _);
-            Assert.AreEqual(new Vector3(0f, 0.5f, 0f), playerPositions[0]);
-            Assert.AreEqual(12, interpolator.PreviousFrameID);
-            Assert.AreEqual(13, interpolator.CurrentFrameID);
+            interpolator.Evaluate(0, 0.5f, playerPositions, out _);
+
+            Assert.AreEqual(new Vector3(0.5f, 0.5f, 0f), playerPositions[0]);
+            Assert.AreEqual(new Vector3(4.5f, 0.5f, 0f), playerPositions[1]);
+            Assert.AreEqual(11, interpolator.DeepestFrameID);
+            Assert.AreEqual(12, interpolator.OldestFrameID);
+            Assert.AreEqual(13, interpolator.PreviousFrameID);
+            Assert.AreEqual(14, interpolator.CurrentFrameID);
         }
 
         [Test]
@@ -90,14 +366,18 @@ namespace FrameSyncDemo.Tests
             players[0].position.x = FixedInt.FromInt(-1);
             players[1].position.x = FixedInt.FromInt(5);
             interpolator.PushLogicFrame(12, players, ball);
+            players[0].position.x = FixedInt.Zero;
+            players[1].position.x = FixedInt.FromInt(6);
+            interpolator.PushLogicFrame(13, players, ball);
 
             interpolator.Evaluate(0, 0.5f, output, out _);
 
-            Assert.AreEqual(new Vector3(-1.5f, 0.5f, 0f), output[0]);
+            Assert.AreEqual(new Vector3(-0.5f, 0.5f, 0f), output[0]);
             Assert.AreEqual(new Vector3(3.5f, 0.5f, 0f), output[1]);
-            Assert.AreEqual(10, interpolator.OldestFrameID);
-            Assert.AreEqual(11, interpolator.PreviousFrameID);
-            Assert.AreEqual(12, interpolator.CurrentFrameID);
+            Assert.AreEqual(10, interpolator.DeepestFrameID);
+            Assert.AreEqual(11, interpolator.OldestFrameID);
+            Assert.AreEqual(12, interpolator.PreviousFrameID);
+            Assert.AreEqual(13, interpolator.CurrentFrameID);
         }
 
         [Test]
@@ -114,11 +394,14 @@ namespace FrameSyncDemo.Tests
             players[0].position.x = FixedInt.FromInt(-1);
             players[1].position.x = FixedInt.FromInt(5);
             interpolator.PushLogicFrame(12, players, ball);
+            players[0].position.x = FixedInt.Zero;
+            players[1].position.x = FixedInt.FromInt(6);
+            interpolator.PushLogicFrame(13, players, ball);
 
             interpolator.Evaluate(1, 0.5f, output, out _);
 
             Assert.AreEqual(new Vector3(-2.5f, 0.5f, 0f), output[0]);
-            Assert.AreEqual(new Vector3(4.5f, 0.5f, 0f), output[1]);
+            Assert.AreEqual(new Vector3(5.5f, 0.5f, 0f), output[1]);
         }
 
         [Test]
@@ -153,6 +436,7 @@ namespace FrameSyncDemo.Tests
             interpolator.Evaluate(0, 0.5f, output, out _);
 
             Assert.AreEqual(new Vector3(7f, 0.5f, 0f), output[0]);
+            Assert.AreEqual(20, interpolator.DeepestFrameID);
             Assert.AreEqual(20, interpolator.OldestFrameID);
             Assert.AreEqual(20, interpolator.PreviousFrameID);
             Assert.AreEqual(20, interpolator.CurrentFrameID);
@@ -172,19 +456,24 @@ namespace FrameSyncDemo.Tests
             players[0].position.x = FixedInt.FromInt(-1);
             SetHeldBall(players, ball, 0, new Vector3(0.4f, 0.8f, 0.6f));
             interpolator.PushLogicFrame(12, players, ball);
+            players[0].position.x = FixedInt.Zero;
+            SetHeldBall(players, ball, 0, new Vector3(0.4f, 0.8f, 0.6f));
+            interpolator.PushLogicFrame(13, players, ball);
 
             interpolator.Evaluate(0, 0.5f, output, out PresentationBallSample sample);
 
             Assert.AreEqual(0, sample.AttachedPlayerIndex);
-            Assert.AreEqual(
-                output[0] + new Vector3(0.4f, 0.8f, 0.6f),
-                sample.BasePosition);
+            Assert.That(
+                Vector3.Distance(
+                    output[0] + new Vector3(0.4f, 0.8f, 0.6f),
+                    sample.BasePosition),
+                Is.LessThanOrEqualTo(0.0001f));
         }
 
         [TestCase(BallEntity.EState.Free)]
         [TestCase(BallEntity.EState.Airborne)]
         [TestCase(BallEntity.EState.Scored)]
-        public void Evaluate_NonHeldBall_UsesDelayedWorld(
+        public void Evaluate_NonHeldBall_UsesDeepTimeline(
             BallEntity.EState state)
         {
             PlayerEntity[] players = CreatePlayers();
@@ -197,6 +486,8 @@ namespace FrameSyncDemo.Tests
             interpolator.PushLogicFrame(11, players, ball);
             ball.position.x = FixedInt.FromInt(100);
             interpolator.PushLogicFrame(12, players, ball);
+            ball.position.x = FixedInt.FromInt(200);
+            interpolator.PushLogicFrame(13, players, ball);
 
             interpolator.Evaluate(0, 0.5f, output, out PresentationBallSample sample);
 
@@ -205,7 +496,7 @@ namespace FrameSyncDemo.Tests
         }
 
         [Test]
-        public void Evaluate_RemoteHeld_WaitsForDelayedOwnership()
+        public void Evaluate_RemoteAcquire_WaitsUntilOldestEndpointOwnsBall()
         {
             PlayerEntity[] players = CreatePlayers();
             BallEntity ball = CreateBall(FixedInt.Zero);
@@ -226,14 +517,22 @@ namespace FrameSyncDemo.Tests
             interpolator.PushLogicFrame(13, players, ball);
             interpolator.Evaluate(0, 0.5f, output, out PresentationBallSample delayed);
 
-            Assert.AreEqual(1, delayed.AttachedPlayerIndex);
+            Assert.AreEqual(-1, delayed.AttachedPlayerIndex);
+            Assert.AreEqual(new Vector3(0.5f, 0f, 0f), delayed.BasePosition);
+
+            players[1].position.x = FixedInt.FromInt(7);
+            SetHeldBall(players, ball, 1, new Vector3(-0.4f, 0.8f, 0.6f));
+            interpolator.PushLogicFrame(14, players, ball);
+            interpolator.Evaluate(0, 0.5f, output, out PresentationBallSample attached);
+
+            Assert.AreEqual(1, attached.AttachedPlayerIndex);
             Assert.AreEqual(
                 output[1] + new Vector3(-0.4f, 0.8f, 0.6f),
-                delayed.BasePosition);
+                attached.BasePosition);
         }
 
         [Test]
-        public void Evaluate_LocalRelease_DoesNotUseStaleLocalAttachment()
+        public void Evaluate_LocalRelease_DeepHistoryHeld_RemainsUnbound()
         {
             PlayerEntity[] players = CreatePlayers();
             BallEntity ball = CreateBall(FixedInt.Zero);
@@ -244,14 +543,18 @@ namespace FrameSyncDemo.Tests
             players[0].position.x = FixedInt.FromInt(-2);
             SetHeldBall(players, ball, 0, new Vector3(0.4f, 0.8f, 0.6f));
             interpolator.PushLogicFrame(11, players, ball);
+            players[0].position.x = FixedInt.FromInt(-1);
+            SetHeldBall(players, ball, 0, new Vector3(0.4f, 0.8f, 0.6f));
+            interpolator.PushLogicFrame(12, players, ball);
             ball.state = BallEntity.EState.Airborne;
             ball.holderPlayerIndex = -1;
             ball.position.x = FixedInt.FromInt(8);
-            interpolator.PushLogicFrame(12, players, ball);
+            interpolator.PushLogicFrame(13, players, ball);
 
             interpolator.Evaluate(0, 0.5f, output, out PresentationBallSample sample);
 
             Assert.AreEqual(-1, sample.AttachedPlayerIndex);
+            Assert.AreEqual(new Vector3(-2.1f, 1.3f, 0.6f), sample.BasePosition);
         }
 
         [Test]
@@ -276,6 +579,12 @@ namespace FrameSyncDemo.Tests
 
             ball.position.x = FixedInt.FromInt(9);
             interpolator.PushLogicFrame(13, players, ball);
+            interpolator.Evaluate(0, 0.5f, output, out PresentationBallSample stillHeld);
+
+            Assert.AreEqual(1, stillHeld.AttachedPlayerIndex);
+
+            ball.position.x = FixedInt.FromInt(10);
+            interpolator.PushLogicFrame(14, players, ball);
             interpolator.Evaluate(0, 0.5f, output, out PresentationBallSample released);
 
             Assert.AreEqual(-1, released.AttachedPlayerIndex);
@@ -319,25 +628,28 @@ namespace FrameSyncDemo.Tests
             players[1].position.x = FixedInt.FromInt(102);
             interpolator.PushLogicFrame(102, players, ball);
 
-            FrameSnapshot oldest = CreateSnapshot(10, -3, 3, 0);
-            FrameSnapshot previous = CreateSnapshot(11, -2, 4, 2);
-            FrameSnapshot newest = CreateSnapshot(12, -1, 5, 4);
+            FrameSnapshot deepest = CreateSnapshot(10, -3, 3, 0);
+            FrameSnapshot oldest = CreateSnapshot(11, -2, 4, 2);
+            FrameSnapshot previous = CreateSnapshot(12, -1, 5, 4);
+            FrameSnapshot newest = CreateSnapshot(13, 0, 6, 6);
             interpolator.ReplaceHistoryAfterRollback(
                 newest,
                 previous,
-                oldest);
+                oldest,
+                deepest);
             interpolator.Evaluate(0, 0.5f, output, out PresentationBallSample sample);
 
-            Assert.AreEqual(new Vector3(-1.5f, 0.5f, 0f), output[0]);
+            Assert.AreEqual(new Vector3(-0.5f, 0.5f, 0f), output[0]);
             Assert.AreEqual(new Vector3(3.5f, 0.5f, 0f), output[1]);
             Assert.AreEqual(new Vector3(1f, 0f, 0f), sample.BasePosition);
-            Assert.AreEqual(10, interpolator.OldestFrameID);
-            Assert.AreEqual(11, interpolator.PreviousFrameID);
-            Assert.AreEqual(12, interpolator.CurrentFrameID);
+            Assert.AreEqual(10, interpolator.DeepestFrameID);
+            Assert.AreEqual(11, interpolator.OldestFrameID);
+            Assert.AreEqual(12, interpolator.PreviousFrameID);
+            Assert.AreEqual(13, interpolator.CurrentFrameID);
         }
 
         [Test]
-        public void ReplaceHistoryAfterRollback_MissingHistory_DuplicatesNewest()
+        public void ReplaceHistoryAfterRollback_MissingPrevious_DuplicatesNewestIntoAllHistory()
         {
             PlayerEntity[] players = CreatePlayers();
             BallEntity ball = CreateBall(FixedInt.Zero);
@@ -349,12 +661,67 @@ namespace FrameSyncDemo.Tests
             interpolator.ReplaceHistoryAfterRollback(
                 newest,
                 null,
+                null,
                 null);
             interpolator.Evaluate(0, 0.5f, output, out PresentationBallSample sample);
 
             Assert.AreEqual(new Vector3(-1f, 0.5f, 0f), output[0]);
             Assert.AreEqual(new Vector3(5f, 0.5f, 0f), output[1]);
             Assert.AreEqual(new Vector3(4f, 0f, 0f), sample.BasePosition);
+            Assert.AreEqual(12, interpolator.DeepestFrameID);
+            Assert.AreEqual(12, interpolator.OldestFrameID);
+            Assert.AreEqual(12, interpolator.PreviousFrameID);
+            Assert.AreEqual(12, interpolator.CurrentFrameID);
+        }
+
+        [Test]
+        public void ReplaceHistoryAfterRollback_MissingOldest_DuplicatesPreviousIntoOlderHistory()
+        {
+            PlayerEntity[] players = CreatePlayers();
+            BallEntity ball = CreateBall(FixedInt.Zero);
+            var interpolator = new PresentationFrameInterpolator(2);
+            var output = new Vector3[2];
+            interpolator.Reset(10, players, ball);
+
+            interpolator.ReplaceHistoryAfterRollback(
+                CreateSnapshot(12, -1, 5, 4),
+                CreateSnapshot(11, -2, 4, 2),
+                null,
+                null);
+            interpolator.Evaluate(0, 0.5f, output, out PresentationBallSample sample);
+
+            Assert.AreEqual(new Vector3(-1.5f, 0.5f, 0f), output[0]);
+            Assert.AreEqual(new Vector3(4f, 0.5f, 0f), output[1]);
+            Assert.AreEqual(new Vector3(2f, 0f, 0f), sample.BasePosition);
+            Assert.AreEqual(11, interpolator.DeepestFrameID);
+            Assert.AreEqual(11, interpolator.OldestFrameID);
+            Assert.AreEqual(11, interpolator.PreviousFrameID);
+            Assert.AreEqual(12, interpolator.CurrentFrameID);
+        }
+
+        [Test]
+        public void ReplaceHistoryAfterRollback_MissingDeepest_DuplicatesOldest()
+        {
+            PlayerEntity[] players = CreatePlayers();
+            BallEntity ball = CreateBall(FixedInt.Zero);
+            var interpolator = new PresentationFrameInterpolator(2);
+            var output = new Vector3[2];
+            interpolator.Reset(10, players, ball);
+
+            interpolator.ReplaceHistoryAfterRollback(
+                CreateSnapshot(13, 0, 6, 6),
+                CreateSnapshot(12, -1, 5, 4),
+                CreateSnapshot(11, -2, 4, 2),
+                null);
+            interpolator.Evaluate(0, 0.5f, output, out PresentationBallSample sample);
+
+            Assert.AreEqual(new Vector3(-0.5f, 0.5f, 0f), output[0]);
+            Assert.AreEqual(new Vector3(4f, 0.5f, 0f), output[1]);
+            Assert.AreEqual(new Vector3(2f, 0f, 0f), sample.BasePosition);
+            Assert.AreEqual(11, interpolator.DeepestFrameID);
+            Assert.AreEqual(11, interpolator.OldestFrameID);
+            Assert.AreEqual(12, interpolator.PreviousFrameID);
+            Assert.AreEqual(13, interpolator.CurrentFrameID);
         }
 
         [Test]
@@ -369,7 +736,15 @@ namespace FrameSyncDemo.Tests
                 () => interpolator.ReplaceHistoryAfterRollback(
                     CreateSnapshot(12, -1, 5, 4),
                     CreateSnapshot(10, -2, 4, 2),
+                    null,
                     null));
+
+            Assert.Throws<ArgumentException>(
+                () => interpolator.ReplaceHistoryAfterRollback(
+                    CreateSnapshot(13, 0, 6, 6),
+                    CreateSnapshot(12, -1, 5, 4),
+                    CreateSnapshot(11, -2, 4, 2),
+                    CreateSnapshot(9, -3, 3, 0)));
         }
 
         [Test]
@@ -382,6 +757,7 @@ namespace FrameSyncDemo.Tests
                 () => interpolator.ReplaceHistoryAfterRollback(
                     CreateSnapshot(0, 100, 100, 100),
                     CreateSnapshot(-1, 200, 200, 200),
+                    null,
                     null));
 
             AssertDistinctHistoryUnchanged(interpolator);
@@ -397,7 +773,24 @@ namespace FrameSyncDemo.Tests
                 () => interpolator.ReplaceHistoryAfterRollback(
                     CreateSnapshot(1, 100, 100, 100),
                     CreateSnapshot(0, 200, 200, 200),
-                    CreateSnapshot(-1, 300, 300, 300)));
+                    CreateSnapshot(-1, 300, 300, 300),
+                    null));
+
+            AssertDistinctHistoryUnchanged(interpolator);
+        }
+
+        [Test]
+        public void ReplaceHistoryAfterRollback_InvalidDeepest_ThrowsWithoutMutation()
+        {
+            PresentationFrameInterpolator interpolator =
+                CreateDistinctHistoryInterpolator();
+
+            Assert.Throws<ArgumentException>(
+                () => interpolator.ReplaceHistoryAfterRollback(
+                    CreateSnapshot(2, 100, 100, 100),
+                    CreateSnapshot(1, 200, 200, 200),
+                    CreateSnapshot(0, 300, 300, 300),
+                    CreateSnapshot(-1, 400, 400, 400)));
 
             AssertDistinctHistoryUnchanged(interpolator);
         }
@@ -590,6 +983,7 @@ namespace FrameSyncDemo.Tests
             var interpolator = new PresentationFrameInterpolator(2);
             var output = new Vector3[2];
             interpolator.Reset(10, players, ball);
+            FrameSnapshot deepest = CreateSnapshot(9, -4, 2, -2);
             FrameSnapshot oldest = CreateSnapshot(10, -3, 3, 0);
             FrameSnapshot previous = CreateSnapshot(11, -2, 4, 2);
             FrameSnapshot newest = CreateSnapshot(12, -1, 5, 4);
@@ -598,7 +992,8 @@ namespace FrameSyncDemo.Tests
             interpolator.ReplaceHistoryAfterRollback(
                 newest,
                 previous,
-                oldest);
+                oldest,
+                deepest);
             interpolator.Evaluate(0, 0.5f, output, out _);
             ulong after = WorldHash.Compute(newest, 12);
 
@@ -607,6 +1002,94 @@ namespace FrameSyncDemo.Tests
             Assert.AreEqual(FixedInt.FromInt(4), newest.ballPosX);
             Assert.AreEqual((int)BallEntity.EState.Free, newest.ballState);
             Assert.AreEqual(-1, newest.ballHolder);
+        }
+
+        private static ViewWorldState CreateViewWorld(
+            int predictedFrame,
+            int confirmedFrame,
+            int localFromX,
+            int localToX,
+            int remoteFromX,
+            int remoteToX,
+            int ballFromX,
+            int ballToX,
+            BallEntity.EState ballState,
+            int holderPlayerIndex,
+            ViewSampleSource ballSource = ViewSampleSource.Confirmed)
+        {
+            var player0From = new SimulationPlayerState
+            {
+                position = new FixedVector3(
+                    FixedInt.FromInt(localFromX),
+                    FixedInt.Zero,
+                    FixedInt.Zero)
+            };
+            var player0To = new SimulationPlayerState
+            {
+                position = new FixedVector3(
+                    FixedInt.FromInt(localToX),
+                    FixedInt.Zero,
+                    FixedInt.Zero)
+            };
+            var player1From = new SimulationPlayerState
+            {
+                position = new FixedVector3(
+                    FixedInt.FromInt(remoteFromX),
+                    FixedInt.Zero,
+                    FixedInt.Zero)
+            };
+            var player1To = new SimulationPlayerState
+            {
+                position = new FixedVector3(
+                    FixedInt.FromInt(remoteToX),
+                    FixedInt.Zero,
+                    FixedInt.Zero)
+            };
+            var ballFrom = new SimulationBallState
+            {
+                position = new FixedVector3(
+                    FixedInt.FromInt(ballFromX),
+                    FixedInt.Zero,
+                    FixedInt.Zero),
+                state = (int)ballState,
+                holderPlayerIndex = holderPlayerIndex
+            };
+            var ballTo = new SimulationBallState
+            {
+                position = new FixedVector3(
+                    FixedInt.FromInt(ballToX),
+                    FixedInt.Zero,
+                    FixedInt.Zero),
+                state = (int)ballState,
+                holderPlayerIndex = holderPlayerIndex
+            };
+            var player0 = new ViewPlayerState(
+                0,
+                player0From,
+                player0To,
+                predictedFrame - 1,
+                predictedFrame,
+                ViewSampleSource.Predicted);
+            var player1 = new ViewPlayerState(
+                1,
+                player1From,
+                player1To,
+                confirmedFrame - 1,
+                confirmedFrame,
+                ViewSampleSource.Confirmed);
+            var ball = new ViewBallState(
+                ballFrom,
+                ballTo,
+                confirmedFrame - 1,
+                confirmedFrame,
+                ballSource);
+            return new ViewWorldState(
+                predictedFrame,
+                confirmedFrame,
+                confirmedFrame,
+                player0,
+                player1,
+                ball);
         }
 
         private static PlayerEntity[] CreatePlayers()
@@ -645,6 +1128,10 @@ namespace FrameSyncDemo.Tests
             players[1].position.x = FixedInt.FromInt(5);
             ball.position.x = FixedInt.FromInt(4);
             interpolator.PushLogicFrame(12, players, ball);
+            players[0].position.x = FixedInt.Zero;
+            players[1].position.x = FixedInt.FromInt(6);
+            ball.position.x = FixedInt.FromInt(6);
+            interpolator.PushLogicFrame(13, players, ball);
             return interpolator;
         }
 
@@ -658,12 +1145,13 @@ namespace FrameSyncDemo.Tests
                 output,
                 out PresentationBallSample sample);
 
-            Assert.AreEqual(new Vector3(-1.5f, 0.5f, 0f), output[0]);
+            Assert.AreEqual(new Vector3(-0.5f, 0.5f, 0f), output[0]);
             Assert.AreEqual(new Vector3(3.5f, 0.5f, 0f), output[1]);
             Assert.AreEqual(new Vector3(1f, 0f, 0f), sample.BasePosition);
-            Assert.AreEqual(10, interpolator.OldestFrameID);
-            Assert.AreEqual(11, interpolator.PreviousFrameID);
-            Assert.AreEqual(12, interpolator.CurrentFrameID);
+            Assert.AreEqual(10, interpolator.DeepestFrameID);
+            Assert.AreEqual(11, interpolator.OldestFrameID);
+            Assert.AreEqual(12, interpolator.PreviousFrameID);
+            Assert.AreEqual(13, interpolator.CurrentFrameID);
         }
 
         private static BallEntity CreateBall(FixedInt x)

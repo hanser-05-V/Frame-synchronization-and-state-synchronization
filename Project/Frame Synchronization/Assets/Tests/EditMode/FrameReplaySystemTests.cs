@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using NUnit.Framework;
 
 namespace FrameSyncDemo.Tests
@@ -9,368 +8,181 @@ namespace FrameSyncDemo.Tests
         private static readonly FixedInt MoveDistance = FixedInt.FromFloat(0.165f);
 
         [Test]
-        public void Replay_ErrorFrameZeroWithoutSnapshot_ResetsAndReplaysFrameZero()
+        public void Replay_PlanOnlyOverload_UsesLedgerPlanAndCommitsItsMismatch()
         {
-            World world = CreateWorld(1);
+            World expected = CreateWorld(1);
+            World replayed = CreateWorld(1);
+            var replayWorld = CreateDeterministicWorld(replayed);
             var prediction = new PredictionSystem();
             prediction.Init();
-            var frameBuffer = new FrameBuffer();
-            frameBuffer.AddFrame(0, CreateInputs());
-            world.players[0].position = FixedVector3.One;
-            world.players[1].position = FixedVector3.One;
-            world.ball.state = BallEntity.EState.Free;
-            int resetCount = 0;
+            var ledger = new FrameInputLedger();
+
+            FrameInput[] frameZero = CreateInputs();
+            RecordBoth(ledger, 0, frameZero);
+            Step(expected, frameZero);
+            replayWorld.Step(frameZero);
+            prediction.TakeWorldSnapshot(0, replayWorld);
+
+            FrameInput[] authoritative = CreateInputs(player0Direction: 3, player1Direction: 1);
+            ledger.ResolveForSimulation(1);
+            RecordBoth(ledger, 1, authoritative);
+            Assert.AreEqual(FrameInputLedger.ReplayPlanResult.Success,
+                ledger.TryBuildReplayPlan(1, 1, out FrameInputLedger.ReplayInputPlan plan));
+            Step(expected, authoritative);
 
             FrameReplayResult result = FrameReplaySystem.Replay(
-                0,
-                0,
-                CreateInput(direction: 1, shoot: true)._raw,
-                0,
-                0,
-                1,
-                frameBuffer,
-                remoteFrame => null,
+                plan,
+                ledger,
                 prediction,
-                world.players,
-                world.stateMachines,
-                world.ball,
-                MoveDistance,
-                CourtConstant.LogicDeltaTime,
+                replayWorld,
+                () => ResetWorld(replayed, 1));
+
+            Assert.IsTrue(result.succeeded);
+            Assert.AreEqual(0, result.restoredFrame);
+            Assert.AreEqual(1, result.replayedFrameCount);
+            AssertWorldState(expected, replayed);
+            Assert.IsFalse(ledger.TryGetEarliestMismatch(out _));
+        }
+
+        [Test]
+        public void Replay_PlanStartingAtLedgerStart_ResetsThenStepsPlan()
+        {
+            World expected = CreateWorld(1);
+            World replayed = CreateWorld(0);
+            var expectedWorld = CreateDeterministicWorld(expected);
+            var replayWorld = CreateDeterministicWorld(replayed);
+            var prediction = new PredictionSystem();
+            prediction.Init();
+            var ledger = new FrameInputLedger();
+            FrameInput[] authoritative = CreateInputs(player0Direction: 3, player1Direction: 1);
+            RecordBoth(ledger, 0, authoritative);
+            Assert.AreEqual(FrameInputLedger.ReplayPlanResult.Success,
+                ledger.TryBuildReplayPlan(0, 0, out FrameInputLedger.ReplayInputPlan plan));
+            expectedWorld.Step(authoritative);
+
+            int resetCount = 0;
+            FrameReplayResult result = FrameReplaySystem.Replay(
+                plan,
+                ledger,
+                prediction,
+                replayWorld,
                 () =>
                 {
                     resetCount++;
-                    ResetWorld(world, 1);
+                    ResetWorld(replayed, 1);
                 });
 
             Assert.IsTrue(result.succeeded);
             Assert.AreEqual(-1, result.restoredFrame);
-            Assert.AreEqual(1, result.replayedFrameCount);
-            Assert.AreEqual(-1, result.missingInputFrame);
             Assert.AreEqual(1, resetCount);
-            Assert.AreEqual(PlayerEntity.EState.Shooting, world.players[1].state);
-            Assert.AreEqual(BallEntity.EState.Airborne, world.ball.state);
-
-            World restoredFrameZero = CreateWorld(0);
-            Assert.IsTrue(prediction.RestoreWorldSnapshot(
-                0,
-                restoredFrameZero.players,
-                restoredFrameZero.ball));
-            AssertWorldState(world, restoredFrameZero);
+            AssertWorldState(expected, replayed);
         }
 
         [Test]
-        public void Replay_PreviousSnapshot_UsesActualThenCorrectionAndSnapshotsEveryFrame()
+        public void Replay_PlanOnlyWithoutExactPriorSnapshot_FailsBeforeWorldMutation()
         {
-            World authoritative = CreateWorld(1);
-            World predicted = CreateWorld(1);
+            World replayed = CreateWorld(1);
+            var replayWorld = CreateDeterministicWorld(replayed);
             var prediction = new PredictionSystem();
             prediction.Init();
-            var frameBuffer = new FrameBuffer();
-            FrameInput[] frameZeroInputs = CreateInputs(player0Direction: 3);
-            FrameInput[] frameOneBufferedInputs = CreateInputs(player0Direction: 8);
-            FrameInput[] frameTwoBufferedInputs = CreateInputs(player0Direction: 5);
-            frameBuffer.AddFrame(0, frameZeroInputs);
-            frameBuffer.AddFrame(1, frameOneBufferedInputs);
-            frameBuffer.AddFrame(2, frameTwoBufferedInputs);
+            var ledger = new FrameInputLedger();
+            ledger.ResolveForSimulation(1);
+            Assert.AreEqual(FrameInputLedger.ReplayPlanResult.Success,
+                ledger.TryBuildReplayPlan(1, 1, out FrameInputLedger.ReplayInputPlan plan));
+            SimulationWorldState before = replayWorld.Capture(99);
 
-            Step(authoritative, frameZeroInputs);
-            Step(predicted, frameZeroInputs);
-            prediction.TakeWorldSnapshot(0, predicted.players, predicted.ball);
-
-            FrameInput actualFrameOne = CreateInput(direction: 1, shoot: true);
-            FrameInput correctedInput = actualFrameOne;
-            Step(authoritative, new[] { frameOneBufferedInputs[0], actualFrameOne });
-            World expectedFrameOne = CloneWorld(authoritative);
-            Step(authoritative, new[] { frameTwoBufferedInputs[0], correctedInput });
-
-            Step(predicted, frameOneBufferedInputs);
-            Step(predicted, frameTwoBufferedInputs);
-            var requestedRemoteFrames = new List<int>();
-            int resetCount = 0;
-
-            FrameReplayResult result = FrameReplaySystem.Replay(
-                1,
-                2,
-                correctedInput._raw,
-                10,
-                0,
-                1,
-                frameBuffer,
-                remoteFrame =>
-                {
-                    requestedRemoteFrames.Add(remoteFrame);
-                    return remoteFrame == -9 ? actualFrameOne._raw : (uint?)null;
-                },
-                prediction,
-                predicted.players,
-                predicted.stateMachines,
-                predicted.ball,
-                MoveDistance,
-                CourtConstant.LogicDeltaTime,
-                () =>
-                {
-                    resetCount++;
-                    ResetWorld(predicted, 1);
-                });
-
-            Assert.IsTrue(result.succeeded);
-            Assert.AreEqual(0, result.restoredFrame);
-            Assert.AreEqual(2, result.replayedFrameCount);
-            Assert.AreEqual(-1, result.missingInputFrame);
-            Assert.AreEqual(0, resetCount);
-            CollectionAssert.AreEqual(new[] { -9, -8 }, requestedRemoteFrames);
-            AssertWorldState(authoritative, predicted);
-
-            World restoredFrameOne = CreateWorld(0);
-            Assert.IsTrue(prediction.RestoreWorldSnapshot(
-                1,
-                restoredFrameOne.players,
-                restoredFrameOne.ball));
-            AssertWorldState(expectedFrameOne, restoredFrameOne);
-
-            World restoredFrameTwo = CreateWorld(0);
-            Assert.IsTrue(prediction.RestoreWorldSnapshot(
-                2,
-                restoredFrameTwo.players,
-                restoredFrameTwo.ball));
-            AssertWorldState(authoritative, restoredFrameTwo);
-        }
-
-        [Test]
-        public void Replay_PredictedWorldDiverged_FinalSnapshotHashMatchesAuthoritative()
-        {
-            World authoritative = CreateWorld(1);
-            World predicted = CreateWorld(1);
-            var authoritativeSnapshots = new PredictionSystem();
-            authoritativeSnapshots.Init();
-            var predictedSnapshots = new PredictionSystem();
-            predictedSnapshots.Init();
-            var frameBuffer = new FrameBuffer();
-            FrameInput[] frameZeroInputs = CreateInputs(player0Direction: 3);
-            FrameInput[] frameOnePredictedInputs = CreateInputs(player0Direction: 8);
-            FrameInput[] frameTwoPredictedInputs = CreateInputs(player0Direction: 5);
-            frameBuffer.AddFrame(0, frameZeroInputs);
-            frameBuffer.AddFrame(1, frameOnePredictedInputs);
-            frameBuffer.AddFrame(2, frameTwoPredictedInputs);
-
-            Step(authoritative, frameZeroInputs);
-            Step(predicted, frameZeroInputs);
-            predictedSnapshots.TakeWorldSnapshot(0, predicted.players, predicted.ball);
-
-            FrameInput actualFrameOne = CreateInput(direction: 1, shoot: true);
-            FrameInput correctedInput = actualFrameOne;
-            Step(authoritative, new[] { frameOnePredictedInputs[0], actualFrameOne });
-            Step(authoritative, new[] { frameTwoPredictedInputs[0], correctedInput });
-            FrameSnapshot authoritativeFinal = authoritativeSnapshots.TakeWorldSnapshot(
-                2,
-                authoritative.players,
-                authoritative.ball);
-
-            Step(predicted, frameOnePredictedInputs);
-            Step(predicted, frameTwoPredictedInputs);
-            FrameSnapshot predictedFinal = predictedSnapshots.TakeWorldSnapshot(
-                2,
-                predicted.players,
-                predicted.ball);
-            Assert.AreNotEqual(
-                WorldHash.Compute(authoritativeFinal),
-                WorldHash.Compute(predictedFinal),
-                "错误预测在回滚前必须形成可检测的完整世界差异");
-
-            FrameReplayResult result = FrameReplaySystem.Replay(
-                1,
-                2,
-                correctedInput._raw,
-                10,
-                0,
-                1,
-                frameBuffer,
-                remoteFrame => remoteFrame == -9 ? actualFrameOne._raw : (uint?)null,
-                predictedSnapshots,
-                predicted.players,
-                predicted.stateMachines,
-                predicted.ball,
-                MoveDistance,
-                CourtConstant.LogicDeltaTime,
-                () => ResetWorld(predicted, 1));
-
-            Assert.IsTrue(result.succeeded);
-            Assert.IsTrue(predictedSnapshots.TryGetWorldSnapshot(
-                2,
-                out FrameSnapshot correctedFinal));
-            Assert.AreEqual(
-                WorldHash.Compute(authoritativeFinal),
-                WorldHash.Compute(correctedFinal));
-        }
-
-        [Test]
-        public void Replay_RebuiltPredictedSuffix_ReleaseTruthTriggersNextCorrection()
-        {
-            World world = CreateWorld(1);
-            var prediction = new PredictionSystem();
-            prediction.Init();
-            var frameBuffer = new FrameBuffer();
-            var actualByFrame = new Dictionary<int, uint> { [0] = 0 };
-            uint moveRaw = CreateInput(direction: 3)._raw;
-
-            prediction.ResolveRemote(0, Resolve(actualByFrame), out _, out _);
-            prediction.ResolveRemote(1, Resolve(actualByFrame), out _, out _);
-            prediction.ResolveRemote(2, Resolve(actualByFrame), out _, out _);
-
-            FrameInput[] idleInputs = CreateInputs();
-            frameBuffer.AddFrame(0, idleInputs);
-            frameBuffer.AddFrame(1, idleInputs);
-            frameBuffer.AddFrame(2, idleInputs);
-            prediction.TakeWorldSnapshot(0, world.players, world.ball);
-            actualByFrame[1] = moveRaw;
-
-            FrameReplayResult result = FrameReplaySystem.Replay(
-                1,
-                2,
-                moveRaw,
-                0,
-                0,
-                1,
-                frameBuffer,
-                Resolve(actualByFrame),
-                prediction,
-                world.players,
-                world.stateMachines,
-                world.ball,
-                MoveDistance,
-                CourtConstant.LogicDeltaTime,
-                () => ResetWorld(world, 1));
-
-            actualByFrame[2] = 0;
-            actualByFrame[3] = 0;
-            prediction.ResolveRemote(
-                3,
-                Resolve(actualByFrame),
-                out int? releaseErrorFrame,
-                out uint releaseCorrectRaw);
-
-            Assert.IsTrue(result.succeeded);
-            Assert.AreEqual(2, releaseErrorFrame);
-            Assert.AreEqual(0u, releaseCorrectRaw);
-        }
-
-        [Test]
-        public void Replay_TransientCorrectionWithMissingSuffix_DoesNotRepeatActions()
-        {
-            World world = CreateWorld(1);
-            var prediction = new PredictionSystem();
-            prediction.Init();
-            var frameBuffer = new FrameBuffer();
-            frameBuffer.AddFrame(0, CreateInputs());
-            frameBuffer.AddFrame(1, CreateInputs());
-            var actualByFrame = new Dictionary<int, uint>();
-            FrameInput corrected = CreateInput(direction: 3, shoot: true);
-            corrected.pickupPressed = true;
-            uint sustainedRaw = CreateInput(direction: 3)._raw;
-
-            FrameReplayResult result = FrameReplaySystem.Replay(
-                0,
-                1,
-                corrected._raw,
-                0,
-                0,
-                1,
-                frameBuffer,
-                Resolve(actualByFrame),
-                prediction,
-                world.players,
-                world.stateMachines,
-                world.ball,
-                MoveDistance,
-                CourtConstant.LogicDeltaTime,
-                () => ResetWorld(world, 1));
-            actualByFrame[1] = sustainedRaw;
-            actualByFrame[2] = sustainedRaw;
-
-            prediction.ResolveRemote(
-                2,
-                Resolve(actualByFrame),
-                out int? repeatedErrorFrame,
-                out uint repeatedCorrectRaw);
-
-            Assert.IsTrue(result.succeeded);
-            Assert.AreEqual(BallEntity.EState.Airborne, world.ball.state);
-            Assert.IsNull(repeatedErrorFrame);
-            Assert.AreEqual(0u, repeatedCorrectRaw);
-        }
-
-        [Test]
-        public void Replay_PreErrorFrameMissingRemoteSlot_ReturnsMissingInputInsteadOfThrowing()
-        {
-            World world = CreateWorld(1);
-            var prediction = new PredictionSystem();
-            prediction.Init();
-            var frameBuffer = new FrameBuffer();
-            frameBuffer.AddFrame(0, new[] { CreateInput() });
-            frameBuffer.AddFrame(1, CreateInputs());
-
-            FrameReplayResult result = FrameReplaySystem.Replay(
-                1,
-                1,
-                CreateInput(direction: 3)._raw,
-                0,
-                0,
-                1,
-                frameBuffer,
-                _ => null,
-                prediction,
-                world.players,
-                world.stateMachines,
-                world.ball,
-                MoveDistance,
-                CourtConstant.LogicDeltaTime,
-                () => ResetWorld(world, 1));
+            FrameReplayResult result = FrameReplaySystem.Replay(plan, ledger, prediction, replayWorld, null);
 
             Assert.IsFalse(result.succeeded);
-            Assert.AreEqual(0, result.missingInputFrame);
-            Assert.AreEqual(0, result.replayedFrameCount);
+            Assert.AreEqual(FrameReplayResult.Failure.MissingSnapshot, result.failure);
+            Assert.AreEqual(before, replayWorld.Capture(99));
+            Assert.IsTrue(ledger.IsCurrentReplayPlan(plan));
         }
 
         [Test]
-        public void Replay_LaterInputMissing_DoesNotPartiallyMutateCurrentWorld()
+        public void Replay_PlanOnlyStalePlan_FailsBeforeWorldMutation()
         {
-            World world = CreateWorld(1);
+            World replayed = CreateWorld(1);
+            var replayWorld = CreateDeterministicWorld(replayed);
             var prediction = new PredictionSystem();
             prediction.Init();
-            prediction.TakeWorldSnapshot(0, world.players, world.ball);
-
-            world.players[0].position.x = FixedInt.FromInt(9);
-            Assert.IsTrue(BallPossessionSystem.TryUpdateHeldBall(
-                world.players[1],
-                world.ball));
-            World originalCurrentWorld = CloneWorld(world);
-
-            var frameBuffer = new FrameBuffer();
-            frameBuffer.AddFrame(1, CreateInputs());
-            FrameInput correctedShoot = CreateInput(direction: 1, shoot: true);
+            var ledger = new FrameInputLedger();
+            ledger.ResolveForSimulation(0);
+            Assert.AreEqual(FrameInputLedger.ReplayPlanResult.Success,
+                ledger.TryBuildReplayPlan(0, 0, out FrameInputLedger.ReplayInputPlan stalePlan));
+            Assert.AreEqual(FrameInputLedger.ReplayPlanResult.Success,
+                ledger.TryBuildReplayPlan(0, 0, out _));
+            SimulationWorldState before = replayWorld.Capture(99);
 
             FrameReplayResult result = FrameReplaySystem.Replay(
-                1,
-                2,
-                correctedShoot._raw,
-                0,
-                0,
-                1,
-                frameBuffer,
-                _ => null,
+                stalePlan,
+                ledger,
                 prediction,
-                world.players,
-                world.stateMachines,
-                world.ball,
-                MoveDistance,
-                CourtConstant.LogicDeltaTime,
-                () => ResetWorld(world, 1));
+                replayWorld,
+                () => ResetWorld(replayed, 1));
 
             Assert.IsFalse(result.succeeded);
-            Assert.AreEqual(0, result.restoredFrame);
-            Assert.AreEqual(0, result.replayedFrameCount);
-            Assert.AreEqual(2, result.missingInputFrame);
-            AssertWorldState(originalCurrentWorld, world);
+            Assert.AreEqual(FrameReplayResult.Failure.StalePlan, result.failure);
+            Assert.AreEqual(before, replayWorld.Capture(99));
+        }
+
+        [Test]
+        public void Replay_OlderSnapshotThanPlanStart_FailsWithoutMutationOrPlanCommit()
+        {
+            World replayed = CreateWorld(1);
+            var replayWorld = CreateDeterministicWorld(replayed);
+            var prediction = new PredictionSystem();
+            prediction.Init();
+            var ledger = new FrameInputLedger();
+            replayWorld.Step(CreateInputs(player0Direction: 3));
+            prediction.TakeWorldSnapshot(0, replayWorld);
+            ledger.ResolveForSimulation(2);
+            ledger.RecordActual(2, 1, new FrameInput(0x200u));
+            Assert.IsTrue(ledger.TryGetEarliestMismatch(out FrameInputLedger.InputMismatch mismatch));
+            Assert.AreEqual(2, mismatch.Frame);
+            Assert.AreEqual(FrameInputLedger.ReplayPlanResult.Success,
+                ledger.TryBuildReplayPlan(2, 2, out FrameInputLedger.ReplayInputPlan plan));
+            SimulationWorldState before = replayWorld.Capture(99);
+
+            FrameReplayResult result = FrameReplaySystem.Replay(plan, ledger, prediction, replayWorld, null);
+
+            Assert.IsFalse(result.succeeded);
+            Assert.AreEqual(FrameReplayResult.Failure.MissingSnapshot, result.failure);
+            Assert.AreEqual(before, replayWorld.Capture(99));
+            Assert.IsTrue(ledger.IsCurrentReplayPlan(plan));
+        }
+
+        [Test]
+        public void Replay_CommitRebuildsPredictedSuffix_LaterActualIsClaimableMismatch()
+        {
+            World replayed = CreateWorld(1);
+            var replayWorld = CreateDeterministicWorld(replayed);
+            var prediction = new PredictionSystem();
+            prediction.Init();
+            var ledger = new FrameInputLedger();
+
+            FrameInput[] frameZero = CreateInputs();
+            RecordBoth(ledger, 0, frameZero);
+            replayWorld.Step(frameZero);
+            prediction.TakeWorldSnapshot(0, replayWorld);
+            ledger.ResolveForSimulation(1);
+            ledger.ResolveForSimulation(2);
+
+            FrameInput changedRemote = CreateInput(direction: 3);
+            ledger.RecordActual(1, 1, changedRemote);
+            Assert.AreEqual(FrameInputLedger.ReplayPlanResult.Success,
+                ledger.TryBuildReplayPlan(1, 2, out FrameInputLedger.ReplayInputPlan plan));
+            Assert.IsTrue(FrameReplaySystem.Replay(plan, ledger, prediction, replayWorld, null).succeeded);
+            Assert.IsFalse(ledger.TryGetEarliestMismatch(out _));
+
+            FrameInputLedger.ActualArrival arrival = ledger.RecordActual(2, 1, CreateInput());
+
+            Assert.AreEqual(FrameInputLedger.ActualDisposition.PredictionMismatched, arrival.Disposition);
+            Assert.IsTrue(ledger.TryGetEarliestMismatch(out FrameInputLedger.InputMismatch mismatch));
+            Assert.AreEqual(2, mismatch.Frame);
+            Assert.AreEqual(1, mismatch.PlayerIndex);
+            Assert.AreEqual(CreateInput()._raw, mismatch.ActualRaw);
+            Assert.AreEqual(changedRemote._raw, mismatch.PredictedRaw);
         }
 
         private static void Step(World world, FrameInput[] inputs)
@@ -401,6 +213,16 @@ namespace FrameSyncDemo.Tests
             return world;
         }
 
+        private static DeterministicWorld CreateDeterministicWorld(World world)
+        {
+            return new DeterministicWorld(
+                world.players,
+                world.stateMachines,
+                world.ball,
+                MoveDistance,
+                CourtConstant.LogicDeltaTime);
+        }
+
         private static void ResetWorld(World world, int holderPlayerIndex)
         {
             world.players[0].Reset(
@@ -418,24 +240,6 @@ namespace FrameSyncDemo.Tests
                 world.ball));
         }
 
-        private static World CloneWorld(World source)
-        {
-            World clone = CreateWorld(0);
-            for (int i = 0; i < source.players.Length; i++)
-            {
-                clone.players[i].position = source.players[i].position;
-                clone.players[i].facing = source.players[i].facing;
-                clone.players[i].state = source.players[i].state;
-                clone.players[i].hasBall = source.players[i].hasBall;
-            }
-
-            clone.ball.position = source.ball.position;
-            clone.ball.velocity = source.ball.velocity;
-            clone.ball.state = source.ball.state;
-            clone.ball.holderPlayerIndex = source.ball.holderPlayerIndex;
-            return clone;
-        }
-
         private static FrameInput[] CreateInputs(
             byte player0Direction = 0,
             byte player1Direction = 0)
@@ -447,17 +251,15 @@ namespace FrameSyncDemo.Tests
             };
         }
 
-        private static FrameInput CreateInput(byte direction = 0, bool shoot = false)
+        private static FrameInput CreateInput(byte direction = 0)
         {
-            return new FrameInput(direction, shoot ? (byte)1 : (byte)0);
+            return new FrameInput(direction, 0);
         }
 
-        private static Func<int, uint?> Resolve(
-            IReadOnlyDictionary<int, uint> actualByFrame)
+        private static void RecordBoth(FrameInputLedger ledger, int frame, FrameInput[] inputs)
         {
-            return frame => actualByFrame.TryGetValue(frame, out uint raw)
-                ? (uint?)raw
-                : null;
+            ledger.RecordActual(frame, 0, inputs[0]);
+            ledger.RecordActual(frame, 1, inputs[1]);
         }
 
         private static void AssertWorldState(World expected, World actual)

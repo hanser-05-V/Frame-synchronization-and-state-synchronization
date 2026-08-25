@@ -59,6 +59,16 @@ namespace FrameSyncDemo.Tests
         }
 
         [Test]
+        public void Compute_WorldAndEquivalentSnapshot_ReturnSameHash()
+        {
+            FrameSnapshot snapshot = CreateSnapshot();
+
+            Assert.AreEqual(
+                WorldHash.Compute(snapshot, 37),
+                WorldHash.Compute(snapshot.ToWorld(), 37));
+        }
+
+        [Test]
         public void Compute_DifferentLocalFramesAtSameCanonicalFrame_ReturnsSameHash()
         {
             FrameSnapshot player0Snapshot = CreateSnapshot();
@@ -97,20 +107,28 @@ namespace FrameSyncDemo.Tests
         }
 
         [Test]
-        public void SynchronizedFieldList_FrameSnapshotPublicFields_MatchesEveryHashCase()
+        public void SynchronizedFieldList_FrameSnapshotHasOneCanonicalStorageGraph()
         {
-            var expectedNames = new ArrayList();
-            foreach (SnapshotField field in Enum.GetValues(typeof(SnapshotField)))
-            {
-                string name = field.ToString();
-                expectedNames.Add(char.ToLowerInvariant(name[0]) + name.Substring(1));
-            }
-
-            var actualNames = new ArrayList();
-            foreach (var field in typeof(FrameSnapshot).GetFields())
-                actualNames.Add(field.Name);
-
-            CollectionAssert.AreEquivalent(expectedNames, actualNames);
+            CollectionAssert.AreEqual(
+                new[] { "world" },
+                Array.ConvertAll(
+                    typeof(FrameSnapshot).GetFields(),
+                    field => field.Name));
+            CollectionAssert.AreEquivalent(
+                new[] { "frameID", "player0", "player1", "ball" },
+                Array.ConvertAll(
+                    typeof(SimulationWorldState).GetFields(),
+                    field => field.Name));
+            CollectionAssert.AreEquivalent(
+                new[] { "position", "facing", "state", "hasBall" },
+                Array.ConvertAll(
+                    typeof(SimulationPlayerState).GetFields(),
+                    field => field.Name));
+            CollectionAssert.AreEquivalent(
+                new[] { "position", "velocity", "state", "holderPlayerIndex" },
+                Array.ConvertAll(
+                    typeof(SimulationBallState).GetFields(),
+                    field => field.Name));
         }
 
         [Test]
@@ -173,79 +191,79 @@ namespace FrameSyncDemo.Tests
             switch (field)
             {
                 case SnapshotField.FrameID:
-                    snapshot.frameID++;
+                    snapshot.world.frameID++;
                     break;
                 case SnapshotField.Player1X:
-                    snapshot.player1X._raw++;
+                    snapshot.world.player0.position.x._raw++;
                     break;
                 case SnapshotField.Player1Y:
-                    snapshot.player1Y._raw++;
+                    snapshot.world.player0.position.y._raw++;
                     break;
                 case SnapshotField.Player1Z:
-                    snapshot.player1Z._raw++;
+                    snapshot.world.player0.position.z._raw++;
                     break;
                 case SnapshotField.Player2X:
-                    snapshot.player2X._raw++;
+                    snapshot.world.player1.position.x._raw++;
                     break;
                 case SnapshotField.Player2Y:
-                    snapshot.player2Y._raw++;
+                    snapshot.world.player1.position.y._raw++;
                     break;
                 case SnapshotField.Player2Z:
-                    snapshot.player2Z._raw++;
+                    snapshot.world.player1.position.z._raw++;
                     break;
                 case SnapshotField.Player1FacingX:
-                    snapshot.player1FacingX._raw++;
+                    snapshot.world.player0.facing.x._raw++;
                     break;
                 case SnapshotField.Player1FacingY:
-                    snapshot.player1FacingY._raw++;
+                    snapshot.world.player0.facing.y._raw++;
                     break;
                 case SnapshotField.Player1FacingZ:
-                    snapshot.player1FacingZ._raw++;
+                    snapshot.world.player0.facing.z._raw++;
                     break;
                 case SnapshotField.Player2FacingX:
-                    snapshot.player2FacingX._raw++;
+                    snapshot.world.player1.facing.x._raw++;
                     break;
                 case SnapshotField.Player2FacingY:
-                    snapshot.player2FacingY._raw++;
+                    snapshot.world.player1.facing.y._raw++;
                     break;
                 case SnapshotField.Player2FacingZ:
-                    snapshot.player2FacingZ._raw++;
+                    snapshot.world.player1.facing.z._raw++;
                     break;
                 case SnapshotField.Player1State:
-                    snapshot.player1State++;
+                    snapshot.world.player0.state++;
                     break;
                 case SnapshotField.Player2State:
-                    snapshot.player2State++;
+                    snapshot.world.player1.state++;
                     break;
                 case SnapshotField.Player1HasBall:
-                    snapshot.player1HasBall = !snapshot.player1HasBall;
+                    snapshot.world.player0.hasBall = !snapshot.world.player0.hasBall;
                     break;
                 case SnapshotField.Player2HasBall:
-                    snapshot.player2HasBall = !snapshot.player2HasBall;
+                    snapshot.world.player1.hasBall = !snapshot.world.player1.hasBall;
                     break;
                 case SnapshotField.BallPosX:
-                    snapshot.ballPosX._raw++;
+                    snapshot.world.ball.position.x._raw++;
                     break;
                 case SnapshotField.BallPosY:
-                    snapshot.ballPosY._raw++;
+                    snapshot.world.ball.position.y._raw++;
                     break;
                 case SnapshotField.BallPosZ:
-                    snapshot.ballPosZ._raw++;
+                    snapshot.world.ball.position.z._raw++;
                     break;
                 case SnapshotField.BallVelX:
-                    snapshot.ballVelX._raw++;
+                    snapshot.world.ball.velocity.x._raw++;
                     break;
                 case SnapshotField.BallVelY:
-                    snapshot.ballVelY._raw++;
+                    snapshot.world.ball.velocity.y._raw++;
                     break;
                 case SnapshotField.BallVelZ:
-                    snapshot.ballVelZ._raw++;
+                    snapshot.world.ball.velocity.z._raw++;
                     break;
                 case SnapshotField.BallState:
-                    snapshot.ballState++;
+                    snapshot.world.ball.state++;
                     break;
                 case SnapshotField.BallHolder:
-                    snapshot.ballHolder++;
+                    snapshot.world.ball.holderPlayerIndex++;
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(field), field, null);

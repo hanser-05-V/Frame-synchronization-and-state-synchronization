@@ -1,7 +1,7 @@
 namespace FrameSyncDemo
 {
     /// <summary>
-    /// 完整同步世界的稳定 Hash。输入顺序与 FrameSnapshot 字段顺序保持一致。
+    /// 完整同步世界的稳定 Hash。字段顺序与 SchemaVersion 2 保持一致。
     /// </summary>
     public static class WorldHash
     {
@@ -18,37 +18,45 @@ namespace FrameSyncDemo
 
         public static ulong Compute(FrameSnapshot snapshot, int canonicalFrameID)
         {
+            SimulationWorldState world = snapshot.ToWorld();
+            return Compute(world, canonicalFrameID);
+        }
+
+        public static ulong Compute(
+            in SimulationWorldState world,
+            int canonicalFrameID)
+        {
             ulong hash = OffsetBasis;
             AddInt32(ref hash, SchemaVersion);
             AddInt32(ref hash, canonicalFrameID);
 
-            AddInt32(ref hash, snapshot.player1X._raw);
-            AddInt32(ref hash, snapshot.player1Y._raw);
-            AddInt32(ref hash, snapshot.player1Z._raw);
-            AddInt32(ref hash, snapshot.player2X._raw);
-            AddInt32(ref hash, snapshot.player2Y._raw);
-            AddInt32(ref hash, snapshot.player2Z._raw);
+            AddInt32(ref hash, world.player0.position.x._raw);
+            AddInt32(ref hash, world.player0.position.y._raw);
+            AddInt32(ref hash, world.player0.position.z._raw);
+            AddInt32(ref hash, world.player1.position.x._raw);
+            AddInt32(ref hash, world.player1.position.y._raw);
+            AddInt32(ref hash, world.player1.position.z._raw);
 
-            AddInt32(ref hash, snapshot.player1FacingX._raw);
-            AddInt32(ref hash, snapshot.player1FacingY._raw);
-            AddInt32(ref hash, snapshot.player1FacingZ._raw);
-            AddInt32(ref hash, snapshot.player2FacingX._raw);
-            AddInt32(ref hash, snapshot.player2FacingY._raw);
-            AddInt32(ref hash, snapshot.player2FacingZ._raw);
+            AddInt32(ref hash, world.player0.facing.x._raw);
+            AddInt32(ref hash, world.player0.facing.y._raw);
+            AddInt32(ref hash, world.player0.facing.z._raw);
+            AddInt32(ref hash, world.player1.facing.x._raw);
+            AddInt32(ref hash, world.player1.facing.y._raw);
+            AddInt32(ref hash, world.player1.facing.z._raw);
 
-            AddInt32(ref hash, snapshot.player1State);
-            AddInt32(ref hash, snapshot.player2State);
-            AddInt32(ref hash, snapshot.player1HasBall ? 1 : 0);
-            AddInt32(ref hash, snapshot.player2HasBall ? 1 : 0);
+            AddInt32(ref hash, world.player0.state);
+            AddInt32(ref hash, world.player1.state);
+            AddInt32(ref hash, world.player0.hasBall ? 1 : 0);
+            AddInt32(ref hash, world.player1.hasBall ? 1 : 0);
 
-            AddInt32(ref hash, snapshot.ballPosX._raw);
-            AddInt32(ref hash, snapshot.ballPosY._raw);
-            AddInt32(ref hash, snapshot.ballPosZ._raw);
-            AddInt32(ref hash, snapshot.ballVelX._raw);
-            AddInt32(ref hash, snapshot.ballVelY._raw);
-            AddInt32(ref hash, snapshot.ballVelZ._raw);
-            AddInt32(ref hash, snapshot.ballState);
-            AddInt32(ref hash, snapshot.ballHolder);
+            AddInt32(ref hash, world.ball.position.x._raw);
+            AddInt32(ref hash, world.ball.position.y._raw);
+            AddInt32(ref hash, world.ball.position.z._raw);
+            AddInt32(ref hash, world.ball.velocity.x._raw);
+            AddInt32(ref hash, world.ball.velocity.y._raw);
+            AddInt32(ref hash, world.ball.velocity.z._raw);
+            AddInt32(ref hash, world.ball.state);
+            AddInt32(ref hash, world.ball.holderPlayerIndex);
             return hash;
         }
 

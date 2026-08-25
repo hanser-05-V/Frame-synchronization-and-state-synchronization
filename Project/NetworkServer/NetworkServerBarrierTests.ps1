@@ -50,8 +50,10 @@ function Read-RouteCExactly
 try
 {
     $routeC_serverAssembly = [Reflection.Assembly]::LoadFrom($ServerPath)
-    $routeC_programType = $routeC_serverAssembly.GetType('FrameSyncServer.Program', $true)
-    $routeC_configureMethod = $routeC_programType.GetMethod(
+    $routeC_tcpServerType = $routeC_serverAssembly.GetType(
+        'FrameSyncServer.TcpRelayServer',
+        $true)
+    $routeC_configureMethod = $routeC_tcpServerType.GetMethod(
         'ConfigureLowLatency',
         [Reflection.BindingFlags]'Static, NonPublic')
     if (-not $routeC_configureMethod)
@@ -81,10 +83,9 @@ try
     $routeC_startInfo.RedirectStandardOutput = $true
     $routeC_startInfo.RedirectStandardError = $true
     $routeC_startInfo.CreateNoWindow = $true
+    $routeC_startInfo.Arguments = '--transport tcp'
 
     $routeC_serverProcess = [System.Diagnostics.Process]::Start($routeC_startInfo)
-    $routeC_serverProcess.StandardInput.WriteLine('0')
-    $routeC_serverProcess.StandardInput.Flush()
 
     $routeC_client0 = Connect-RouteCClient
     $routeC_stream0 = $routeC_client0.GetStream()

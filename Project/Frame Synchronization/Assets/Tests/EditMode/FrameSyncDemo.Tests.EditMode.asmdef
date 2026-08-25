@@ -2,7 +2,8 @@
     "name": "FrameSyncDemo.Tests.EditMode",
     "rootNamespace": "FrameSyncDemo.Tests",
     "references": [
-        "FrameSyncDemo.Runtime"
+        "FrameSyncDemo.Runtime",
+        "kcp2k.Core"
     ],
     "includePlatforms": [
         "Editor"

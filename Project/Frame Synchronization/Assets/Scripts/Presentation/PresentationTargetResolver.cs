@@ -70,6 +70,13 @@ namespace FrameSyncDemo
             return !sample.IsAttached;
         }
 
+        public static bool ShouldUseBallCorrectionSmoother(
+            PresentationBallSample sample,
+            bool isCorrectionActive)
+        {
+            return !sample.IsAttached || isCorrectionActive;
+        }
+
         public static bool ShouldProcessRollback(
             bool isPaused,
             bool isPlayingBack)

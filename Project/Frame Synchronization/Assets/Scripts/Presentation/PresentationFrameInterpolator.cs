@@ -4,7 +4,7 @@ using UnityEngine;
 namespace FrameSyncDemo
 {
     /// <summary>
-    /// 仅保存表现坐标，在三个完整逻辑帧端点间计算混合时间线。
+    /// 仅保存表现坐标，在四个完整逻辑帧端点间计算混合时间线。
     /// </summary>
     public sealed class PresentationFrameInterpolator
     {
@@ -17,12 +17,17 @@ namespace FrameSyncDemo
         }
 
         private readonly int _playerCount;
+        private readonly Vector3[] _deepestPlayerPositions;
         private readonly Vector3[] _oldestPlayerPositions;
         private readonly Vector3[] _previousPlayerPositions;
         private readonly Vector3[] _currentPlayerPositions;
+        private BallEndpoint _deepestBall;
         private BallEndpoint _oldestBall;
         private BallEndpoint _previousBall;
         private BallEndpoint _currentBall;
+        private ViewWorldState _viewWorld;
+        private bool _usesViewWorld;
+        private bool _hasFreshConfirmedInterval;
 
         public PresentationFrameInterpolator(int playerCount)
         {
@@ -34,12 +39,14 @@ namespace FrameSyncDemo
             }
 
             _playerCount = playerCount;
+            _deepestPlayerPositions = new Vector3[playerCount];
             _oldestPlayerPositions = new Vector3[playerCount];
             _previousPlayerPositions = new Vector3[playerCount];
             _currentPlayerPositions = new Vector3[playerCount];
         }
 
         public bool IsReady { get; private set; }
+        public int DeepestFrameID { get; private set; }
         public int OldestFrameID { get; private set; }
         public int PreviousFrameID { get; private set; }
         public int CurrentFrameID { get; private set; }
@@ -49,15 +56,47 @@ namespace FrameSyncDemo
             return !IsReady || frameID > CurrentFrameID;
         }
 
+        public void Reset(in ViewWorldState viewWorld)
+        {
+            SetViewWorld(viewWorld, true);
+        }
+
+        public void PushViewWorld(in ViewWorldState viewWorld)
+        {
+            if (IsReady && viewWorld.PredictedFrame <= CurrentFrameID)
+            {
+                throw new ArgumentOutOfRangeException(
+                    nameof(viewWorld),
+                    "正常表现世界的预测帧头必须严格递增。");
+            }
+
+            bool confirmedAdvanced = !_usesViewWorld ||
+                viewWorld.PresentationFrame >
+                _viewWorld.PresentationFrame;
+            SetViewWorld(viewWorld, confirmedAdvanced);
+        }
+
+        public void ReplaceViewWorld(in ViewWorldState viewWorld)
+        {
+            bool confirmedAdvanced = !_usesViewWorld ||
+                viewWorld.PresentationFrame >
+                _viewWorld.PresentationFrame;
+            SetViewWorld(viewWorld, confirmedAdvanced);
+        }
+
         public void Reset(
             int frameID,
             PlayerEntity[] players,
             BallEntity ball)
         {
+            _usesViewWorld = false;
+            _hasFreshConfirmedInterval = false;
             ValidateWorld(players, ball);
             CaptureCurrent(players, ball);
             CopyCurrentToPrevious();
             CopyPreviousToOldest();
+            CopyOldestToDeepest();
+            DeepestFrameID = frameID;
             OldestFrameID = frameID;
             PreviousFrameID = frameID;
             CurrentFrameID = frameID;
@@ -69,6 +108,8 @@ namespace FrameSyncDemo
             PlayerEntity[] players,
             BallEntity ball)
         {
+            _usesViewWorld = false;
+            _hasFreshConfirmedInterval = false;
             if (!IsReady)
             {
                 Reset(frameID, players, ball);
@@ -83,6 +124,8 @@ namespace FrameSyncDemo
             }
 
             ValidateWorld(players, ball);
+            CopyOldestToDeepest();
+            DeepestFrameID = OldestFrameID;
             CopyPreviousToOldest();
             OldestFrameID = PreviousFrameID;
             CopyCurrentToPrevious();
@@ -96,10 +139,14 @@ namespace FrameSyncDemo
             PlayerEntity[] players,
             BallEntity ball)
         {
+            _usesViewWorld = false;
+            _hasFreshConfirmedInterval = false;
             ValidateWorld(players, ball);
             CaptureCurrent(players, ball);
             CopyCurrentToPrevious();
             CopyPreviousToOldest();
+            CopyOldestToDeepest();
+            DeepestFrameID = frameID;
             OldestFrameID = frameID;
             PreviousFrameID = frameID;
             CurrentFrameID = frameID;
@@ -109,8 +156,11 @@ namespace FrameSyncDemo
         public void ReplaceHistoryAfterRollback(
             FrameSnapshot newest,
             FrameSnapshot? previous,
-            FrameSnapshot? oldest)
+            FrameSnapshot? oldest,
+            FrameSnapshot? deepest)
         {
+            _usesViewWorld = false;
+            _hasFreshConfirmedInterval = false;
             if (_playerCount != 2)
             {
                 throw new InvalidOperationException(
@@ -130,6 +180,12 @@ namespace FrameSyncDemo
                     "最旧回滚快照无效。",
                     nameof(oldest));
             }
+            if (deepest.HasValue && !deepest.Value.IsValid)
+            {
+                throw new ArgumentException(
+                    "最深回滚快照无效。",
+                    nameof(deepest));
+            }
             if (previous.HasValue &&
                 previous.Value.frameID != newest.frameID - 1)
             {
@@ -144,6 +200,14 @@ namespace FrameSyncDemo
                 throw new ArgumentException(
                     "最旧回滚快照必须紧邻前一快照。",
                     nameof(oldest));
+            }
+            if (deepest.HasValue &&
+                (!oldest.HasValue ||
+                 deepest.Value.frameID != oldest.Value.frameID - 1))
+            {
+                throw new ArgumentException(
+                    "最深回滚快照必须紧邻最旧快照。",
+                    nameof(deepest));
             }
 
             CaptureSnapshot(newest, _currentPlayerPositions, out _currentBall);
@@ -174,6 +238,20 @@ namespace FrameSyncDemo
             {
                 CopyPreviousToOldest();
                 OldestFrameID = PreviousFrameID;
+            }
+
+            if (deepest.HasValue)
+            {
+                CaptureSnapshot(
+                    deepest.Value,
+                    _deepestPlayerPositions,
+                    out _deepestBall);
+                DeepestFrameID = deepest.Value.frameID;
+            }
+            else
+            {
+                CopyOldestToDeepest();
+                DeepestFrameID = OldestFrameID;
             }
             IsReady = true;
         }
@@ -219,14 +297,25 @@ namespace FrameSyncDemo
         {
             ValidateMixedEvaluation(localPlayerIndex, playerPositions);
             float safeAlpha = NormalizeAlpha(alpha);
+            if (_usesViewWorld)
+            {
+                EvaluateViewWorld(
+                    safeAlpha,
+                    safeAlpha,
+                    false,
+                    playerPositions,
+                    out ballSample);
+                return;
+            }
+
             for (int i = 0; i < _playerCount; i++)
             {
                 Vector3 from = i == localPlayerIndex
                     ? _previousPlayerPositions[i]
-                    : _oldestPlayerPositions[i];
+                    : _deepestPlayerPositions[i];
                 Vector3 to = i == localPlayerIndex
                     ? _currentPlayerPositions[i]
-                    : _previousPlayerPositions[i];
+                    : _oldestPlayerPositions[i];
                 playerPositions[i] = Vector3.LerpUnclamped(
                     from,
                     to,
@@ -237,6 +326,141 @@ namespace FrameSyncDemo
                 localPlayerIndex,
                 safeAlpha,
                 playerPositions);
+        }
+
+        public void Evaluate(
+            int localPlayerIndex,
+            float predictedAlpha,
+            float confirmedAlpha,
+            Vector3[] playerPositions,
+            out PresentationBallSample ballSample)
+        {
+            ValidateMixedEvaluation(localPlayerIndex, playerPositions);
+            float safePredictedAlpha = NormalizeAlpha(predictedAlpha);
+            float safeConfirmedAlpha = NormalizeAlpha(confirmedAlpha);
+            if (_usesViewWorld)
+            {
+                EvaluateViewWorld(
+                    safePredictedAlpha,
+                    safeConfirmedAlpha,
+                    true,
+                    playerPositions,
+                    out ballSample);
+                return;
+            }
+
+            Evaluate(
+                localPlayerIndex,
+                safePredictedAlpha,
+                playerPositions,
+                out ballSample);
+        }
+
+        private void SetViewWorld(
+            in ViewWorldState viewWorld,
+            bool hasFreshConfirmedInterval)
+        {
+            if (viewWorld.PredictedFrame < -1 ||
+                viewWorld.ConfirmedFrame < -1 ||
+                viewWorld.ConfirmedFrame > viewWorld.PredictedFrame)
+            {
+                throw new ArgumentOutOfRangeException(nameof(viewWorld));
+            }
+
+            _viewWorld = viewWorld;
+            _usesViewWorld = true;
+            _hasFreshConfirmedInterval = hasFreshConfirmedInterval;
+            DeepestFrameID = viewWorld.PresentationFrame;
+            OldestFrameID = viewWorld.PresentationFrame;
+            PreviousFrameID = viewWorld.PresentationFrame;
+            CurrentFrameID = viewWorld.PredictedFrame;
+            IsReady = true;
+        }
+
+        private void EvaluateViewWorld(
+            float predictedAlpha,
+            float confirmedAlpha,
+            bool useIndependentConfirmedClock,
+            Vector3[] playerPositions,
+            out PresentationBallSample ballSample)
+        {
+            for (int i = 0; i < _playerCount; i++)
+            {
+                ViewPlayerState player = _viewWorld.GetPlayer(i);
+                bool isConfirmed = IsConfirmedSource(player.Source);
+                bool interpolate = !isConfirmed ||
+                    useIndependentConfirmedClock ||
+                    _hasFreshConfirmedInterval;
+                float playerAlpha = isConfirmed
+                    ? confirmedAlpha
+                    : predictedAlpha;
+                playerPositions[i] = Vector3.LerpUnclamped(
+                    ToPlayerVisualPosition(
+                        interpolate
+                            ? player.FromPosition
+                            : player.ToPosition),
+                    ToPlayerVisualPosition(player.ToPosition),
+                    playerAlpha);
+            }
+
+            ViewBallState ball = _viewWorld.Ball;
+            bool ballIsConfirmed = IsConfirmedSource(ball.Source);
+            bool interpolateBall = !ballIsConfirmed ||
+                useIndependentConfirmedClock ||
+                _hasFreshConfirmedInterval;
+            float ballAlpha = ballIsConfirmed
+                ? confirmedAlpha
+                : predictedAlpha;
+            Vector3 ballPosition = Vector3.LerpUnclamped(
+                (interpolateBall
+                    ? ball.FromPosition
+                    : ball.ToPosition).ToVector3(),
+                ball.ToPosition.ToVector3(),
+                ballAlpha);
+            int holderIndex = ball.IsAttached
+                ? ball.ToHolderPlayerIndex
+                : -1;
+            if (holderIndex >= 0 && holderIndex < _playerCount)
+            {
+                ViewPlayerState holder = _viewWorld.GetPlayer(holderIndex);
+                Vector3 fromOffset = (interpolateBall
+                    ? ball.FromPosition
+                    : ball.ToPosition).ToVector3() -
+                    ToPlayerVisualPosition(
+                        interpolateBall
+                            ? holder.FromPosition
+                            : holder.ToPosition);
+                Vector3 toOffset = ball.ToPosition.ToVector3() -
+                    ToPlayerVisualPosition(holder.ToPosition);
+                if (ball.FromState != BallEntity.EState.Held ||
+                    ball.FromHolderPlayerIndex != holderIndex)
+                {
+                    fromOffset = toOffset;
+                }
+
+                ballPosition = playerPositions[holderIndex] +
+                    Vector3.LerpUnclamped(
+                        fromOffset,
+                        toOffset,
+                        ballAlpha);
+            }
+
+            ballSample = new PresentationBallSample(
+                ballPosition,
+                holderIndex);
+        }
+
+        private static Vector3 ToPlayerVisualPosition(
+            FixedVector3 position)
+        {
+            return position.ToVector3() + Vector3.up * 0.5f;
+        }
+
+        private static bool IsConfirmedSource(ViewSampleSource source)
+        {
+            return source == ViewSampleSource.InitialConfirmed ||
+                source == ViewSampleSource.Confirmed ||
+                source == ViewSampleSource.ConfirmedSingleEndpoint;
         }
 
         public static float CalculateAlpha(
@@ -360,6 +584,14 @@ namespace FrameSyncDemo
             _oldestBall = _previousBall;
         }
 
+        private void CopyOldestToDeepest()
+        {
+            for (int i = 0; i < _playerCount; i++)
+                _deepestPlayerPositions[i] = _oldestPlayerPositions[i];
+
+            _deepestBall = _oldestBall;
+        }
+
         private static void CaptureSnapshot(
             FrameSnapshot snapshot,
             Vector3[] players,
@@ -413,15 +645,15 @@ namespace FrameSyncDemo
                     localPlayerIndex);
             }
 
-            int remoteHolder = _previousBall.HolderPlayerIndex;
+            int remoteHolder = _oldestBall.HolderPlayerIndex;
             if (remoteHolder != localPlayerIndex &&
                 remoteHolder >= 0 &&
                 remoteHolder < _playerCount &&
-                IsHeldBy(_previousBall, remoteHolder))
+                IsHeldBy(_oldestBall, remoteHolder))
             {
                 Vector3 offset = InterpolateHeldOffset(
+                    _deepestBall,
                     _oldestBall,
-                    _previousBall,
                     remoteHolder,
                     alpha);
                 return new PresentationBallSample(
@@ -431,8 +663,8 @@ namespace FrameSyncDemo
 
             return new PresentationBallSample(
                 Vector3.LerpUnclamped(
+                    _deepestBall.Position,
                     _oldestBall.Position,
-                    _previousBall.Position,
                     alpha),
                 -1);
         }

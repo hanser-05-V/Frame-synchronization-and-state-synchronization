@@ -48,5 +48,24 @@ namespace FrameSyncDemo.Tests
 
             Assert.AreEqual(12, gate.ValidatedThroughFrame);
         }
+
+        [Test]
+        public void ConfirmedCanonicalFrame_MappedToPlayerOneLocalFrame_PublishesAfterCorrection()
+        {
+            const int canonicalFrame = 42;
+            const int offset = 17;
+            Assert.IsTrue(CanonicalFrame.TryToLocal(
+                1,
+                canonicalFrame,
+                offset,
+                out int localFrame));
+
+            var gate = new StableRemoteFrameGate();
+            gate.StageResolvedThrough(localFrame);
+
+            Assert.AreEqual(-1, gate.ValidatedThroughFrame);
+            gate.CommitCorrection();
+            Assert.AreEqual(59, gate.ValidatedThroughFrame);
+        }
     }
 }

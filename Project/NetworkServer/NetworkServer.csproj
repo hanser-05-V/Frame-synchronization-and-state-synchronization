@@ -4,4 +4,54 @@
     <TargetFramework>net48</TargetFramework>
     <LangVersion>7.3</LangVersion>
   </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="..\Frame Synchronization\Assets\Scripts\Network\NetworkLabProfile.cs" Link="Shared\NetworkLabProfile.cs" />
+    <Compile Include="..\Frame Synchronization\Assets\Scripts\Network\DeterministicNetworkFaultModel.cs" Link="Shared\DeterministicNetworkFaultModel.cs" />
+    <Compile Include="..\Frame Synchronization\Assets\Scripts\Network\NetworkTransportKind.cs" Link="Shared\NetworkTransportKind.cs" />
+    <Compile Include="..\Frame Synchronization\Assets\Scripts\Network\NetworkSessionState.cs" Link="Shared\NetworkSessionState.cs" />
+    <Compile Include="..\Frame Synchronization\Assets\Scripts\Network\RouteCProtocolConstants.cs" Link="Shared\RouteCProtocolConstants.cs" />
+    <Compile Include="..\Frame Synchronization\Assets\Scripts\Network\RouteCMessageType.cs" Link="Shared\RouteCMessageType.cs" />
+    <Compile Include="..\Frame Synchronization\Assets\Scripts\Network\RouteCProtocolDropReason.cs" Link="Shared\RouteCProtocolDropReason.cs" />
+    <Compile Include="..\Frame Synchronization\Assets\Scripts\Network\RouteCSessionId.cs" Link="Shared\RouteCSessionId.cs" />
+    <Compile Include="..\Frame Synchronization\Assets\Scripts\Network\RouteCProtocolMessage.cs" Link="Shared\RouteCProtocolMessage.cs" />
+    <Compile Include="..\Frame Synchronization\Assets\Scripts\Network\RouteCProtocolCodec.cs" Link="Shared\RouteCProtocolCodec.cs" />
+    <Compile Include="..\Frame Synchronization\Assets\Scripts\Network\RawUdpFaultReason.cs" Link="Shared\RawUdpFaultReason.cs" />
+    <Compile Include="..\Frame Synchronization\Assets\Scripts\Network\RawUdpFault.cs" Link="Shared\RawUdpFault.cs" />
+    <Compile Include="..\Frame Synchronization\Assets\Scripts\Network\RawUdpInputEntry.cs" Link="Shared\RawUdpInputEntry.cs" />
+    <Compile Include="..\Frame Synchronization\Assets\Scripts\Network\RawUdpInputWindow.cs" Link="Shared\RawUdpInputWindow.cs" />
+    <Compile Include="..\Frame Synchronization\Assets\Scripts\Network\RawUdpProtocolCodec.cs" Link="Shared\RawUdpProtocolCodec.cs" />
+    <Compile Include="..\Frame Synchronization\Assets\Scripts\Network\RawUdpSerialOrder.cs" Link="Shared\RawUdpSerialOrder.cs" />
+    <Compile Include="..\Frame Synchronization\Assets\Scripts\Network\RawUdpSerialNumber.cs" Link="Shared\RawUdpSerialNumber.cs" />
+    <Compile Include="..\Frame Synchronization\Assets\Scripts\Network\RawUdpSequenceDisposition.cs" Link="Shared\RawUdpSequenceDisposition.cs" />
+    <Compile Include="..\Frame Synchronization\Assets\Scripts\Network\RawUdpPacketSequenceWindow.cs" Link="Shared\RawUdpPacketSequenceWindow.cs" />
+    <Compile Include="..\Frame Synchronization\Assets\Scripts\Network\RawUdpInputDisposition.cs" Link="Shared\RawUdpInputDisposition.cs" />
+    <Compile Include="..\Frame Synchronization\Assets\Scripts\Network\RawUdpInputReceiver.cs" Link="Shared\RawUdpInputReceiver.cs" />
+    <Compile Include="..\Frame Synchronization\Assets\Scripts\Network\RawUdpRelayHistory.cs" Link="Shared\RawUdpRelayHistory.cs" />
+    <Compile Include="..\Frame Synchronization\Assets\Scripts\Network\RawUdpDatagramFaultProfile.cs" Link="Shared\RawUdpDatagramFaultProfile.cs" />
+    <Compile Include="..\Frame Synchronization\Assets\Scripts\Network\RawUdpDatagramFaultDecision.cs" Link="Shared\RawUdpDatagramFaultDecision.cs" />
+    <Compile Include="..\Frame Synchronization\Assets\Scripts\Network\RawUdpDatagramFaultModel.cs" Link="Shared\RawUdpDatagramFaultModel.cs" />
+    <Compile Include="..\Frame Synchronization\Assets\Scripts\Network\RawUdpSessionFingerprint.cs" Link="Shared\RawUdpSessionFingerprint.cs" />
+    <Compile Include="..\Frame Synchronization\Assets\Scripts\Network\NetworkTransportEventReason.cs" Link="Shared\NetworkTransportEventReason.cs" />
+    <Compile Include="..\Frame Synchronization\Assets\Scripts\Network\NetworkTransportEvent.cs" Link="Shared\NetworkTransportEvent.cs" />
+    <Compile Include="..\Frame Synchronization\Assets\Scripts\Network\NetworkPacketArrival.cs" Link="Shared\NetworkPacketArrival.cs" />
+    <Compile Include="..\Frame Synchronization\Assets\Scripts\Network\IFrameTransportClient.cs" Link="Shared\IFrameTransportClient.cs" />
+    <Compile Include="..\Frame Synchronization\Assets\Scripts\Network\RawUdpClientDiagnosticsSnapshot.cs" Link="Shared\RawUdpClientDiagnosticsSnapshot.cs" />
+    <Compile Include="..\Frame Synchronization\Assets\Scripts\Network\RawUdpClientProtocolState.cs" Link="Shared\RawUdpClientProtocolState.cs" />
+    <Compile Include="..\Frame Synchronization\Assets\Scripts\Network\RawUdpInputTransport.cs" Link="Shared\RawUdpInputTransport.cs" />
+    <Compile Include="..\Frame Synchronization\Assets\Scripts\Network\OutboundHistoryDisposition.cs" Link="Shared\OutboundHistoryDisposition.cs" />
+    <Compile Include="..\Frame Synchronization\Assets\Scripts\Network\OutboundActualHistory.cs" Link="Shared\OutboundActualHistory.cs" />
+    <Compile Include="..\Frame Synchronization\Assets\Scripts\Network\RouteCKcpHeader.cs" Link="Shared\RouteCKcpHeader.cs" />
+    <Compile Include="..\Frame Synchronization\Assets\Scripts\Network\RouteCKcpSettings.cs" Link="Shared\RouteCKcpSettings.cs" />
+    <Compile Include="..\Frame Synchronization\Assets\Scripts\Network\RouteCKcpDiagnosticsSnapshot.cs" Link="Shared\RouteCKcpDiagnosticsSnapshot.cs" />
+    <Compile Include="..\Frame Synchronization\Assets\Scripts\Network\RouteCKcpSession.cs" Link="Shared\RouteCKcpSession.cs" />
+    <Compile Include="..\Frame Synchronization\Assets\Scripts\Network\IMonotonicClock.cs" Link="Shared\IMonotonicClock.cs" />
+    <Compile Include="..\Frame Synchronization\Assets\Scripts\Network\StopwatchMonotonicClock.cs" Link="Shared\StopwatchMonotonicClock.cs" />
+    <Compile Include="..\Frame Synchronization\Assets\Scripts\Network\ResumeReadiness.cs" Link="Shared\ResumeReadiness.cs" />
+    <Compile Include="..\Frame Synchronization\Assets\Scripts\Network\ResumeRejectedReason.cs" Link="Shared\ResumeRejectedReason.cs" />
+    <Compile Include="..\Frame Synchronization\Assets\ThirdParty\kcp2k\Core\AckItem.cs" Link="ThirdParty\kcp2k\AckItem.cs" />
+    <Compile Include="..\Frame Synchronization\Assets\ThirdParty\kcp2k\Core\Kcp.cs" Link="ThirdParty\kcp2k\Kcp.cs" />
+    <Compile Include="..\Frame Synchronization\Assets\ThirdParty\kcp2k\Core\Pool.cs" Link="ThirdParty\kcp2k\Pool.cs" />
+    <Compile Include="..\Frame Synchronization\Assets\ThirdParty\kcp2k\Core\Segment.cs" Link="ThirdParty\kcp2k\Segment.cs" />
+    <Compile Include="..\Frame Synchronization\Assets\ThirdParty\kcp2k\Core\Utils.cs" Link="ThirdParty\kcp2k\Utils.cs" />
+  </ItemGroup>
 </Project>

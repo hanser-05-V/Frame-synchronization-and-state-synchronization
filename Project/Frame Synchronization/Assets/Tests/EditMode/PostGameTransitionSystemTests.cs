@@ -54,6 +54,126 @@ namespace FrameSyncDemo.Tests
             Assert.AreEqual(before, world.players[0].position);
         }
 
+        [Test]
+        public void TryRestoreTerminalWorld_Coordinator_RestoresConfirmedTrackIntoPredictedRuntime()
+        {
+            RuntimeWorld runtime = CreateRuntimeWorld();
+            var predicted = new DeterministicWorld(
+                runtime.players,
+                runtime.stateMachines,
+                runtime.ball,
+                FixedInt.FromInt(1),
+                CourtConstant.LogicDeltaTime);
+            var coordinator = new FrameSyncCoordinator(
+                predicted,
+                predicted.Capture(-1),
+                FixedInt.FromInt(1),
+                CourtConstant.LogicDeltaTime,
+                8);
+            coordinator.RecordActual(0, 0, new FrameInput(1, 0));
+            coordinator.RecordActual(0, 1, default);
+            FrameInputLedger.ResolvedFrame inputs = coordinator.ResolveForPrediction(0);
+            Assert.IsTrue(coordinator.Advance(0, inputs).Succeeded);
+            FrameInputLedger.ResolvedFrame predictedOnly =
+                coordinator.ResolveForPrediction(1);
+            Assert.IsTrue(coordinator.Advance(1, predictedOnly).Succeeded);
+            Assert.AreEqual(1, coordinator.PredictedFrame);
+            runtime.players[0].position.x = FixedInt.FromInt(99);
+            HighlightReplayRecorder recorder = CreateEndedRecorder();
+
+            bool restored = PostGameTransitionSystem.TryRestoreTerminalWorld(
+                recorder,
+                coordinator,
+                recorder.PostGameTerminalFrame,
+                out int terminalFrame);
+
+            Assert.IsTrue(restored);
+            Assert.AreEqual(0, terminalFrame);
+            Assert.AreEqual(terminalFrame, coordinator.PredictedFrame);
+            Assert.AreEqual(
+                WorldHash.Compute(coordinator.ConfirmedWorld, 0),
+                WorldHash.Compute(coordinator.PredictedWorld, 0));
+            Assert.IsFalse(coordinator.TryGetSnapshot(
+                WorldTrack.Predicted,
+                1,
+                out _));
+        }
+
+        [Test]
+        public void TryRestoreTerminalWorld_ConfirmedHeadPastRecordedTerminal_UsesLatestConfirmedFrame()
+        {
+            RuntimeWorld runtime = CreateRuntimeWorld();
+            var predicted = new DeterministicWorld(
+                runtime.players,
+                runtime.stateMachines,
+                runtime.ball,
+                FixedInt.FromInt(1),
+                CourtConstant.LogicDeltaTime);
+            var coordinator = new FrameSyncCoordinator(
+                predicted,
+                predicted.Capture(-1),
+                FixedInt.FromInt(1),
+                CourtConstant.LogicDeltaTime,
+                8);
+            for (int frame = 0; frame <= 2; frame++)
+            {
+                coordinator.RecordActual(frame, 0, new FrameInput(1, 0));
+                coordinator.RecordActual(frame, 1, default);
+                FrameInputLedger.ResolvedFrame inputs =
+                    coordinator.ResolveForPrediction(frame);
+                Assert.IsTrue(coordinator.Advance(frame, inputs).Succeeded);
+            }
+            HighlightReplayRecorder recorder = CreateEndedRecorder();
+
+            bool restored = PostGameTransitionSystem.TryRestoreTerminalWorld(
+                recorder,
+                coordinator,
+                0,
+                out int terminalFrame);
+
+            Assert.IsTrue(restored);
+            Assert.AreEqual(2, terminalFrame);
+            Assert.AreEqual(2, coordinator.ConfirmedFrame);
+            Assert.AreEqual(2, coordinator.PredictedFrame);
+            Assert.AreEqual(
+                WorldHash.Compute(coordinator.ConfirmedWorld, 2),
+                WorldHash.Compute(coordinator.PredictedWorld, 2));
+            Assert.IsTrue(coordinator.TryGetSnapshot(
+                WorldTrack.Predicted,
+                2,
+                out SimulationWorldState predictedSnapshot));
+            Assert.AreEqual(
+                WorldHash.Compute(coordinator.ConfirmedWorld, 2),
+                WorldHash.Compute(predictedSnapshot, 2));
+        }
+
+        private static RuntimeWorld CreateRuntimeWorld()
+        {
+            var player0 = new PlayerEntity();
+            var player1 = new PlayerEntity();
+            player0.Reset(
+                new FixedVector3(FixedInt.FromInt(-3), FixedInt.Zero, FixedInt.Zero),
+                0);
+            player1.Reset(
+                new FixedVector3(FixedInt.FromInt(3), FixedInt.Zero, FixedInt.Zero),
+                1);
+            var players = new[] { player0, player1 };
+            var ball = new BallEntity();
+            ball.Reset(FixedVector3.Zero);
+            player0.hasBall = true;
+            ball.state = BallEntity.EState.Held;
+            ball.holderPlayerIndex = 0;
+            Assert.IsTrue(BallPossessionSystem.TryUpdateHeldBall(player0, ball));
+            return new RuntimeWorld(
+                players,
+                new[]
+                {
+                    new PlayerStateMachine(player0),
+                    new PlayerStateMachine(player1)
+                },
+                ball);
+        }
+
         private static HighlightReplayRecorder CreateEndedRecorder()
         {
             var recorder = new HighlightReplayRecorder();
@@ -95,6 +215,23 @@ namespace FrameSyncDemo.Tests
             public World(PlayerEntity[] players, BallEntity ball)
             {
                 this.players = players;
+                this.ball = ball;
+            }
+        }
+
+        private sealed class RuntimeWorld
+        {
+            public readonly PlayerEntity[] players;
+            public readonly PlayerStateMachine[] stateMachines;
+            public readonly BallEntity ball;
+
+            public RuntimeWorld(
+                PlayerEntity[] players,
+                PlayerStateMachine[] stateMachines,
+                BallEntity ball)
+            {
+                this.players = players;
+                this.stateMachines = stateMachines;
                 this.ball = ball;
             }
         }

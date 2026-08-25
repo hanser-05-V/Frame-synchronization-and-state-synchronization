@@ -363,6 +363,24 @@ namespace FrameSyncDemo.Tests
                     new PresentationBallSample(Vector3.zero, 0)));
         }
 
+        [TestCase(-1, false, true)]
+        [TestCase(-1, true, true)]
+        [TestCase(0, false, false)]
+        [TestCase(0, true, true)]
+        public void ShouldUseBallCorrectionSmoother_AttachedBallContinuesActiveCorrection(
+            int attachedPlayerIndex,
+            bool isCorrectionActive,
+            bool expected)
+        {
+            Assert.AreEqual(
+                expected,
+                PresentationTargetResolver.ShouldUseBallCorrectionSmoother(
+                    new PresentationBallSample(
+                        Vector3.zero,
+                        attachedPlayerIndex),
+                    isCorrectionActive));
+        }
+
         [TestCase(false, false, true)]
         [TestCase(false, true, false)]
         [TestCase(true, false, false)]

@@ -3,9 +3,9 @@ using UnityEngine;
 namespace FrameSyncDemo
 {
     /// <summary>
-    /// 环形帧缓存 — 帧同步的数据仓库
-    /// 参考街篮2 FrameBuffer.cs 的环形缓冲区 + SyncFrame/TryGetFrame 协议
-    /// 本Demo简化：固定数组 + frameID % capacity 定位
+    /// Ring-buffered execution log. It records the values the frame engine ran
+    /// for diagnostics and presentation only; FrameInputLedger remains the sole
+    /// authority for input truth, replay, and stable actual-input reads.
     /// </summary>
     public class FrameBuffer
     {
@@ -90,6 +90,7 @@ namespace FrameSyncDemo
         }
 
         /// <summary>仅查看不消费（用于对比/回放）</summary>
+        // Execution-log inspection only; never use this as replay or input truth.
         public bool PeekFrame(int frameID, out Frame frame)
         {
             frame = default;

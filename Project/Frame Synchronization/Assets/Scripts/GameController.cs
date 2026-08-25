@@ -20,6 +20,14 @@ namespace FrameSyncDemo
         [Header("完整世界 Hash")]
         [SerializeField] private int _worldHashLogIntervalFrames = 200;
 
+        [Header("P2-E Network Diagnostics")]
+        [SerializeField] private bool _enableP2EDiagnostics;
+
+        [Header("P2-E Confirmed Playback")]
+        [SerializeField]
+        private ConfirmedPlaybackSettings _confirmedPlaybackSettings =
+            new ConfirmedPlaybackSettings();
+
         [Header("回滚表现平滑")]
         [SerializeField] private float _rollbackVisualSmoothingSeconds = 0.1f;
         [SerializeField] private float _rollbackVisualMaxSmoothingSeconds = 0.2f;
@@ -30,6 +38,8 @@ namespace FrameSyncDemo
         private GameObject[] _players;
         private GameObject _ballObject;
         private PresentationFrameInterpolator _presentationInterpolator;
+        private ConfirmedPresentationCursor _confirmedPresentationCursor;
+        private ConfirmedPlaybackAdvance _lastConfirmedPlaybackAdvance;
         private PresentationCorrectionSmoother[] _playerCorrectionSmoothers;
         private PresentationCorrectionSmoother _ballSmoother;
         private Vector3[] _interpolatedPlayerPositions;
@@ -42,6 +52,11 @@ namespace FrameSyncDemo
         private PlayerEntity[] _playerEntities;
         private PlayerStateMachine[] _playerFSMs;
         private BallEntity _ballEntity;
+        private FrameSyncCoordinator _frameSyncCoordinator;
+        private FrameInputLedger.ResolvedFrame _pendingResolvedInputs;
+        private int _pendingCanonicalFrame = -1;
+        private int _latestLocallySubmittedFrameID = -1;
+        private FrameAdvanceResult _lastFrameAdvance;
         private bool _reportedHeldInvariantError;
 
         // ----- 兼容字段（阶段0回滚用）-----
@@ -51,7 +66,11 @@ namespace FrameSyncDemo
         private int _playerCount = 2;
         private bool _paused = false;
         private NetworkClient _networkClient;
-        private PredictionSystem _predictionSystem;
+        private bool _networkStartPending;
+        private bool _networkSessionStarted;
+        private bool _networkSessionStartEventPending;
+        private string _networkTerminalFault = string.Empty;
+        private RuntimeNetworkDiagnostics _runtimeNetworkDiagnostics;
         private MatchPhase _matchPhase = MatchPhase.Playing;
         private StableFrameCursor _highlightStableCursor;
         private StableRemoteFrameGate _highlightRemoteFrameGate;
@@ -60,12 +79,13 @@ namespace FrameSyncDemo
         private RuntimeControlOverlay _controlOverlay;
         private string _lastHighlightCaptureError = string.Empty;
 
-        private readonly RollbackRequestBuffer _rollbackRequests =
-            new RollbackRequestBuffer();
         private readonly LocalFrameActionBuffer _localFrameActionBuffer =
             new LocalFrameActionBuffer();
 
-        private void Start() { Initialize(); }
+        private void Start()
+        {
+            Initialize();
+        }
 
         private void Initialize()
         {
@@ -101,6 +121,12 @@ namespace FrameSyncDemo
             _ballEntity.holderPlayerIndex = 0;
             if (!BallPossessionSystem.TryUpdateHeldBall(_playerEntities[0], _ballEntity))
                 Debug.LogError("[P0] 初始球权不一致，无法设置持球挂点");
+            var predictedWorld = new DeterministicWorld(
+                _playerEntities,
+                _playerFSMs,
+                _ballEntity,
+                FixedInt.FromFloat(_moveSpeed * 0.033f),
+                CourtConstant.LogicDeltaTime);
 
             // ===== 渲染 =====
             _players = new GameObject[_playerCount];
@@ -154,10 +180,32 @@ namespace FrameSyncDemo
             _networkClient = gameObject.GetComponent<NetworkClient>();
             if (_networkClient == null)
                 _networkClient = gameObject.AddComponent<NetworkClient>();
+            if (_confirmedPlaybackSettings == null)
+            {
+                _confirmedPlaybackSettings =
+                    new ConfirmedPlaybackSettings();
+            }
+            _confirmedPlaybackSettings.ValidateOrReset(Debug.LogWarning);
+            _runtimeNetworkDiagnostics = new RuntimeNetworkDiagnostics(
+                IsP2EDiagnosticsEnabled(),
+                Debug.Log,
+                timestampFrequency: 0,
+                targetReadyBacklog:
+                    _confirmedPlaybackSettings.TargetReadyBacklog,
+                maxReadyBacklog:
+                    _confirmedPlaybackSettings.MaxReadyBacklog);
             _frameEngine.IsNetworkMode = true;
 
-            _predictionSystem = new PredictionSystem();
-            _predictionSystem.Init();
+            SimulationWorldState initialWorld = predictedWorld.Capture(-1);
+            _frameSyncCoordinator = new FrameSyncCoordinator(
+                predictedWorld,
+                initialWorld,
+                FixedInt.FromFloat(_moveSpeed * 0.033f),
+                CourtConstant.LogicDeltaTime);
+            _latestLocallySubmittedFrameID = -1;
+            _confirmedPresentationCursor =
+                new ConfirmedPresentationCursor(
+                    _confirmedPlaybackSettings);
             _highlightStableCursor = new StableFrameCursor();
             _highlightRemoteFrameGate = new StableRemoteFrameGate();
             _highlightRecorder = new HighlightReplayRecorder();
@@ -169,16 +217,12 @@ namespace FrameSyncDemo
 
             int localID = Application.isEditor ? 0 : 1;
             NetworkConfig.LocalPlayerID = localID;
-            _networkClient.Connect(NetworkConfig.DEFAULT_IP, NetworkConfig.DEFAULT_PORT);
-            if (!NetworkFrameTimeline.CanStartSession(_networkClient.IsConnected))
-            {
-                Debug.LogError("[GameController] 联网会话未共同放行，帧引擎保持停止");
-                return;
-            }
-
-            Debug.Log(
-                "[GameController] 双客户端已共同放行，共享帧起点=0，远端偏移=0");
-            _frameEngine.StartEngine();
+            _networkClient.ConnectConfigured();
+            _networkStartPending = true;
+            _networkSessionStarted = false;
+            _networkSessionStartEventPending = false;
+            _networkTerminalFault = string.Empty;
+            Debug.Log("[GameController] 网络握手进行中，帧引擎保持停止");
         }
 
         // ===== ReadInputs — 和阶段0完全一致 =====
@@ -189,35 +233,52 @@ namespace FrameSyncDemo
             if (_paused)
                 return new FrameInput[] { new FrameInput(), new FrameInput() };
 
-            if (_networkClient != null && _networkClient.IsConnected)
-            {
-                FrameInput myInput = ReadPrimaryInput();
-                int currentFrame = _frameEngine.CurrentFrame - 1;
-                _networkClient.DrainQueueToDict();
-                LogNetworkFrameGap(currentFrame);
+            int localFrame = _frameEngine.CurrentFrame - 1;
+            if (localFrame < 0)
+                return new FrameInput[] { new FrameInput(), new FrameInput() };
 
-                FrameInput remoteInput = _predictionSystem.ResolveRemote(
-                    currentFrame,
-                    GetRemoteActualRawForLocalFrame,
-                    out int? errorFrame,
-                    out uint correctRaw);
-                _highlightRemoteFrameGate.StageResolvedThrough(
-                    System.Math.Min(
-                        currentFrame,
-                        _networkClient.LatestDrainedRemoteFrameID));
-                if (errorFrame.HasValue)
+            int canonicalFrame = localFrame;
+
+            if (ShouldUseNetworkInputPath())
+            {
+                FrameInput localInput = ReadPrimaryInput();
+                if (!CanonicalFrame.TryFromLocal(
+                    _networkClient.LocalPlayerIndex,
+                    localFrame,
+                    NetworkFrameTimeline.RemoteFrameOffset,
+                    out canonicalFrame))
                 {
-                    _rollbackRequests.Request(errorFrame.Value, correctRaw);
+                    _paused = true;
+                    return new FrameInput[] { new FrameInput(), new FrameInput() };
                 }
 
-                _networkClient.SendInput(myInput._raw, currentFrame);
-                var result = new FrameInput[2];
-                result[_networkClient.LocalPlayerIndex] = myInput;
-                result[_networkClient.RemotePlayerIndex] = remoteInput;
-                return result;
+                if (!RecordLedgerActual(
+                        canonicalFrame,
+                        _networkClient.LocalPlayerIndex,
+                        localInput) ||
+                    !DrainRemoteInputsToLedger())
+                {
+                    return new FrameInput[] { new FrameInput(), new FrameInput() };
+                }
+
+                LogNetworkFrameGap(localFrame);
+                if (!TrySubmitLocalInput(localInput._raw, localFrame))
+                    return new FrameInput[] { new FrameInput(), new FrameInput() };
+            }
+            else
+            {
+                if (!RecordLedgerActual(canonicalFrame, 0, ReadPrimaryInput()) ||
+                    !RecordLedgerActual(canonicalFrame, 1, ReadP2Input()))
+                {
+                    return new FrameInput[] { new FrameInput(), new FrameInput() };
+                }
             }
 
-            return new FrameInput[] { ReadPrimaryInput(), ReadP2Input() };
+            FrameInputLedger.ResolvedFrame resolved =
+                _frameSyncCoordinator.ResolveForPrediction(canonicalFrame);
+            _pendingCanonicalFrame = canonicalFrame;
+            _pendingResolvedInputs = resolved;
+            return new[] { resolved.GetPlayer(0).Value, resolved.GetPlayer(1).Value };
         }
 
         // ===== OnFrameUpdate — 确定性世界更新 =====
@@ -225,7 +286,44 @@ namespace FrameSyncDemo
         {
             if (_paused) return;
 
-            SimulateLogicFrame(frameID, inputs, true);
+            if (!TryGetCanonicalFrame(frameID, out int canonicalFrame) ||
+                canonicalFrame != _pendingCanonicalFrame)
+            {
+                _paused = true;
+                Debug.LogError(
+                    $"[RouteC][CoordinatorFault] invalid pending frame " +
+                    $"local={frameID} canonical={canonicalFrame} " +
+                    $"pending={_pendingCanonicalFrame}");
+                return;
+            }
+
+            int confirmedBefore = _frameSyncCoordinator.ConfirmedFrame;
+            _lastFrameAdvance = _frameSyncCoordinator.Advance(
+                canonicalFrame,
+                _pendingResolvedInputs);
+            if (!_lastFrameAdvance.Succeeded)
+            {
+                _paused = true;
+                Debug.LogError(
+                    $"[RouteC][CoordinatorFault] advance failed frame={canonicalFrame}");
+                return;
+            }
+
+            int viewFrame = -1;
+            if (_runtimeNetworkDiagnostics.Enabled &&
+                TryBuildRealtimeViewWorld(out ViewWorldState diagnosticView))
+            {
+                viewFrame = diagnosticView.PresentationFrame;
+            }
+            _runtimeNetworkDiagnostics.RecordLogic(
+                System.Diagnostics.Stopwatch.GetTimestamp(),
+                confirmedBefore,
+                _frameSyncCoordinator.ConfirmedFrame,
+                _frameSyncCoordinator.PredictedFrame,
+                viewFrame);
+
+            SyncLegacyPositionsFromEntities();
+            LogSimulationResult(frameID, _lastFrameAdvance.SimulationResult);
         }
 
         // ===== OnPostFrameUpdate — 完整帧快照 =====
@@ -233,45 +331,37 @@ namespace FrameSyncDemo
         {
             if (_paused) return;
 
-            if (_predictionSystem != null)
+            if (_frameSyncCoordinator != null)
             {
-                FrameSnapshot snapshot = _predictionSystem.TakeWorldSnapshot(
-                    frameID,
-                    _playerEntities,
-                    _ballEntity);
+                if (!TryGetCanonicalFrame(frameID, out int canonicalFrame))
+                {
+                    _paused = true;
+                    Debug.LogError($"[RouteC][LedgerFault] invalid local snapshot frame={frameID}");
+                    return;
+                }
 
-                if (!_rollbackRequests.HasRequest)
-                    LogNormalWorldHash(snapshot);
+                if (!_frameSyncCoordinator.TryGetFrameSnapshot(
+                        WorldTrack.Predicted,
+                        canonicalFrame,
+                        out FrameSnapshot snapshot))
+                {
+                    _paused = true;
+                    Debug.LogError(
+                        $"[RouteC][CoordinatorFault] predicted snapshot missing " +
+                        $"frame={canonicalFrame}");
+                    return;
+                }
+
+                if (!_frameSyncCoordinator.TryGetEarliestMismatch(out _) &&
+                    _frameSyncCoordinator.TryGetFrameSnapshot(
+                        WorldTrack.Confirmed,
+                        canonicalFrame,
+                        out FrameSnapshot confirmedSnapshot))
+                {
+                    LogNormalWorldHash(confirmedSnapshot, canonicalFrame);
+                }
             }
 
-            if (_presentationInterpolator != null &&
-                _presentationInterpolator.CanPushLogicFrame(frameID))
-            {
-                _presentationInterpolator.PushLogicFrame(
-                    frameID,
-                    _playerEntities,
-                    _ballEntity);
-            }
-        }
-
-        private FrameSimulationResult SimulateLogicFrame(
-            int frameID,
-            FrameInput[] inputs,
-            bool emitLogs)
-        {
-            FixedInt moveDistance = FixedInt.FromFloat(_moveSpeed * 0.033f);
-            FrameSimulationResult result = FrameSimulationSystem.Step(
-                _playerEntities,
-                _playerFSMs,
-                _ballEntity,
-                inputs,
-                moveDistance,
-                CourtConstant.LogicDeltaTime);
-
-            SyncLegacyPositionsFromEntities();
-            if (emitLogs)
-                LogSimulationResult(frameID, result);
-            return result;
         }
 
         private void LogSimulationResult(int frameID, FrameSimulationResult result)
@@ -454,6 +544,7 @@ namespace FrameSyncDemo
             _presentationInterpolator.Evaluate(
                 GetPresentationLocalPlayerIndex(),
                 _frameEngine.RenderInterpolationAlpha,
+                GetConfirmedPresentationAlpha(),
                 _interpolatedPlayerPositions,
                 out PresentationBallSample ballSample);
 
@@ -480,11 +571,11 @@ namespace FrameSyncDemo
             bool useIndependentSmoother =
                 PresentationTargetResolver.ShouldUseIndependentBallSmoother(
                     ballSample);
-            if (_hasPresentedBallAttachment &&
+            bool attachmentChanged = _hasPresentedBallAttachment &&
                 PresentationTargetResolver.ShouldTransferBallVisualCorrection(
                     _lastPresentedBallAttachmentIndex,
-                    ballSample.AttachedPlayerIndex) &&
-                useIndependentSmoother)
+                    ballSample.AttachedPlayerIndex);
+            if (attachmentChanged)
             {
                 _ballSmoother.BeginCorrection(
                     _ballObject.transform.position,
@@ -492,7 +583,9 @@ namespace FrameSyncDemo
             }
 
             Vector3 ballPosition;
-            if (useIndependentSmoother)
+            if (PresentationTargetResolver.ShouldUseBallCorrectionSmoother(
+                    ballSample,
+                    _ballSmoother.IsCorrecting))
             {
                 ballPosition = _ballSmoother.Evaluate(ballTarget, deltaTime);
             }
@@ -504,6 +597,26 @@ namespace FrameSyncDemo
 
             _ballObject.transform.position = ballPosition;
             RememberPresentedBallAttachment(ballSample);
+
+            if (_runtimeNetworkDiagnostics.Enabled)
+            {
+                int remotePlayerIndex = GetPresentationLocalPlayerIndex() == 0
+                    ? 1
+                    : 0;
+                int viewFrame =
+                    _lastConfirmedPlaybackAdvance.HasPresentationFrame
+                        ? _lastConfirmedPlaybackAdvance.ActiveToFrame
+                        : -1;
+                Vector3 remotePosition =
+                    _players[remotePlayerIndex].transform.position;
+                _runtimeNetworkDiagnostics.RecordRemoteRender(
+                    System.Diagnostics.Stopwatch.GetTimestamp(),
+                    remotePosition.x,
+                    remotePosition.z,
+                    _frameSyncCoordinator.PredictedFrame,
+                    _frameSyncCoordinator.ConfirmedFrame,
+                    viewFrame);
+            }
         }
 
         private void SnapPresentationToLogic()
@@ -522,10 +635,11 @@ namespace FrameSyncDemo
             _ballSmoother?.Snap();
             _hasPresentedBallAttachment = false;
             _lastPresentedBallAttachmentIndex = -1;
-            _presentationInterpolator?.Reset(
-                frameID,
-                _playerEntities,
-                _ballEntity);
+            if (_presentationInterpolator != null &&
+                TryBuildRealtimeViewWorld(out ViewWorldState viewWorld))
+            {
+                _presentationInterpolator.Reset(viewWorld);
+            }
             SyncPresentationFromLogic(0f);
         }
 
@@ -545,6 +659,8 @@ namespace FrameSyncDemo
                 return;
             }
 
+            ProcessNetworkTransportEvents();
+
             if (_matchPhase == MatchPhase.PostGameReplay)
             {
                 HandlePostGameReplayInput();
@@ -555,7 +671,7 @@ namespace FrameSyncDemo
             CaptureLocalFrameActions();
             if (Input.GetKeyDown(KeyCode.F10))
             {
-                bool isConnected = _networkClient != null && _networkClient.IsConnected;
+                bool isConnected = ShouldUseNetworkInputPath();
                 if (!NetworkFrameTimeline.CanPauseLocally(isConnected))
                 {
                     Debug.LogWarning(
@@ -570,6 +686,107 @@ namespace FrameSyncDemo
                 }
             }
             UpdateControlOverlay();
+        }
+
+        private bool ShouldUseNetworkInputPath()
+        {
+            return _networkClient != null &&
+                   _networkClient.HasStartedSession;
+        }
+
+        private bool TrySubmitLocalInput(uint raw, int localFrameID)
+        {
+            if (_networkClient != null &&
+                _networkClient.SendInput(raw, localFrameID))
+            {
+                if (localFrameID > _latestLocallySubmittedFrameID)
+                    _latestLocallySubmittedFrameID = localFrameID;
+                return true;
+            }
+
+            EnterMatchTerminalFault(new NetworkTransportEvent(
+                NetworkSessionState.Terminated,
+                NetworkTransportEventReason.LocalInputQueueFull,
+                "none",
+                0u,
+                0u));
+            return false;
+        }
+
+        private void ProcessNetworkTransportEvents()
+        {
+            if (_networkClient == null)
+                return;
+
+            while (_networkClient.TryGetTransportEvent(
+                out NetworkTransportEvent transportEvent))
+            {
+                if (transportEvent.Reason ==
+                        NetworkTransportEventReason.SessionStarted &&
+                    transportEvent.State == NetworkSessionState.Running)
+                {
+                    _networkSessionStartEventPending = true;
+                    continue;
+                }
+
+                if (transportEvent.Reason ==
+                    NetworkTransportEventReason.ResumeRequired)
+                {
+                    ResumeReadiness readiness = BuildResumeReadiness();
+                    _networkClient.SubmitResumeReadiness(in readiness);
+                    continue;
+                }
+
+                if (transportEvent.State == NetworkSessionState.Terminated ||
+                    transportEvent.Reason ==
+                        NetworkTransportEventReason.ResumeRejected ||
+                    transportEvent.Reason ==
+                        NetworkTransportEventReason.WorkerFault ||
+                    transportEvent.Reason ==
+                        NetworkTransportEventReason.WorkerStopTimedOut ||
+                    transportEvent.Reason ==
+                        NetworkTransportEventReason.OutboundHistoryFault)
+                {
+                    _networkSessionStartEventPending = false;
+                    EnterMatchTerminalFault(transportEvent);
+                }
+            }
+
+            TryStartPendingNetworkSession();
+        }
+
+        private void TryStartPendingNetworkSession()
+        {
+            if (!_networkSessionStartEventPending ||
+                _networkSessionStarted ||
+                _networkClient.State != NetworkSessionState.Running ||
+                !_networkClient.HasStartedSession ||
+                (_networkClient.LocalPlayerIndex != 0 &&
+                 _networkClient.LocalPlayerIndex != 1))
+            {
+                return;
+            }
+
+            _networkSessionStartEventPending = false;
+            _networkSessionStarted = true;
+            _networkStartPending = false;
+            _frameEngine.StartEngine();
+            Debug.Log(
+                "[GameController] 双客户端已共同放行，共享帧起点=0，远端偏移=0");
+        }
+
+        private void EnterMatchTerminalFault(
+            NetworkTransportEvent transportEvent)
+        {
+            _networkStartPending = false;
+            _paused = true;
+            _frameEngine.Pause();
+            _networkTerminalFault =
+                "[RouteC][MatchTerminalFault] state=" +
+                transportEvent.State +
+                " reason=" +
+                transportEvent.Reason;
+            Debug.LogError(_networkTerminalFault);
         }
 
         private void HandlePostGameReplayInput()
@@ -655,106 +872,84 @@ namespace FrameSyncDemo
             return 0;
         }
 
-        private void ResetPositions()
+        // ===== 回滚 =====
+        private bool DoRollback(int errorFrame)
         {
-            ClearLocalFrameActionsForCurrentRenderFrame();
-            ResetWorldLogic();
-            SnapPresentationToLogic();
-        }
-
-        private void ResetWorldLogic()
-        {
-            for (int i = 0; i < _playerCount; i++)
+            int lastExecutedLocalFrame = _frameEngine.CurrentFrame - 1;
+            if (!TryGetCanonicalFrame(lastExecutedLocalFrame, out int lastExecutedFrame))
             {
-                FixedVector3 startPosition = new FixedVector3(
-                    FixedInt.FromInt(i == 0 ? -3 : 3),
-                    FixedInt.Zero,
-                    FixedInt.Zero);
-                _playerEntities[i].Reset(startPosition, i);
+                _paused = true;
+                Debug.LogError(
+                    $"[RouteC][LedgerFault] invalid rollback local frame={lastExecutedLocalFrame}");
+                return false;
             }
 
-            _ballEntity.Reset(FixedVector3.Zero);
-            _playerEntities[0].hasBall = true;
-            _ballEntity.state = BallEntity.EState.Held;
-            _ballEntity.holderPlayerIndex = 0;
-            BallPossessionSystem.TryUpdateHeldBall(_playerEntities[0], _ballEntity);
-            _reportedHeldInvariantError = false;
-            SyncLegacyPositionsFromEntities();
-        }
-
-        // ===== 回滚 =====
-        private bool DoRollback(int errorFrame, uint correctRemoteRaw)
-        {
-            int lastExecutedFrame = _frameEngine.CurrentFrame - 1;
-            int localIdx = _networkClient != null ? _networkClient.LocalPlayerIndex : 0;
-            int remoteIdx = _networkClient != null ? _networkClient.RemotePlayerIndex : 1;
             for (int i = 0; i < _playerCount; i++)
                 _rollbackPlayerDisplayPositions[i] = _players[i].transform.position;
             Vector3 ballDisplayPosition = _ballObject.transform.position;
-            FixedInt moveDistance = FixedInt.FromFloat(_moveSpeed * 0.033f);
-            FrameReplayResult result = FrameReplaySystem.Replay(
-                errorFrame,
-                lastExecutedFrame,
-                correctRemoteRaw,
-                NetworkFrameTimeline.RemoteFrameOffset,
-                localIdx,
-                remoteIdx,
-                _frameEngine.Buffer,
-                remoteFrame =>
-                {
-                    if (_networkClient != null &&
-                        _networkClient.TryGetRemoteInputAt(remoteFrame, out uint actualRaw))
-                    {
-                        return actualRaw;
-                    }
-
-                    return null;
-                },
-                _predictionSystem,
-                _playerEntities,
-                _playerFSMs,
-                _ballEntity,
-                moveDistance,
-                CourtConstant.LogicDeltaTime,
-                ResetWorldLogic);
+            ReconcileResult result = _frameSyncCoordinator.Reconcile();
 
             SyncLegacyPositionsFromEntities();
-            if (!result.succeeded)
+            if (!result.Succeeded)
             {
-                Debug.LogError($"[Rollback] 帧{result.missingInputFrame}本地Input缺失");
+                _paused = true;
+                Debug.LogError(
+                    $"[RouteC][RollbackFault] phase=replay " +
+                    $"plan={result.PlanResult} failure={result.ReplayFailure} " +
+                    $"errorFrame={errorFrame} restored={result.RestoredFrame}");
                 return false;
             }
 
-            ReplacePresentationHistoryAfterRollback(lastExecutedFrame);
-            BeginRollbackPresentationCorrection(
-                ballDisplayPosition);
+            _confirmedPresentationCursor?.RecalculateAfterRollback(
+                _frameSyncCoordinator.ConfirmedFrame);
+            if (ReplacePresentationHistoryAfterRollback(lastExecutedFrame))
+            {
+                BeginRollbackPresentationCorrection(
+                    ballDisplayPosition);
+            }
 
             Debug.Log(
                 $"[RouteC][Rollback] errorFrame={errorFrame} " +
-                $"restoredFrame={result.restoredFrame} " +
-                $"replayed={result.replayedFrameCount} " +
+                $"restoredFrame={result.RestoredFrame} " +
+                $"replayed={result.ReplayedFrameCount} " +
                 $"ballState={_ballEntity.state}");
 
-            if (!_predictionSystem.TryGetWorldSnapshot(
-                lastExecutedFrame,
-                out FrameSnapshot finalSnapshot))
+            int confirmedFrame = _frameSyncCoordinator.ConfirmedFrame;
+            FrameSnapshot confirmedSnapshot = default;
+            bool hasConfirmedSnapshot = confirmedFrame >= 0 &&
+                _frameSyncCoordinator.TryGetFrameSnapshot(
+                    WorldTrack.Confirmed,
+                    confirmedFrame,
+                    out confirmedSnapshot);
+            if (confirmedFrame >= 0 && !hasConfirmedSnapshot)
             {
                 Debug.LogError(
-                    $"[RouteC][WorldHash] frame={lastExecutedFrame} " +
-                    "回滚成功但最终快照缺失");
+                    $"[RouteC][WorldHash] frame={confirmedFrame} " +
+                    "回滚成功但确认快照缺失");
+                _paused = true;
                 return false;
             }
 
-            LogRollbackWorldHash(
-                finalSnapshot,
-                errorFrame,
-                result.restoredFrame,
-                result.replayedFrameCount);
+            if (hasConfirmedSnapshot)
+            {
+                LogRollbackWorldHash(
+                    confirmedSnapshot,
+                    errorFrame,
+                    result.RestoredFrame,
+                    result.ReplayedFrameCount);
+                _runtimeNetworkDiagnostics.RecordRollback(
+                    System.Diagnostics.Stopwatch.GetTimestamp(),
+                    errorFrame,
+                    result.RestoredFrame,
+                    result.ReplayedFrameCount,
+                    WorldHash.Compute(confirmedSnapshot, confirmedFrame));
+            }
             return true;
         }
 
         private void BeginRollbackPresentationCorrection(
-            Vector3 ballDisplayPosition)
+            Vector3 ballDisplayPosition,
+            float maximumDurationSeconds = 0f)
         {
             if (_presentationInterpolator == null ||
                 _playerCorrectionSmoothers == null ||
@@ -769,13 +964,24 @@ namespace FrameSyncDemo
             _presentationInterpolator.Evaluate(
                 GetPresentationLocalPlayerIndex(),
                 _frameEngine.RenderInterpolationAlpha,
+                GetConfirmedPresentationAlpha(),
                 _interpolatedPlayerPositions,
                 out PresentationBallSample ballSample);
             for (int i = 0; i < _playerCount; i++)
             {
-                _playerCorrectionSmoothers[i].BeginCorrection(
-                    _rollbackPlayerDisplayPositions[i],
-                    _interpolatedPlayerPositions[i]);
+                if (maximumDurationSeconds > 0f)
+                {
+                    _playerCorrectionSmoothers[i].BeginCorrection(
+                        _rollbackPlayerDisplayPositions[i],
+                        _interpolatedPlayerPositions[i],
+                        maximumDurationSeconds);
+                }
+                else
+                {
+                    _playerCorrectionSmoothers[i].BeginCorrection(
+                        _rollbackPlayerDisplayPositions[i],
+                        _interpolatedPlayerPositions[i]);
+                }
                 _playerPresentationPositions[i] =
                     _rollbackPlayerDisplayPositions[i];
             }
@@ -785,12 +991,27 @@ namespace FrameSyncDemo
                     ballSample,
                     _interpolatedPlayerPositions,
                     _playerPresentationPositions);
+            bool attachmentChanged = _hasPresentedBallAttachment &&
+                PresentationTargetResolver.ShouldTransferBallVisualCorrection(
+                    _lastPresentedBallAttachmentIndex,
+                    ballSample.AttachedPlayerIndex);
             if (PresentationTargetResolver.ShouldUseIndependentBallSmoother(
-                ballSample))
+                    ballSample) ||
+                attachmentChanged)
             {
-                _ballSmoother.BeginCorrection(
-                    ballDisplayPosition,
-                    ballTarget);
+                if (maximumDurationSeconds > 0f)
+                {
+                    _ballSmoother.BeginCorrection(
+                        ballDisplayPosition,
+                        ballTarget,
+                        maximumDurationSeconds);
+                }
+                else
+                {
+                    _ballSmoother.BeginCorrection(
+                        ballDisplayPosition,
+                        ballTarget);
+                }
             }
             else
             {
@@ -799,42 +1020,182 @@ namespace FrameSyncDemo
             RememberPresentedBallAttachment(ballSample);
         }
 
-        private void ReplacePresentationHistoryAfterRollback(
+        private bool ReplacePresentationHistoryAfterRollback(
             int lastExecutedFrame)
         {
-            if (_predictionSystem.TryGetWorldSnapshot(
-                lastExecutedFrame,
-                out FrameSnapshot newest))
+            if (TryBuildPresentationCursorViewWorld(
+                out ViewWorldState viewWorld))
             {
-                FrameSnapshot? previous = null;
-                FrameSnapshot? oldest = null;
-                if (_predictionSystem.TryGetWorldSnapshot(
-                    lastExecutedFrame - 1,
-                    out FrameSnapshot previousValue))
-                {
-                    previous = previousValue;
-                    if (_predictionSystem.TryGetWorldSnapshot(
-                        lastExecutedFrame - 2,
-                        out FrameSnapshot oldestValue))
-                    {
-                        oldest = oldestValue;
-                    }
-                }
-
-                _presentationInterpolator.ReplaceHistoryAfterRollback(
-                    newest,
-                    previous,
-                    oldest);
-                return;
+                _presentationInterpolator.ReplaceViewWorld(viewWorld);
+                return true;
             }
 
             Debug.LogError(
-                $"[RouteC][Presentation] frame={lastExecutedFrame} " +
-                "回滚最终快照缺失，表现缓冲退化为纠正后的实时世界");
-            _presentationInterpolator.ReplaceAfterRollback(
-                lastExecutedFrame,
-                _playerEntities,
-                _ballEntity);
+                $"[RouteC][PresentationFault] frame={lastExecutedFrame} " +
+                $"missing=[{_confirmedPresentationCursor.ActiveFromFrame}," +
+                $"{_confirmedPresentationCursor.ActiveToFrame}] " +
+                "after rollback; confirmed presentation is held.");
+            _confirmedPresentationCursor.EnterPresentationFault(
+                _confirmedPresentationCursor.ActiveFromFrame,
+                _confirmedPresentationCursor.ActiveToFrame);
+            return false;
+        }
+
+        private bool TryBuildRealtimeViewWorld(out ViewWorldState viewWorld)
+        {
+            if (_frameSyncCoordinator == null)
+            {
+                viewWorld = default;
+                return false;
+            }
+
+            return ViewWorldBuilder.TryBuild(
+                _frameSyncCoordinator,
+                GetPresentationLocalPlayerIndex(),
+                out viewWorld);
+        }
+
+        private bool TryBuildPresentationCursorViewWorld(
+            out ViewWorldState viewWorld)
+        {
+            if (_frameSyncCoordinator == null ||
+                _confirmedPresentationCursor == null)
+            {
+                viewWorld = default;
+                return false;
+            }
+
+            return ViewWorldBuilder.TryBuild(
+                _frameSyncCoordinator,
+                GetPresentationLocalPlayerIndex(),
+                _confirmedPresentationCursor.ActiveToFrame,
+                out viewWorld);
+        }
+
+        private bool AdvanceRealtimePresentation(
+            float deltaTimeSeconds,
+            float frameDurationSeconds)
+        {
+            if (_presentationInterpolator == null ||
+                _frameSyncCoordinator == null ||
+                _confirmedPresentationCursor == null)
+            {
+                return false;
+            }
+
+            ConfirmedPlaybackAdvance advance =
+                _confirmedPresentationCursor.Advance(
+                    _frameSyncCoordinator.ConfirmedFrame,
+                    deltaTimeSeconds,
+                    frameDurationSeconds);
+            _lastConfirmedPlaybackAdvance = advance;
+            long observedTimestamp =
+                System.Diagnostics.Stopwatch.GetTimestamp();
+            if (advance.IsFaulted)
+            {
+                _runtimeNetworkDiagnostics.RecordConfirmedPlayback(
+                    observedTimestamp,
+                    advance);
+                return false;
+            }
+
+            int presentationFrame = advance.HasPresentationFrame
+                ? advance.ActiveToFrame
+                : -1;
+            Vector3 ballDisplayPosition = default;
+            bool capturedOverflowDisplay = advance.IsOverflowRebase &&
+                TryCapturePresentationDisplay(out ballDisplayPosition);
+            if (!ViewWorldBuilder.TryBuild(
+                    _frameSyncCoordinator,
+                    GetPresentationLocalPlayerIndex(),
+                    presentationFrame,
+                    out ViewWorldState viewWorld))
+            {
+                if (advance.HasPresentationFrame)
+                {
+                    _confirmedPresentationCursor.EnterPresentationFault(
+                        advance.ActiveFromFrame,
+                        advance.ActiveToFrame);
+                    _lastConfirmedPlaybackAdvance =
+                        _confirmedPresentationCursor.Advance(
+                            _frameSyncCoordinator.ConfirmedFrame,
+                            0f,
+                            frameDurationSeconds);
+                    Debug.LogError(
+                        "[RouteC][PresentationFault] confirmed range=" +
+                        $"[{advance.ActiveFromFrame}," +
+                        $"{advance.ActiveToFrame}] is unavailable; " +
+                        "confirmed presentation is held.");
+                }
+                _runtimeNetworkDiagnostics.RecordConfirmedPlayback(
+                    observedTimestamp,
+                    _lastConfirmedPlaybackAdvance);
+                return false;
+            }
+
+            if (_presentationInterpolator.CanPushLogicFrame(
+                    viewWorld.PredictedFrame))
+            {
+                _presentationInterpolator.PushViewWorld(viewWorld);
+            }
+            else
+            {
+                _presentationInterpolator.ReplaceViewWorld(viewWorld);
+            }
+
+            if (capturedOverflowDisplay)
+            {
+                BeginRollbackPresentationCorrection(
+                    ballDisplayPosition,
+                    _confirmedPlaybackSettings
+                        .OverflowCorrectionMaximumSeconds);
+            }
+
+            _runtimeNetworkDiagnostics.RecordBallSourceSwitch(
+                observedTimestamp,
+                viewWorld.PresentationFrame,
+                viewWorld.Ball.Source,
+                viewWorld.Ball.ToHolderPlayerIndex);
+            _runtimeNetworkDiagnostics.RecordConfirmedPlayback(
+                observedTimestamp,
+                advance);
+
+            return true;
+        }
+
+        private bool TryCapturePresentationDisplay(
+            out Vector3 ballDisplayPosition)
+        {
+            if (_players == null ||
+                _ballObject == null ||
+                _rollbackPlayerDisplayPositions == null ||
+                _players.Length != _rollbackPlayerDisplayPositions.Length)
+            {
+                ballDisplayPosition = default;
+                return false;
+            }
+
+            for (int i = 0; i < _players.Length; i++)
+            {
+                if (_players[i] == null)
+                {
+                    ballDisplayPosition = default;
+                    return false;
+                }
+
+                _rollbackPlayerDisplayPositions[i] =
+                    _players[i].transform.position;
+            }
+
+            ballDisplayPosition = _ballObject.transform.position;
+            return true;
+        }
+
+        private float GetConfirmedPresentationAlpha()
+        {
+            return _confirmedPresentationCursor != null
+                ? _confirmedPresentationCursor.InterpolationAlpha
+                : _frameEngine.RenderInterpolationAlpha;
         }
 
         private void RememberPresentedBallAttachment(
@@ -845,10 +1206,9 @@ namespace FrameSyncDemo
             _hasPresentedBallAttachment = true;
         }
 
-        private void LogNormalWorldHash(FrameSnapshot snapshot)
+        private void LogNormalWorldHash(FrameSnapshot snapshot, int canonicalFrame)
         {
-            if (!TryGetCanonicalFrame(snapshot.frameID, out int canonicalFrame) ||
-                _worldHashLogIntervalFrames <= 0 ||
+            if (_worldHashLogIntervalFrames <= 0 ||
                 canonicalFrame % _worldHashLogIntervalFrames != 0)
             {
                 return;
@@ -860,7 +1220,7 @@ namespace FrameSyncDemo
                 $"algo={WorldHash.AlgorithmName} " +
                 $"localPlayer={GetLocalPlayerLogIndex()} " +
                 $"frame={canonicalFrame} localFrame={snapshot.frameID} " +
-                $"phase=final source=normal " +
+                $"phase=confirmed source=normal " +
                 $"hash=0x{hash:X16}");
         }
 
@@ -870,16 +1230,13 @@ namespace FrameSyncDemo
             int restoredFrame,
             int replayedFrameCount)
         {
-            if (!TryGetCanonicalFrame(snapshot.frameID, out int canonicalFrame))
-                return;
-
-            ulong hash = WorldHash.Compute(snapshot, canonicalFrame);
+            ulong hash = WorldHash.Compute(snapshot, snapshot.frameID);
             Debug.Log(
                 $"[RouteC][WorldHash] schema={WorldHash.SchemaVersion} " +
                 $"algo={WorldHash.AlgorithmName} " +
                 $"localPlayer={GetLocalPlayerLogIndex()} " +
-                $"frame={canonicalFrame} localFrame={snapshot.frameID} " +
-                $"phase=final source=rollback " +
+                $"frame={snapshot.frameID} " +
+                $"phase=confirmed source=rollback " +
                 $"errorFrame={errorFrame} restoredFrame={restoredFrame} " +
                 $"replayed={replayedFrameCount} hash=0x{hash:X16}");
         }
@@ -900,15 +1257,87 @@ namespace FrameSyncDemo
                 : 0;
         }
 
-        private uint? GetRemoteActualRawForLocalFrame(int localFrame)
+        private bool DrainRemoteInputsToLedger()
         {
-            if (_networkClient == null)
-                return null;
+            int drainCount = 0;
+            long firstReceivedTimestamp = 0;
+            long lastReceivedTimestamp = 0;
+            while (_networkClient.TryGetRemoteInput(
+                out NetworkPacketArrival packetArrival))
+            {
+                uint raw = packetArrival.Raw;
+                int remoteFrame = packetArrival.RemoteFrameID;
+                _runtimeNetworkDiagnostics.RecordReceive(packetArrival);
+                if (drainCount == 0)
+                    firstReceivedTimestamp = packetArrival.ReceivedTimestamp;
+                lastReceivedTimestamp = packetArrival.ReceivedTimestamp;
+                drainCount++;
 
-            int remoteFrame = NetworkFrameTimeline.RemoteFrameForLocal(localFrame);
-            return _networkClient.TryGetRemoteInputAt(remoteFrame, out uint actualRaw)
-                ? (uint?)actualRaw
-                : null;
+                if (remoteFrame < 0)
+                {
+                    _paused = true;
+                    Debug.LogError($"[RouteC][LedgerFault] invalid remote frame={remoteFrame}");
+                    return false;
+                }
+
+                if (!CanonicalFrame.TryFromLocal(
+                    _networkClient.RemotePlayerIndex,
+                    remoteFrame,
+                    NetworkFrameTimeline.RemoteFrameOffset,
+                    out int canonicalFrame))
+                {
+                    _paused = true;
+                    Debug.LogError($"[RouteC][LedgerFault] invalid remote frame={remoteFrame}");
+                    return false;
+                }
+
+                _runtimeNetworkDiagnostics.RecordActualArrival(
+                    canonicalFrame,
+                    packetArrival.ReceivedTimestamp);
+                if (!RecordLedgerActual(
+                        canonicalFrame,
+                        _networkClient.RemotePlayerIndex,
+                        FrameInput.FromRaw(raw)))
+                {
+                    return false;
+                }
+            }
+
+            if (drainCount > 0)
+            {
+                _runtimeNetworkDiagnostics.RecordDrain(
+                    System.Diagnostics.Stopwatch.GetTimestamp(),
+                    drainCount,
+                    firstReceivedTimestamp,
+                    lastReceivedTimestamp);
+            }
+
+            return true;
+        }
+
+        private bool IsP2EDiagnosticsEnabled()
+        {
+            if (_enableP2EDiagnostics)
+                return true;
+
+            string[] arguments = System.Environment.GetCommandLineArgs();
+            return System.Array.IndexOf(arguments, "-p2eDiagnostics") >= 0;
+        }
+
+        private bool RecordLedgerActual(int frame, int playerIndex, FrameInput input)
+        {
+            FrameInputLedger.ActualArrival arrival =
+                _frameSyncCoordinator.RecordActual(frame, playerIndex, input);
+            if (arrival.Disposition == FrameInputLedger.ActualDisposition.HistoryUnavailable ||
+                arrival.Disposition == FrameInputLedger.ActualDisposition.CapacityExceeded ||
+                arrival.Disposition == FrameInputLedger.ActualDisposition.ConflictingDuplicate)
+            {
+                _paused = true;
+                Debug.LogError($"[RouteC][LedgerFault] frame={frame} player={playerIndex} raw=0x{input._raw:X8} floor={_frameSyncCoordinator.FirstRetainedFrame} disposition={arrival.Disposition}");
+                return false;
+            }
+
+            return true;
         }
 
         private void LogNetworkFrameGap(int localFrame)
@@ -933,6 +1362,23 @@ namespace FrameSyncDemo
                 $"arrivalGap={arrivalGap}");
         }
 
+        private ResumeReadiness BuildResumeReadiness()
+        {
+            if (_frameSyncCoordinator == null)
+            {
+                throw new System.InvalidOperationException(
+                    "Frame-sync coordinator is not initialized.");
+            }
+
+            int lastContiguousRemoteFrameID = _networkClient == null
+                ? -1
+                : _networkClient.LatestRemoteFrameID;
+            return new ResumeReadiness(
+                lastContiguousRemoteFrameID,
+                _frameSyncCoordinator.EarliestRecoverableCanonicalFrame,
+                _latestLocallySubmittedFrameID);
+        }
+
         private bool TryGetCanonicalFrame(int localFrame, out int canonicalFrame)
         {
             return CanonicalFrame.TryFromLocal(
@@ -940,6 +1386,36 @@ namespace FrameSyncDemo
                 localFrame,
                 NetworkFrameTimeline.RemoteFrameOffset,
                 out canonicalFrame);
+        }
+
+        private bool TryGetLocalFrame(int canonicalFrame, out int localFrame)
+        {
+            return CanonicalFrame.TryToLocal(
+                GetLocalPlayerLogIndex(),
+                canonicalFrame,
+                NetworkFrameTimeline.RemoteFrameOffset,
+                out localFrame);
+        }
+
+        private void StageConfirmedLedgerFrameForHighlight()
+        {
+            if (_frameSyncCoordinator == null || _highlightRemoteFrameGate == null ||
+                _frameSyncCoordinator.ConfirmedThroughFrame < _frameSyncCoordinator.StartFrame)
+            {
+                return;
+            }
+
+            if (!TryGetLocalFrame(
+                    _frameSyncCoordinator.ConfirmedThroughFrame,
+                    out int confirmedLocalFrame))
+            {
+                _paused = true;
+                Debug.LogError(
+                    "[RouteC][LedgerFault] cannot map confirmed ledger frame to local frame.");
+                return;
+            }
+
+            _highlightRemoteFrameGate.StageResolvedThrough(confirmedLocalFrame);
         }
 
         private void LateUpdate()
@@ -952,27 +1428,28 @@ namespace FrameSyncDemo
                 return;
             }
 
-            if (_networkClient != null && _networkClient.IsConnected)
+            bool correctionCompleted = true;
+            if (ShouldUseNetworkInputPath())
             {
-                _networkClient.DrainQueueToDict();
-                bool correctionCompleted = true;
                 if (PresentationTargetResolver.ShouldProcessRollback(
                         _paused,
                         false) &&
-                    _rollbackRequests.TryTake(
-                        out int errorFrame,
-                        out uint correctRaw))
+                    _frameSyncCoordinator.TryGetEarliestMismatch(
+                        out FrameInputLedger.InputMismatch mismatch))
                 {
-                    correctionCompleted = DoRollback(errorFrame, correctRaw);
-                    if (!correctionCompleted)
-                        _rollbackRequests.Request(errorFrame, correctRaw);
+                    correctionCompleted = DoRollback(mismatch.Frame);
                 }
 
                 if (correctionCompleted)
+                {
+                    StageConfirmedLedgerFrameForHighlight();
                     _highlightRemoteFrameGate.CommitCorrection();
+                }
             }
 
-            ProcessStableHighlightFrames();
+            bool stableConsumersCompleted = ProcessStableHighlightFrames();
+            if (correctionCompleted && stableConsumersCompleted)
+                TryPruneLedgerHistory();
             if (_matchPhase == MatchPhase.PostGameReplay)
             {
                 ApplyPostGameReplayPresentation();
@@ -980,29 +1457,32 @@ namespace FrameSyncDemo
                 return;
             }
 
-            if (_networkClient != null && _networkClient.IsConnected)
+            if (!_paused)
             {
-                int minKeep = _frameEngine.CurrentFrame - 120;
-                if (minKeep > 0)
-                    _networkClient.CleanupRemoteInputs(minKeep);
+                bool canSubmitPresentation = AdvanceRealtimePresentation(
+                    Time.deltaTime,
+                    _frameEngine.FrameIntervalMs / 1000f);
+                if (canSubmitPresentation)
+                    SyncPresentationFromLogic(Time.deltaTime);
             }
-
-            SyncPresentationFromLogic(_paused ? 0f : Time.deltaTime);
+            else
+            {
+                SyncPresentationFromLogic(0f);
+            }
             UpdateControlOverlay();
         }
 
-        private void ProcessStableHighlightFrames()
+        private bool ProcessStableHighlightFrames()
         {
             if (_highlightStableCursor == null ||
                 _highlightRecorder == null ||
-                _predictionSystem == null ||
+                _frameSyncCoordinator == null ||
                 _frameEngine == null)
             {
-                return;
+                return false;
             }
 
-            bool isConnected = _networkClient != null &&
-                _networkClient.IsConnected;
+            bool isConnected = ShouldUseNetworkInputPath();
             int latestRemoteFrame = isConnected
                 ? _highlightRemoteFrameGate.ValidatedThroughFrame
                 : -1;
@@ -1015,8 +1495,17 @@ namespace FrameSyncDemo
                 stableThroughFrame,
                 out int frameID))
             {
-                if (!_predictionSystem.TryGetWorldSnapshot(
-                    frameID,
+                if (!TryGetCanonicalFrame(frameID, out int canonicalFrame))
+                {
+                    _paused = true;
+                    Debug.LogError(
+                        $"[RouteC][LedgerFault] invalid stable local frame={frameID}");
+                    return false;
+                }
+
+                if (!_frameSyncCoordinator.TryGetFrameSnapshot(
+                    WorldTrack.Confirmed,
+                    canonicalFrame,
                     out FrameSnapshot snapshot))
                 {
                     if (TryRebaseExpiredHighlightHistory(frameID))
@@ -1024,21 +1513,21 @@ namespace FrameSyncDemo
 
                     Debug.LogError(
                         $"[RouteC][Highlight] stable snapshot missing " +
-                        $"frame={frameID}");
-                    return;
+                        $"localFrame={frameID} canonicalFrame={canonicalFrame}");
+                    return false;
                 }
 
-                if (!TryGetStableActualInputs(frameID, out FrameInput[] inputs))
+                if (!TryGetStableActualInputs(canonicalFrame, out FrameInput[] inputs))
                 {
                     if (TryRebaseExpiredHighlightHistory(frameID))
                         continue;
 
-                    return;
+                    return false;
                 }
 
                 _highlightRecorder.ProcessStableFrame(
                     frameID,
-                    snapshot,
+                    WithFrameID(snapshot, frameID),
                     inputs);
                 _highlightStableCursor.MarkProcessed(frameID);
 
@@ -1054,68 +1543,142 @@ namespace FrameSyncDemo
                 if (_highlightRecorder.CanEnterPostGame)
                 {
                     EnterPostGameReplay();
-                    return;
+                    return false;
                 }
             }
+
+            return true;
+        }
+
+        private void TryPruneLedgerHistory()
+        {
+            if (_paused || _frameSyncCoordinator == null ||
+                _highlightStableCursor == null ||
+                _frameSyncCoordinator.HasIntegrityFault)
+            {
+                return;
+            }
+
+            int firstFrameToKeep = NextFrameOrMax(
+                _frameSyncCoordinator.ConfirmedThroughFrame);
+            if (_frameSyncCoordinator.TryGetInFlightReplayPlan(
+                    out FrameInputLedger.ReplayInputPlan inFlightPlan))
+            {
+                firstFrameToKeep = System.Math.Min(
+                    firstFrameToKeep,
+                    inFlightPlan.FromFrame);
+            }
+
+            if (_frameSyncCoordinator.TryGetEarliestMismatch(
+                    out FrameInputLedger.InputMismatch mismatch))
+            {
+                int mismatchFloor = GetMismatchRecoveryFloor(mismatch.Frame);
+                firstFrameToKeep = System.Math.Min(firstFrameToKeep, mismatchFloor);
+            }
+
+            if (!TryGetCanonicalFrame(
+                    NextFrameOrMax(_highlightStableCursor.LastProcessedFrame),
+                    out int highlightFirstNeededCanonicalFrame))
+            {
+                _paused = true;
+                Debug.LogError(
+                    "[RouteC][LedgerFault] cannot map highlight cursor to canonical frame.");
+                return;
+            }
+
+            firstFrameToKeep = System.Math.Min(
+                firstFrameToKeep,
+                highlightFirstNeededCanonicalFrame);
+            if (firstFrameToKeep <= _frameSyncCoordinator.FirstRetainedFrame)
+            {
+                return;
+            }
+
+            FrameInputLedger.PruneResult result =
+                _frameSyncCoordinator.TryPruneBefore(firstFrameToKeep);
+            if (result != FrameInputLedger.PruneResult.Success &&
+                result != FrameInputLedger.PruneResult.NoOp)
+            {
+                Debug.LogWarning(
+                    $"[RouteC][LedgerPrune] floor={firstFrameToKeep} " +
+                    $"retained={_frameSyncCoordinator.FirstRetainedFrame} result={result}");
+            }
+        }
+
+        private int GetMismatchRecoveryFloor(int mismatchFrame)
+        {
+            if (mismatchFrame <= _frameSyncCoordinator.StartFrame)
+            {
+                return _frameSyncCoordinator.StartFrame;
+            }
+
+            return _frameSyncCoordinator.TryGetFrameSnapshot(
+                WorldTrack.Confirmed,
+                mismatchFrame - 1,
+                out _)
+                ? mismatchFrame
+                : _frameSyncCoordinator.StartFrame;
+        }
+
+        private static int NextFrameOrMax(int frame)
+        {
+            return frame == int.MaxValue ? int.MaxValue : frame + 1;
+        }
+
+        private static FrameSnapshot WithFrameID(FrameSnapshot snapshot, int frameID)
+        {
+            snapshot.frameID = frameID;
+            return snapshot;
         }
 
         private bool TryRebaseExpiredHighlightHistory(int missingFrameID)
         {
-            int firstRetainedFrame = System.Math.Max(
+            int firstRetainedLocalFrame = System.Math.Max(
                 0,
                 _frameEngine.Buffer.MaxWrittenFrame - FrameBuffer.CAPACITY + 1);
-            if (_networkClient != null && _networkClient.IsConnected)
+            if (_frameSyncCoordinator != null)
             {
-                int firstRetainedRemoteFrame =
-                    _networkClient.GetMinRemoteFrameID();
-                if (firstRetainedRemoteFrame >= 0)
+                if (!TryGetLocalFrame(
+                        _frameSyncCoordinator.FirstRetainedFrame,
+                        out int ledgerFirstRetainedLocalFrame))
                 {
-                    firstRetainedFrame = System.Math.Max(
-                        firstRetainedFrame,
-                        firstRetainedRemoteFrame);
+                    _paused = true;
+                    Debug.LogError(
+                        "[RouteC][LedgerFault] cannot map ledger retention floor to local frame.");
+                    return false;
                 }
+
+                firstRetainedLocalFrame = System.Math.Max(
+                    firstRetainedLocalFrame,
+                    ledgerFirstRetainedLocalFrame);
             }
 
-            if (firstRetainedFrame <= missingFrameID)
+            if (firstRetainedLocalFrame <= missingFrameID)
                 return false;
 
-            _highlightStableCursor.RebaseAt(firstRetainedFrame);
-            _highlightRecorder.RebaseAt(firstRetainedFrame);
+            _highlightStableCursor.RebaseAt(firstRetainedLocalFrame);
+            _highlightRecorder.RebaseAt(firstRetainedLocalFrame);
             Debug.LogError(
                 $"[RouteC][Highlight] stable history expired at " +
-                $"frame={missingFrameID}; resumed at frame={firstRetainedFrame}");
+                $"localFrame={missingFrameID}; resumed at localFrame={firstRetainedLocalFrame}");
             return true;
         }
 
         private bool TryGetStableActualInputs(
-            int frameID,
+            int canonicalFrame,
             out FrameInput[] inputs)
         {
             inputs = null;
-            if (!_frameEngine.Buffer.PeekFrame(
-                frameID,
-                out FrameBuffer.Frame frameData) ||
-                frameData.inputs == null ||
-                frameData.inputs.Length != _playerCount)
-            {
-                return false;
-            }
-
-            inputs = (FrameInput[])frameData.inputs.Clone();
-            if (_networkClient == null || !_networkClient.IsConnected)
-                return true;
-
-            int remoteFrame = NetworkFrameTimeline.RemoteFrameForLocal(frameID);
-            if (!_networkClient.TryGetRemoteInputAt(
-                remoteFrame,
-                out uint actualRemoteRaw))
+            if (_frameSyncCoordinator == null ||
+                !_frameSyncCoordinator.TryGetActualFrame(
+                    canonicalFrame,
+                    out FrameInputLedger.ResolvedFrame actual))
             {
                 inputs = null;
                 return false;
             }
 
-            inputs[_networkClient.RemotePlayerIndex] =
-                FrameInput.FromRaw(actualRemoteRaw);
+            inputs = new[] { actual.GetPlayer(0).Value, actual.GetPlayer(1).Value };
             return true;
         }
 
@@ -1124,16 +1687,30 @@ namespace FrameSyncDemo
             if (_matchPhase == MatchPhase.PostGameReplay)
                 return;
 
+            int recordedTerminalFrame =
+                _highlightRecorder?.PostGameTerminalFrame ?? -1;
+            if (!TryGetCanonicalFrame(
+                    recordedTerminalFrame,
+                    out int canonicalTerminalFrame))
+            {
+                Debug.LogError(
+                    $"[RouteC][Highlight] invalid terminal frame " +
+                    $"frame={recordedTerminalFrame}");
+                return;
+            }
+
             if (!PostGameTransitionSystem.TryRestoreTerminalWorld(
                 _highlightRecorder,
-                _predictionSystem,
-                _playerEntities,
-                _ballEntity,
-                out int terminalFrame))
+                _frameSyncCoordinator,
+                canonicalTerminalFrame,
+                out int restoredCanonicalFrame) ||
+                !TryGetLocalFrame(
+                    restoredCanonicalFrame,
+                    out int terminalFrame))
             {
                 Debug.LogError(
                     $"[RouteC][Highlight] terminal snapshot missing " +
-                    $"frame={terminalFrame}; postgame transition cancelled");
+                    $"frame={recordedTerminalFrame}; postgame transition cancelled");
                 return;
             }
 
