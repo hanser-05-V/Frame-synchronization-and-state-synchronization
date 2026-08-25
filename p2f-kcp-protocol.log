@@ -1,0 +1,37 @@
+ReleasePath=E:\帧同步_RouteC\Project\NetworkServer\bin\Release\net48\NetworkServer.exe
+ReleaseSha256=283770E3ECC5D2F13C3B1E4262563D3AEDE388407B90753F176D237AE14DA7A7
+LifecycleProxyPath=E:\帧同步_RouteC\Project\NetworkServer\obj\p2f-task12-release-servercheck.exe
+LifecycleProxySha256=283770E3ECC5D2F13C3B1E4262563D3AEDE388407B90753F176D237AE14DA7A7
+ProxyReason=legacy source-root path assumption; bytes identical to Release
+ServerEntryScriptSha256=FD095A2959B6C23A230C3662F4529869EA97B540B477D5450E0EE42DF2EDAFB8
+ResumeProtocolScriptSha256=4F79B473708B30FBF48B1CEF354612353BE39075086122E3C1EA468088FEDFEE
+RUN: ServerOptionsTests.ps1
+PASS: server transport options, legacy TCP profiles, and KCP worker entry are correct.
+RUN: ServerEntryOwnershipTests.ps1
+PASS: Program is thin and the TCP/Raw/KCP servers exclusively own their selected transports.
+RUN: KcpServerBudgetTests.ps1
+PASS: KCP server enforces and independently counts 64/64/2ms round budgets.
+RUN: KcpServerLifecycleProtocolTests.ps1
+PASS: KCP server immutable history and idempotent Ready/Start barrier are correct.
+RUN: KcpServerProtocolTests.ps1
+PASS: KCP server routing, handshake, and reconnect generation isolation are correct.
+RUN: KcpServerRelayProtocolTests.ps1
+PASS: KCP server decodes business input and re-sends through the receiver Conv.
+RUN: KcpServerResumeProtocolTests.ps1
+PASS: Task 9 Slice 1 server history keys, dispositions, freeze, and capacity semantics are correct.
+PASS: Task 9 Slice 2 server AttemptID, probe/state boundary, idempotence, and heartbeat isolation are correct.
+PASS: Task 9 Slice 3 exact frozen ranges and immutable live-tail boundary are correct.
+PASS: Task 9 Slice 4 safety failures reject both peers with stable wire reasons and distinct internal diagnostics.
+PASS: Task 9 Slice 5 upload coverage, dual completion, client rejection, and tail release are correct.
+PASS: server-only resume protocol coverage completed against the Release assembly.
+RUN: KcpServerTimeoutProtocolTests.ps1
+PASS: KCP server advisory activity, 3000ms timeout, 5000ms grace, and terminal reason are correct.
+RUN: KcpUdpRelayServerLifecycleTests.ps1
+PASS: KCP relay owns one Socket/worker/router and stops cleanly in all lifecycle states.
+RUN: RouteCKcpPendingTests.ps1
+PASS: RouteCKcpSession exposes a read-only non-consuming pending-message seam.
+RUN: KcpUdpLiveProtocolTests.ps1
+PASS: live KCP sockets complete handshake, Start, relay, reconnect generation switch, flood tolerance, and bounded stop.
+SuiteCount=11
+Port8888Free=true
+Gate=PASS

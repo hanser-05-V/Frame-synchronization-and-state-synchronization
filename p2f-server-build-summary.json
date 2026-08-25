@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-08-25T10:40:00.9298758+08:00",
+  "project": "E:\\帧同步_RouteC\\Project\\NetworkServer\\NetworkServer.csproj",
+  "projectSha256": "683DC82485B2126BBCA6E8778131FABAC99F9A357DE6505FDCA92F080CE42AF2",
+  "targetFramework": ".NETFramework,Version=v4.8",
+  "configuration": "Release",
+  "langVersion": "7.3",
+  "optimize": true,
+  "debugSymbols": false,
+  "compiler": "C:\\Unity\\unity2022\\Editor\\Data\\MonoBleedingEdge\\lib\\mono\\4.5\\csc.exe",
+  "compilerVersion": "﻿3.7.0-5.20367.1 (f96dcbb6)\r\n﻿",
+  "referenceDirectory": "C:\\Unity\\unity2022\\Editor\\Data\\MonoBleedingEdge\\lib\\mono\\4.8-api",
+  "projectSourceCount": 70,
+  "compilerSourceCount": 71,
+  "sourceManifestSha256": "B36AC6A0FEF42937395514F6C90C2A86F5001C3919E0E07AFDDD3AC8C0DC875E",
+  "output": "E:\\帧同步_RouteC\\Project\\NetworkServer\\bin\\Release\\net48\\NetworkServer.exe",
+  "bytes": 142848,
+  "sha256": "283770E3ECC5D2F13C3B1E4262563D3AEDE388407B90753F176D237AE14DA7A7",
+  "pdbExists": false,
+  "compilerExitCode": 0
+}

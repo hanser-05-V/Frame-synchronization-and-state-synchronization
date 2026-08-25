@@ -1,0 +1,46 @@
+{
+  "schema": "route-c-tcp-control-v1",
+  "status": "PASS",
+  "transport": "tcp",
+  "faultSemantics": "tcp-recovered-loss-hol/application",
+  "environment": {
+    "machine": "PC-620",
+    "os": "Microsoft Windows NT 10.0.19045.0",
+    "powershell": "7.6.4",
+    "stopwatchFrequency": 10000000
+  },
+  "input": {
+    "framesPerClient": 900,
+    "businessInputBytes": 8,
+    "logicalCadenceMs": 33,
+    "seed": 20260824,
+    "recoveredLossPercent": 2,
+    "lossRecoveryDelayMs": 100
+  },
+  "correctness": {
+    "sentPerClient": [
+      900,
+      900
+    ],
+    "receivedPerClient": [
+      900,
+      900
+    ],
+    "ascending": true,
+    "missingBusinessDeliveries": 0,
+    "duplicateBusinessDeliveries": 0
+  },
+  "relayLatencyMs": {
+    "sampleCount": 1800,
+    "p50": 15.5274,
+    "p95": 62.3081,
+    "p99": 110.0901
+  },
+  "applicationBytes": 14400,
+  "serverProcessCpuMs": 46.875,
+  "cleanup": {
+    "ownedServerProcessId": 25128,
+    "exactProcessStopped": true,
+    "fixedPortReleased": true
+  }
+}

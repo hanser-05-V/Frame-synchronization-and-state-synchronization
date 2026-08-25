@@ -1,0 +1,256 @@
+{
+  "schema": "route-c-kcp-interval-matrix-v1",
+  "status": "PASS",
+  "transport": "kcp-udp",
+  "faultSemantics": "udp-datagram-drop",
+  "environment": {
+    "machine": "PC-620",
+    "os": "Microsoft Windows NT 10.0.19045.0",
+    "powershell": "7.6.4",
+    "stopwatchFrequency": 10000000
+  },
+  "evidenceProvenance": {
+    "generatedAtUtc": "2026-08-25T02:56:32.6022614Z",
+    "serverAssemblySha256": "283770E3ECC5D2F13C3B1E4262563D3AEDE388407B90753F176D237AE14DA7A7",
+    "probeScriptSha256": "2AA08EC2970AE317ABE1DC84B366CEE8E1B08731D8F19564B2CABD57604DE60E",
+    "matrixScriptSha256": "819A1D2CE0AD4C705703F383C82A194677292FB553AB50AD450FF0D4ABCD1CB9"
+  },
+  "conditions": {
+    "framesPerClient": 900,
+    "businessInputBytes": 8,
+    "logicalCadenceMs": 33,
+    "seed": 20260824,
+    "clientToServerDropPercent": 2,
+    "runsPerInterval": 3,
+    "sameMachine": true
+  },
+  "runOrder": [
+    {
+      "intervalMs": 1,
+      "run": 1,
+      "ownedProcessId": 10356,
+      "serverPidFileName": "p2f-kcp-interval-1ms-run1-782723357fe4423d8ff17efcb9887ef2-server.pid",
+      "traceName": "p2f-kcp-interval-1ms-run1.jsonl",
+      "runSummaryName": "p2f-kcp-interval-1ms-run1-summary.json"
+    },
+    {
+      "intervalMs": 5,
+      "run": 1,
+      "ownedProcessId": 39332,
+      "serverPidFileName": "p2f-kcp-interval-5ms-run1-9db922257bd549a1b227bdac6ba87a0d-server.pid",
+      "traceName": "p2f-kcp-interval-5ms-run1.jsonl",
+      "runSummaryName": "p2f-kcp-interval-5ms-run1-summary.json"
+    },
+    {
+      "intervalMs": 10,
+      "run": 1,
+      "ownedProcessId": 17152,
+      "serverPidFileName": "p2f-kcp-interval-10ms-run1-c9ce1e36c4174149a4ae938c43e92b00-server.pid",
+      "traceName": "p2f-kcp-interval-10ms-run1.jsonl",
+      "runSummaryName": "p2f-kcp-interval-10ms-run1-summary.json"
+    },
+    {
+      "intervalMs": 20,
+      "run": 1,
+      "ownedProcessId": 38248,
+      "serverPidFileName": "p2f-kcp-interval-20ms-run1-fcaec5c05fab4345a921a70486fb7680-server.pid",
+      "traceName": "p2f-kcp-interval-20ms-run1.jsonl",
+      "runSummaryName": "p2f-kcp-interval-20ms-run1-summary.json"
+    },
+    {
+      "intervalMs": 20,
+      "run": 2,
+      "ownedProcessId": 19804,
+      "serverPidFileName": "p2f-kcp-interval-20ms-run2-4be1df483d02462da019c6d27332de6d-server.pid",
+      "traceName": "p2f-kcp-interval-20ms-run2.jsonl",
+      "runSummaryName": "p2f-kcp-interval-20ms-run2-summary.json"
+    },
+    {
+      "intervalMs": 10,
+      "run": 2,
+      "ownedProcessId": 1568,
+      "serverPidFileName": "p2f-kcp-interval-10ms-run2-ce13d61fed0b458584dc8990320a8092-server.pid",
+      "traceName": "p2f-kcp-interval-10ms-run2.jsonl",
+      "runSummaryName": "p2f-kcp-interval-10ms-run2-summary.json"
+    },
+    {
+      "intervalMs": 5,
+      "run": 2,
+      "ownedProcessId": 19924,
+      "serverPidFileName": "p2f-kcp-interval-5ms-run2-7543ab5c67444b7280bdaa6fb60f2cd3-server.pid",
+      "traceName": "p2f-kcp-interval-5ms-run2.jsonl",
+      "runSummaryName": "p2f-kcp-interval-5ms-run2-summary.json"
+    },
+    {
+      "intervalMs": 1,
+      "run": 2,
+      "ownedProcessId": 25944,
+      "serverPidFileName": "p2f-kcp-interval-1ms-run2-6c327ce46acd49cdacd49cb9f93ed6b2-server.pid",
+      "traceName": "p2f-kcp-interval-1ms-run2.jsonl",
+      "runSummaryName": "p2f-kcp-interval-1ms-run2-summary.json"
+    },
+    {
+      "intervalMs": 1,
+      "run": 3,
+      "ownedProcessId": 37612,
+      "serverPidFileName": "p2f-kcp-interval-1ms-run3-738024d952e04b1a93df59071f7afcee-server.pid",
+      "traceName": "p2f-kcp-interval-1ms-run3.jsonl",
+      "runSummaryName": "p2f-kcp-interval-1ms-run3-summary.json"
+    },
+    {
+      "intervalMs": 5,
+      "run": 3,
+      "ownedProcessId": 5956,
+      "serverPidFileName": "p2f-kcp-interval-5ms-run3-307afec47fe344e486cb3b4162053508-server.pid",
+      "traceName": "p2f-kcp-interval-5ms-run3.jsonl",
+      "runSummaryName": "p2f-kcp-interval-5ms-run3-summary.json"
+    },
+    {
+      "intervalMs": 10,
+      "run": 3,
+      "ownedProcessId": 39028,
+      "serverPidFileName": "p2f-kcp-interval-10ms-run3-f34dc6975b97440298cd572ca1078d27-server.pid",
+      "traceName": "p2f-kcp-interval-10ms-run3.jsonl",
+      "runSummaryName": "p2f-kcp-interval-10ms-run3-summary.json"
+    },
+    {
+      "intervalMs": 20,
+      "run": 3,
+      "ownedProcessId": 33508,
+      "serverPidFileName": "p2f-kcp-interval-20ms-run3-40650fb3cd3c4fb6a8d951eb75090911-server.pid",
+      "traceName": "p2f-kcp-interval-20ms-run3.jsonl",
+      "runSummaryName": "p2f-kcp-interval-20ms-run3-summary.json"
+    }
+  ],
+  "candidates": [
+    {
+      "intervalMs": 1,
+      "requestedIntervalMs": 1,
+      "coreEffectiveIntervalMs": 1,
+      "passedRuns": 3,
+      "correctnessPassed": true,
+      "relayLatencyMs": {
+        "p50Median": 15.8453,
+        "p95Median": 17.6638,
+        "p99Median": 55.9169
+      },
+      "totalDatagramsMedian": 4904.0,
+      "totalBytesMedian": 339160.0,
+      "kcpOutputDatagramsMedian": 4963.0,
+      "kcpOutputPayloadBytesMedian": 204072.0,
+      "kcpUpdateCallsMedian": 10226.0,
+      "retransmittedSegmentsMedian": 59.0,
+      "waitSndHighWaterMaximum": 4,
+      "workerCpuPercentMedian": 2.562388,
+      "actualUpdateGapMs": {
+        "p50Median": 15.2092,
+        "p95Median": 16.0694,
+        "p99Median": 16.2032
+      },
+      "wakeupErrorMs": {
+        "p50Median": 14.1224,
+        "p95Median": 15.0073,
+        "p99Median": 15.1325,
+        "maximumAcrossRuns": 31.4603
+      },
+      "sub10msUpdateObservedInEverySessionEveryRun": true
+    },
+    {
+      "intervalMs": 5,
+      "requestedIntervalMs": 5,
+      "coreEffectiveIntervalMs": 5,
+      "passedRuns": 3,
+      "correctnessPassed": true,
+      "relayLatencyMs": {
+        "p50Median": 15.9889,
+        "p95Median": 30.744,
+        "p99Median": 48.5549
+      },
+      "totalDatagramsMedian": 3978.0,
+      "totalBytesMedian": 314144.0,
+      "kcpOutputDatagramsMedian": 4028.0,
+      "kcpOutputPayloadBytesMedian": 205024.0,
+      "kcpUpdateCallsMedian": 8202.0,
+      "retransmittedSegmentsMedian": 72.0,
+      "waitSndHighWaterMaximum": 3,
+      "workerCpuPercentMedian": 1.770083,
+      "actualUpdateGapMs": {
+        "p50Median": 15.5362,
+        "p95Median": 16.1037,
+        "p99Median": 16.2333
+      },
+      "wakeupErrorMs": {
+        "p50Median": 10.5332,
+        "p95Median": 11.3921,
+        "p99Median": 11.8903,
+        "maximumAcrossRuns": 30.7368
+      },
+      "sub10msUpdateObservedInEverySessionEveryRun": true
+    },
+    {
+      "intervalMs": 10,
+      "requestedIntervalMs": 10,
+      "coreEffectiveIntervalMs": 10,
+      "passedRuns": 3,
+      "correctnessPassed": true,
+      "relayLatencyMs": {
+        "p50Median": 15.9993,
+        "p95Median": 30.8883,
+        "p99Median": 53.3266
+      },
+      "totalDatagramsMedian": 3993.0,
+      "totalBytesMedian": 314532.0,
+      "kcpOutputDatagramsMedian": 4039.0,
+      "kcpOutputPayloadBytesMedian": 204904.0,
+      "kcpUpdateCallsMedian": 7817.0,
+      "retransmittedSegmentsMedian": 73.0,
+      "waitSndHighWaterMaximum": 3,
+      "workerCpuPercentMedian": 2.680308,
+      "actualUpdateGapMs": {
+        "p50Median": 15.6044,
+        "p95Median": 16.1098,
+        "p99Median": 16.2601
+      },
+      "wakeupErrorMs": {
+        "p50Median": 6.7432,
+        "p95Median": 11.9634,
+        "p99Median": 12.7478,
+        "maximumAcrossRuns": 27.1722
+      },
+      "sub10msUpdateObservedInEverySessionEveryRun": true
+    },
+    {
+      "intervalMs": 20,
+      "requestedIntervalMs": 20,
+      "coreEffectiveIntervalMs": 20,
+      "passedRuns": 3,
+      "correctnessPassed": true,
+      "relayLatencyMs": {
+        "p50Median": 16.375,
+        "p95Median": 47.1639,
+        "p99Median": 77.1968
+      },
+      "totalDatagramsMedian": 4093.0,
+      "totalBytesMedian": 318188.0,
+      "kcpOutputDatagramsMedian": 4140.0,
+      "kcpOutputPayloadBytesMedian": 205864.0,
+      "kcpUpdateCallsMedian": 11975.0,
+      "retransmittedSegmentsMedian": 89.0,
+      "waitSndHighWaterMaximum": 5,
+      "workerCpuPercentMedian": 2.262984,
+      "actualUpdateGapMs": {
+        "p50Median": 11.8578,
+        "p95Median": 31.2732,
+        "p99Median": 31.9183
+      },
+      "wakeupErrorMs": {
+        "p50Median": 0.0113,
+        "p95Median": 13.7263,
+        "p99Median": 15.07,
+        "maximumAcrossRuns": 31.2717
+      },
+      "sub10msUpdateObservedInEverySessionEveryRun": true
+    }
+  ],
+  "rawRunCount": 12
+}

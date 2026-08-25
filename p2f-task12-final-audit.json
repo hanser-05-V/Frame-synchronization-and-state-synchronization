@@ -1,0 +1,58 @@
+{
+  "schema": "route-c-p2f-task12-final-audit-v1",
+  "generatedAt": "2026-08-25T11:19:05.0707358+08:00",
+  "branch": "delivery/route-c",
+  "head": "2bbb1193b81893b66ded937f52b8ad02197b43a4",
+  "result": "PASS_AUTOMATION_PENDING_MANUAL_ACCEPTANCE",
+  "releaseServer": {
+    "bytes": 142848,
+    "sha256": "283770E3ECC5D2F13C3B1E4262563D3AEDE388407B90753F176D237AE14DA7A7",
+    "matchesVersionedExecutable": true
+  },
+  "checks": {
+    "focusedUnity": "257/257, 0 failed, 0 skipped",
+    "focusedUnityEvidence": "TestResults-p2f-focused.xml",
+    "focusedUnityFreshSource": "TestResults-p2f-focused-green.xml",
+    "focusedUnityEvidenceSha256": "92A8BBCA445B3B555D1924CA39DE1C171905E0AF751CFC6A9E179A0EF8C35B31",
+    "focusedUnityEvidenceByteIdentical": true,
+    "fullUnity": "682/682, 0 failed, 0 skipped",
+    "playerBuild": true,
+    "releaseBuild": true,
+    "preCopyGate": "19/19",
+    "kcpProtocolSuites": "11/11",
+    "liveClean": true,
+    "liveReconnect": true,
+    "liveGraceExpired": true,
+    "liveHistoryExpired": true,
+    "intervalMatrix": "12/12",
+    "tcpControl": true,
+    "versionedServerSmoke": true,
+    "staleP2FDocClaims": 0,
+    "secretJsonFieldHits": 0,
+    "scopedDiffCheckExitCode": 0,
+    "networkServerProcesses": 0,
+    "tcpPort8888Owners": 0,
+    "udpPort8888Owners": 0,
+    "mainUnityPid16196Alive": true
+  },
+  "knownPreExistingOutOfScopeException": {
+    "path": "Project/Frame Synchronization/Assets/Scenes/SampleScene.unity",
+    "lastWriteTime": "2026-08-24T14:21:29.7994184+08:00",
+    "fullWorktreeDiffCheckExitCode": 2,
+    "lines": [1665, 1666],
+    "reason": "pre-existing trailing whitespace; Task 12 excludes scene changes"
+  },
+  "failedChecks": [],
+  "independentReadOnlyReview": {
+    "evidence": "p2f-task12-independent-review.txt",
+    "critical": 0,
+    "important": 0,
+    "minor": 2
+  },
+  "manualAcceptanceRequired": true,
+  "manualAcceptanceBoundary": {
+    "unityTwoClient": "normal-session visuals, smoothness, feel, and gameplay transitions",
+    "liveSocketProbe": "endpoint-change reconnect, grace/history rejection, and abnormal termination",
+    "unityVisualReconnect": "not currently executable; requires a separately authorized production injection seam"
+  }
+}

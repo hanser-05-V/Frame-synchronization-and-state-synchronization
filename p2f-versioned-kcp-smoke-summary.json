@@ -1,0 +1,187 @@
+{
+  "schema": "route-c-kcp-live-socket-v1",
+  "scenario": "clean",
+  "status": "PASS",
+  "transport": "kcp-udp",
+  "faultSemantics": "udp-datagram-drop",
+  "environment": {
+    "machine": "PC-620",
+    "os": "Microsoft Windows NT 10.0.19045.0",
+    "powershell": "7.6.4",
+    "stopwatchFrequency": 10000000
+  },
+  "evidenceProvenance": {
+    "startedAtUtc": "2026-08-25T03:01:05.7681794Z",
+    "finishedAtUtc": "2026-08-25T03:01:36.7327064Z",
+    "serverLaunchMode": "networkserver-exe-cli",
+    "serverProcessId": 40556,
+    "serverAssemblySha256": "283770E3ECC5D2F13C3B1E4262563D3AEDE388407B90753F176D237AE14DA7A7",
+    "probeScriptSha256": "2AA08EC2970AE317ABE1DC84B366CEE8E1B08731D8F19564B2CABD57604DE60E"
+  },
+  "input": {
+    "framesPerClient": 900,
+    "businessInputBytes": 8,
+    "logicalCadenceMs": 33,
+    "seed": 20260824,
+    "clientToServerDropPercent": 0,
+    "serverPort": 8888
+  },
+  "correctness": {
+    "players": [
+      0,
+      1
+    ],
+    "sentPerClient": [
+      900,
+      900
+    ],
+    "receivedPerClient": [
+      900,
+      900
+    ],
+    "ascending": true,
+    "missingBusinessDeliveries": 0,
+    "duplicateBusinessDeliveries": 0
+  },
+  "relayLatencyMs": {
+    "sampleCount": 1800,
+    "p50": 15.9653,
+    "p95": 16.9603,
+    "p99": 31.2752
+  },
+  "transportMetrics": {
+    "totalDatagrams": 3936,
+    "totalBytes": 311920,
+    "udpWireDatagrams": 3936,
+    "udpWireBytes": 311920,
+    "kcpOutputDatagrams": 3936,
+    "kcpOutputPayloadBytes": 201712,
+    "kcpUpdateCalls": 7720,
+    "retransmittedSegments": 2,
+    "intentionallyDroppedDatagrams": 0,
+    "waitSndHighWater": 2
+  },
+  "kcpUpdate": {
+    "requestedIntervalMs": 10,
+    "coreEffectiveIntervalMs": 10,
+    "checkDeltaValuesMs": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10
+    ],
+    "sessions": [
+      {
+        "role": "server",
+        "playerIndex": 0,
+        "sampleCount": 1942,
+        "sub10msCount": 9,
+        "sub10msFraction": 0.0046344,
+        "actualGapMs": {
+          "p50": 15.6166,
+          "p95": 16.1022,
+          "p99": 16.1755,
+          "maximum": 21.0311
+        },
+        "wakeupErrorMs": {
+          "p50": 6.2334,
+          "p95": 11.9724,
+          "p99": 12.1373,
+          "maximum": 14.9298
+        }
+      },
+      {
+        "role": "server",
+        "playerIndex": 1,
+        "sampleCount": 1941,
+        "sub10msCount": 8,
+        "sub10msFraction": 0.00412159,
+        "actualGapMs": {
+          "p50": 15.6166,
+          "p95": 16.1006,
+          "p99": 16.1744,
+          "maximum": 21.086
+        },
+        "wakeupErrorMs": {
+          "p50": 6.2334,
+          "p95": 11.9724,
+          "p99": 12.1373,
+          "maximum": 14.086
+        }
+      },
+      {
+        "role": "client",
+        "playerIndex": 1,
+        "sampleCount": 1916,
+        "sub10msCount": 7,
+        "sub10msFraction": 0.00365344,
+        "actualGapMs": {
+          "p50": 15.6218,
+          "p95": 16.1636,
+          "p99": 16.3215,
+          "maximum": 29.6025
+        },
+        "wakeupErrorMs": {
+          "p50": 6.9018,
+          "p95": 11.9004,
+          "p99": 12.698,
+          "maximum": 18.5804
+        }
+      },
+      {
+        "role": "client",
+        "playerIndex": 0,
+        "sampleCount": 1917,
+        "sub10msCount": 8,
+        "sub10msFraction": 0.00417319,
+        "actualGapMs": {
+          "p50": 15.6144,
+          "p95": 16.1633,
+          "p99": 16.3154,
+          "maximum": 29.6036
+        },
+        "wakeupErrorMs": {
+          "p50": 6.8874,
+          "p95": 11.9387,
+          "p99": 12.6848,
+          "maximum": 18.5996
+        }
+      }
+    ],
+    "actualGapMs": {
+      "sampleCount": 7716,
+      "p50": 15.6166,
+      "p95": 16.1217,
+      "p99": 16.2566,
+      "maximum": 29.6036,
+      "sub10msObserved": true
+    },
+    "wakeupErrorMs": {
+      "sampleCount": 7716,
+      "p50": 6.8611,
+      "p95": 11.9643,
+      "p99": 12.5492,
+      "maximum": 18.5996
+    }
+  },
+  "workerCpu": {
+    "serverMeasurementAvailable": true,
+    "serverCpuMs": 93.75,
+    "clientCpuMs": 484.375,
+    "totalCpuMs": 578.125,
+    "aggregatePercentOfOneCore": 1.868889
+  },
+  "cleanup": {
+    "serverStopped": true,
+    "exactOwnedServerProcessStopped": true,
+    "clientWorkersCompleted": 2,
+    "portReleased": true,
+    "wallDurationMs": 30934.153
+  }
+}

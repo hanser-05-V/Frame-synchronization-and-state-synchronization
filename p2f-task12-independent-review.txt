@@ -1,0 +1,26 @@
+Route C P2-F Task 12 independent read-only review
+Date: 2026-08-25
+Scope: Task 12 scripts, four delivery documents, fresh evidence, Release/versioned server, and acceptance boundary
+
+Critical: 0
+Important: 0
+Minor: 2
+
+Minor 1:
+Project/NetworkServer/ServerEntryOwnershipTests.ps1 uses whole-file regex counts around lines 90-122. The current source matches and the test passes, but a future rearrangement or dead code could produce a false green. This is non-blocking for Task 12.
+
+Minor 2:
+Full-worktree git diff --check finds pre-existing trailing whitespace in Project/Frame Synchronization/Assets/Scenes/SampleScene.unity lines 1665-1666. The file predates Task 12, scene changes are explicitly out of scope, and the Task 12 scoped diff check passes.
+
+Verified facts:
+- focused Unity: 257/257, 0 failed, 0 skipped
+- full Unity: 682/682, 0 failed, 0 skipped
+- TestResults-p2f-focused.xml is byte-identical to the fresh TestResults-p2f-focused-green.xml
+- Release and versioned NetworkServer.exe: 142848 bytes, SHA-256 283770E3ECC5D2F13C3B1E4262563D3AEDE388407B90753F176D237AE14DA7A7
+- interval matrix: 12/12 PASS
+- reconnect, grace-expired, and history-expired: PASS
+- TCP and KCP fault semantics remain distinct
+- delivery documents distinguish code defaults, SampleScene's serialized RawUdp value, live Socket probes, and Unity normal-session manual acceptance
+- no secret evidence fields, false manual-acceptance claim, or non-executable delivery command found
+
+Reviewer constraints observed: read-only; no service launch; no Unity control; no file modification.

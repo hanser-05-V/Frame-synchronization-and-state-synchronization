@@ -1,0 +1,21 @@
+{
+  "schema": "route-c-kcp-live-socket-v1",
+  "scenario": "reconnect",
+  "status": "PASS",
+  "transport": "kcp-udp",
+  "endpointChanged": true,
+  "generationBefore": 1,
+  "generationAfter": 2,
+  "recoverableGapFrames": 8,
+  "replayedFrames": 8,
+  "resumeAccepted": true,
+  "resumeCompleteObservedByPeers": 2,
+  "finalStates": [
+    "Running",
+    "Running"
+  ],
+  "cleanup": {
+    "serverStopped": true,
+    "portReleased": true
+  }
+}

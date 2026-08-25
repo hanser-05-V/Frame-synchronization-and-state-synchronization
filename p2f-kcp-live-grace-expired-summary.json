@@ -1,0 +1,18 @@
+{
+  "schema": "route-c-kcp-live-socket-v1",
+  "scenario": "grace-expired",
+  "status": "PASS",
+  "transport": "kcp-udp",
+  "endpointChanged": false,
+  "rejectedPeers": 2,
+  "rejectionReason": "ResumeGraceExpired",
+  "diagnosticFailureKind": "GraceExpired",
+  "finalStates": [
+    "Terminated",
+    "Terminated"
+  ],
+  "cleanup": {
+    "serverStopped": true,
+    "portReleased": true
+  }
+}

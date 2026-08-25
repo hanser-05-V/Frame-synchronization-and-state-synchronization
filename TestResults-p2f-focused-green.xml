@@ -1,0 +1,927 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="257" result="Passed" total="257" passed="257" failed="0" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-08-25 02:32:54Z" end-time="2026-08-25 02:32:57Z" duration="3.2859202">
+  <test-suite type="TestSuite" id="1789" name="Frame Synchronization" fullname="Frame Synchronization" runstate="Runnable" testcasecount="682" result="Passed" start-time="2026-08-25 02:32:54Z" end-time="2026-08-25 02:32:57Z" duration="3.285920" total="257" passed="257" failed="0" inconclusive="0" skipped="0" asserts="0">
+    <properties />
+    <test-suite type="Assembly" id="2570" name="FrameSyncDemo.Tests.EditMode.dll" fullname="E:/帧同步_RouteC/.task12-isolation/Frame Synchronization/Library/ScriptAssemblies/FrameSyncDemo.Tests.EditMode.dll" runstate="Runnable" testcasecount="682" result="Passed" start-time="2026-08-25 02:32:54Z" end-time="2026-08-25 02:32:57Z" duration="3.271784" total="257" passed="257" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="23000" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="EditMode" />
+      </properties>
+      <test-suite type="TestSuite" id="2571" name="FrameSyncDemo" fullname="FrameSyncDemo" runstate="Runnable" testcasecount="682" result="Passed" start-time="2026-08-25 02:32:54Z" end-time="2026-08-25 02:32:57Z" duration="3.264972" total="257" passed="257" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-suite type="TestSuite" id="2572" name="Tests" fullname="FrameSyncDemo.Tests" runstate="Runnable" testcasecount="682" result="Passed" start-time="2026-08-25 02:32:54Z" end-time="2026-08-25 02:32:57Z" duration="3.261393" total="257" passed="257" failed="0" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <test-suite type="TestFixture" id="1857" name="FrameInputLedgerReplayTests" fullname="FrameSyncDemo.Tests.FrameInputLedgerReplayTests" classname="FrameSyncDemo.Tests.FrameInputLedgerReplayTests" runstate="Runnable" testcasecount="17" result="Passed" start-time="2026-08-25 02:32:54Z" end-time="2026-08-25 02:32:54Z" duration="0.084292" total="17" passed="17" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1861" name="CommitReplay_PlanCapturesOnlyMismatchesInsideItsFrameRange" fullname="FrameSyncDemo.Tests.FrameInputLedgerReplayTests.CommitReplay_PlanCapturesOnlyMismatchesInsideItsFrameRange" methodname="CommitReplay_PlanCapturesOnlyMismatchesInsideItsFrameRange" classname="FrameSyncDemo.Tests.FrameInputLedgerReplayTests" runstate="Runnable" seed="1776219506" result="Passed" start-time="2026-08-25 02:32:54Z" end-time="2026-08-25 02:32:54Z" duration="0.022181" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1863" name="CommitReplay_PreflightFailureIsAtomicAndReleasesCurrentPlan" fullname="FrameSyncDemo.Tests.FrameInputLedgerReplayTests.CommitReplay_PreflightFailureIsAtomicAndReleasesCurrentPlan" methodname="CommitReplay_PreflightFailureIsAtomicAndReleasesCurrentPlan" classname="FrameSyncDemo.Tests.FrameInputLedgerReplayTests" runstate="Runnable" seed="105857642" result="Passed" start-time="2026-08-25 02:32:54Z" end-time="2026-08-25 02:32:54Z" duration="0.002646" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1859" name="CommitReplay_ReplacesOnlyPlanPredictionsAndClearsOnlyCapturedGenerationMismatches" fullname="FrameSyncDemo.Tests.FrameInputLedgerReplayTests.CommitReplay_ReplacesOnlyPlanPredictionsAndClearsOnlyCapturedGenerationMismatches" methodname="CommitReplay_ReplacesOnlyPlanPredictionsAndClearsOnlyCapturedGenerationMismatches" classname="FrameSyncDemo.Tests.FrameInputLedgerReplayTests" runstate="Runnable" seed="1268657003" result="Passed" start-time="2026-08-25 02:32:54Z" end-time="2026-08-25 02:32:54Z" duration="0.000653" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1860" name="CommitReplay_StalePlanDoesNotChangeSlotsOrMismatches" fullname="FrameSyncDemo.Tests.FrameInputLedgerReplayTests.CommitReplay_StalePlanDoesNotChangeSlotsOrMismatches" methodname="CommitReplay_StalePlanDoesNotChangeSlotsOrMismatches" classname="FrameSyncDemo.Tests.FrameInputLedgerReplayTests" runstate="Runnable" seed="1703901723" result="Passed" start-time="2026-08-25 02:32:54Z" end-time="2026-08-25 02:32:54Z" duration="0.000286" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1862" name="EarliestMismatch_FailedReplayAttemptLeavesItPendingUntilCommitExposesNext" fullname="FrameSyncDemo.Tests.FrameInputLedgerReplayTests.EarliestMismatch_FailedReplayAttemptLeavesItPendingUntilCommitExposesNext" methodname="EarliestMismatch_FailedReplayAttemptLeavesItPendingUntilCommitExposesNext" classname="FrameSyncDemo.Tests.FrameInputLedgerReplayTests" runstate="Runnable" seed="752408314" result="Passed" start-time="2026-08-25 02:32:54Z" end-time="2026-08-25 02:32:54Z" duration="0.000308" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1872" name="HistoryWindow_AfterSafePruneAllowsFirstFrameBeyondCapacityAndMakesOldFramesUnavailable" fullname="FrameSyncDemo.Tests.FrameInputLedgerReplayTests.HistoryWindow_AfterSafePruneAllowsFirstFrameBeyondCapacityAndMakesOldFramesUnavailable" methodname="HistoryWindow_AfterSafePruneAllowsFirstFrameBeyondCapacityAndMakesOldFramesUnavailable" classname="FrameSyncDemo.Tests.FrameInputLedgerReplayTests" runstate="Runnable" seed="418266936" result="Passed" start-time="2026-08-25 02:32:54Z" end-time="2026-08-25 02:32:54Z" duration="0.003097" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1871" name="HistoryWindow_DoesNotSilentlyOverwritePendingFrames" fullname="FrameSyncDemo.Tests.FrameInputLedgerReplayTests.HistoryWindow_DoesNotSilentlyOverwritePendingFrames" methodname="HistoryWindow_DoesNotSilentlyOverwritePendingFrames" classname="FrameSyncDemo.Tests.FrameInputLedgerReplayTests" runstate="Runnable" seed="391001116" result="Passed" start-time="2026-08-25 02:32:54Z" end-time="2026-08-25 02:32:54Z" duration="0.000481" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1873" name="HistoryWindow_RepeatedConfirmedPruneSupportsMoreThanCapacityWithoutOverwriting" fullname="FrameSyncDemo.Tests.FrameInputLedgerReplayTests.HistoryWindow_RepeatedConfirmedPruneSupportsMoreThanCapacityWithoutOverwriting" methodname="HistoryWindow_RepeatedConfirmedPruneSupportsMoreThanCapacityWithoutOverwriting" classname="FrameSyncDemo.Tests.FrameInputLedgerReplayTests" runstate="Runnable" seed="2084795701" result="Passed" start-time="2026-08-25 02:32:54Z" end-time="2026-08-25 02:32:54Z" duration="0.008878" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1868" name="ReplayInputPlan_IsExternallyImmutableAndUncommittedPlanDoesNotAlterLiveSlots" fullname="FrameSyncDemo.Tests.FrameInputLedgerReplayTests.ReplayInputPlan_IsExternallyImmutableAndUncommittedPlanDoesNotAlterLiveSlots" methodname="ReplayInputPlan_IsExternallyImmutableAndUncommittedPlanDoesNotAlterLiveSlots" classname="FrameSyncDemo.Tests.FrameInputLedgerReplayTests" runstate="Runnable" seed="1203439000" result="Passed" start-time="2026-08-25 02:32:54Z" end-time="2026-08-25 02:32:54Z" duration="0.000624" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1865" name="TryBuildReplayPlan_HistoryAndCapacityFailuresDoNotMutateLedger" fullname="FrameSyncDemo.Tests.FrameInputLedgerReplayTests.TryBuildReplayPlan_HistoryAndCapacityFailuresDoNotMutateLedger" methodname="TryBuildReplayPlan_HistoryAndCapacityFailuresDoNotMutateLedger" classname="FrameSyncDemo.Tests.FrameInputLedgerReplayTests" runstate="Runnable" seed="1572996136" result="Passed" start-time="2026-08-25 02:32:54Z" end-time="2026-08-25 02:32:54Z" duration="0.000249" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1867" name="TryBuildReplayPlan_MissingOnePlayerInExistingFrameLeavesLiveSlotsUntouched" fullname="FrameSyncDemo.Tests.FrameInputLedgerReplayTests.TryBuildReplayPlan_MissingOnePlayerInExistingFrameLeavesLiveSlotsUntouched" methodname="TryBuildReplayPlan_MissingOnePlayerInExistingFrameLeavesLiveSlotsUntouched" classname="FrameSyncDemo.Tests.FrameInputLedgerReplayTests" runstate="Runnable" seed="276426488" result="Passed" start-time="2026-08-25 02:32:54Z" end-time="2026-08-25 02:32:54Z" duration="0.000249" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1866" name="TryBuildReplayPlan_MissingPlayerOrFrameLeavesLiveSlotsAndMismatchesUntouched" fullname="FrameSyncDemo.Tests.FrameInputLedgerReplayTests.TryBuildReplayPlan_MissingPlayerOrFrameLeavesLiveSlotsAndMismatchesUntouched" methodname="TryBuildReplayPlan_MissingPlayerOrFrameLeavesLiveSlotsAndMismatchesUntouched" classname="FrameSyncDemo.Tests.FrameInputLedgerReplayTests" runstate="Runnable" seed="2039998710" result="Passed" start-time="2026-08-25 02:32:54Z" end-time="2026-08-25 02:32:54Z" duration="0.000254" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1858" name="TryBuildReplayPlan_RecomputesPredictedSuffixFromPrecedingActualWithoutMutatingLiveSlots" fullname="FrameSyncDemo.Tests.FrameInputLedgerReplayTests.TryBuildReplayPlan_RecomputesPredictedSuffixFromPrecedingActualWithoutMutatingLiveSlots" methodname="TryBuildReplayPlan_RecomputesPredictedSuffixFromPrecedingActualWithoutMutatingLiveSlots" classname="FrameSyncDemo.Tests.FrameInputLedgerReplayTests" runstate="Runnable" seed="584389571" result="Passed" start-time="2026-08-25 02:32:54Z" end-time="2026-08-25 02:32:54Z" duration="0.000453" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1864" name="TryBuildReplayPlan_SingleFrameAtIntMaxValue_DoesNotWrapFrameIteration" fullname="FrameSyncDemo.Tests.FrameInputLedgerReplayTests.TryBuildReplayPlan_SingleFrameAtIntMaxValue_DoesNotWrapFrameIteration" methodname="TryBuildReplayPlan_SingleFrameAtIntMaxValue_DoesNotWrapFrameIteration" classname="FrameSyncDemo.Tests.FrameInputLedgerReplayTests" runstate="Runnable" seed="1668588690" result="Passed" start-time="2026-08-25 02:32:54Z" end-time="2026-08-25 02:32:54Z" duration="0.000328" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1869" name="TryPruneBefore_PreservesSeedsAndRejectsUnsafeFloors" fullname="FrameSyncDemo.Tests.FrameInputLedgerReplayTests.TryPruneBefore_PreservesSeedsAndRejectsUnsafeFloors" methodname="TryPruneBefore_PreservesSeedsAndRejectsUnsafeFloors" classname="FrameSyncDemo.Tests.FrameInputLedgerReplayTests" runstate="Runnable" seed="205571135" result="Passed" start-time="2026-08-25 02:32:54Z" end-time="2026-08-25 02:32:54Z" duration="0.000316" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1870" name="TryPruneBefore_RejectsInFlightIntegrityAndUnconfirmedFrames" fullname="FrameSyncDemo.Tests.FrameInputLedgerReplayTests.TryPruneBefore_RejectsInFlightIntegrityAndUnconfirmedFrames" methodname="TryPruneBefore_RejectsInFlightIntegrityAndUnconfirmedFrames" classname="FrameSyncDemo.Tests.FrameInputLedgerReplayTests" runstate="Runnable" seed="1687327333" result="Passed" start-time="2026-08-25 02:32:54Z" end-time="2026-08-25 02:32:54Z" duration="0.000270" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1874" name="TryPruneBefore_SeedIgnoresBoundaryPredictedValueAndUsesLatestEarlierActual" fullname="FrameSyncDemo.Tests.FrameInputLedgerReplayTests.TryPruneBefore_SeedIgnoresBoundaryPredictedValueAndUsesLatestEarlierActual" methodname="TryPruneBefore_SeedIgnoresBoundaryPredictedValueAndUsesLatestEarlierActual" classname="FrameSyncDemo.Tests.FrameInputLedgerReplayTests" runstate="Runnable" seed="382412297" result="Passed" start-time="2026-08-25 02:32:54Z" end-time="2026-08-25 02:32:54Z" duration="0.000240" asserts="0">
+              <properties />
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1875" name="FrameInputLedgerTests" fullname="FrameSyncDemo.Tests.FrameInputLedgerTests" classname="FrameSyncDemo.Tests.FrameInputLedgerTests" runstate="Runnable" testcasecount="11" result="Passed" start-time="2026-08-25 02:32:54Z" end-time="2026-08-25 02:32:54Z" duration="0.023533" total="11" passed="11" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1884" name="ConflictingConfirmedInput_FaultPreventsMismatchConsumptionAndFurtherPublication" fullname="FrameSyncDemo.Tests.FrameInputLedgerTests.ConflictingConfirmedInput_FaultPreventsMismatchConsumptionAndFurtherPublication" methodname="ConflictingConfirmedInput_FaultPreventsMismatchConsumptionAndFurtherPublication" classname="FrameSyncDemo.Tests.FrameInputLedgerTests" runstate="Runnable" seed="828567679" result="Passed" start-time="2026-08-25 02:32:54Z" end-time="2026-08-25 02:32:54Z" duration="0.001341" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1886" name="InvalidArgumentsAndRepeatedResolve_HaveStableResultsWithoutArrayAlias" fullname="FrameSyncDemo.Tests.FrameInputLedgerTests.InvalidArgumentsAndRepeatedResolve_HaveStableResultsWithoutArrayAlias" methodname="InvalidArgumentsAndRepeatedResolve_HaveStableResultsWithoutArrayAlias" classname="FrameSyncDemo.Tests.FrameInputLedgerTests" runstate="Runnable" seed="416949150" result="Passed" start-time="2026-08-25 02:32:54Z" end-time="2026-08-25 02:32:54Z" duration="0.000773" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1879" name="RecordActual_AfterPrediction_ReportsMatchOrMismatchAndPreservesEarliestOrdering" fullname="FrameSyncDemo.Tests.FrameInputLedgerTests.RecordActual_AfterPrediction_ReportsMatchOrMismatchAndPreservesEarliestOrdering" methodname="RecordActual_AfterPrediction_ReportsMatchOrMismatchAndPreservesEarliestOrdering" classname="FrameSyncDemo.Tests.FrameInputLedgerTests" runstate="Runnable" seed="1275825980" result="Passed" start-time="2026-08-25 02:32:54Z" end-time="2026-08-25 02:32:54Z" duration="0.000515" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1882" name="RecordActual_ConflictingDuplicate_LatchesFaultAndKeepsFirstValue" fullname="FrameSyncDemo.Tests.FrameInputLedgerTests.RecordActual_ConflictingDuplicate_LatchesFaultAndKeepsFirstValue" methodname="RecordActual_ConflictingDuplicate_LatchesFaultAndKeepsFirstValue" classname="FrameSyncDemo.Tests.FrameInputLedgerTests" runstate="Runnable" seed="117566642" result="Passed" start-time="2026-08-25 02:32:54Z" end-time="2026-08-25 02:32:54Z" duration="0.000366" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1877" name="RecordActual_FillingEarlierGaps_AdvancesConfirmationThroughContiguousPrefix" fullname="FrameSyncDemo.Tests.FrameInputLedgerTests.RecordActual_FillingEarlierGaps_AdvancesConfirmationThroughContiguousPrefix" methodname="RecordActual_FillingEarlierGaps_AdvancesConfirmationThroughContiguousPrefix" classname="FrameSyncDemo.Tests.FrameInputLedgerTests" runstate="Runnable" seed="1107306091" result="Passed" start-time="2026-08-25 02:32:54Z" end-time="2026-08-25 02:32:54Z" duration="0.000317" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1876" name="RecordActual_RequiresBothPlayersBeforeConfirmingFrameZero" fullname="FrameSyncDemo.Tests.FrameInputLedgerTests.RecordActual_RequiresBothPlayersBeforeConfirmingFrameZero" methodname="RecordActual_RequiresBothPlayersBeforeConfirmingFrameZero" classname="FrameSyncDemo.Tests.FrameInputLedgerTests" runstate="Runnable" seed="1547235878" result="Passed" start-time="2026-08-25 02:32:54Z" end-time="2026-08-25 02:32:54Z" duration="0.000214" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1883" name="RecordActual_SameValueDuplicate_IsIdempotentAndDoesNotCreateMismatch" fullname="FrameSyncDemo.Tests.FrameInputLedgerTests.RecordActual_SameValueDuplicate_IsIdempotentAndDoesNotCreateMismatch" methodname="RecordActual_SameValueDuplicate_IsIdempotentAndDoesNotCreateMismatch" classname="FrameSyncDemo.Tests.FrameInputLedgerTests" runstate="Runnable" seed="1543300815" result="Passed" start-time="2026-08-25 02:32:54Z" end-time="2026-08-25 02:32:54Z" duration="0.000295" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1880" name="ResolveForSimulation_FrameBeyondRetainedCapacity_ThrowsWithoutCreatingSlotOrAdvancingObservation" fullname="FrameSyncDemo.Tests.FrameInputLedgerTests.ResolveForSimulation_FrameBeyondRetainedCapacity_ThrowsWithoutCreatingSlotOrAdvancingObservation" methodname="ResolveForSimulation_FrameBeyondRetainedCapacity_ThrowsWithoutCreatingSlotOrAdvancingObservation" classname="FrameSyncDemo.Tests.FrameInputLedgerTests" runstate="Runnable" seed="928509582" result="Passed" start-time="2026-08-25 02:32:54Z" end-time="2026-08-25 02:32:54Z" duration="0.000287" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1878" name="ResolveForSimulation_MissingAfterActual_PredictsSustainedInputAndClearsTransientBits" fullname="FrameSyncDemo.Tests.FrameInputLedgerTests.ResolveForSimulation_MissingAfterActual_PredictsSustainedInputAndClearsTransientBits" methodname="ResolveForSimulation_MissingAfterActual_PredictsSustainedInputAndClearsTransientBits" classname="FrameSyncDemo.Tests.FrameInputLedgerTests" runstate="Runnable" seed="828819293" result="Passed" start-time="2026-08-25 02:32:54Z" end-time="2026-08-25 02:32:54Z" duration="0.000337" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1881" name="TryGetEarliestMismatch_SameFramePlayerOneArrivesFirst_ReturnsPlayerZero" fullname="FrameSyncDemo.Tests.FrameInputLedgerTests.TryGetEarliestMismatch_SameFramePlayerOneArrivesFirst_ReturnsPlayerZero" methodname="TryGetEarliestMismatch_SameFramePlayerOneArrivesFirst_ReturnsPlayerZero" classname="FrameSyncDemo.Tests.FrameInputLedgerTests" runstate="Runnable" seed="1969459020" result="Passed" start-time="2026-08-25 02:32:54Z" end-time="2026-08-25 02:32:54Z" duration="0.000243" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1885" name="TryGetRecord_FrameEntryExists_ReturnsMissingSlotAsQueryableRecord" fullname="FrameSyncDemo.Tests.FrameInputLedgerTests.TryGetRecord_FrameEntryExists_ReturnsMissingSlotAsQueryableRecord" methodname="TryGetRecord_FrameEntryExists_ReturnsMissingSlotAsQueryableRecord" classname="FrameSyncDemo.Tests.FrameInputLedgerTests" runstate="Runnable" seed="1767456658" result="Passed" start-time="2026-08-25 02:32:54Z" end-time="2026-08-25 02:32:54Z" duration="0.000217" asserts="0">
+              <properties />
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1913" name="FrameSyncCoordinatorTests" fullname="FrameSyncDemo.Tests.FrameSyncCoordinatorTests" classname="FrameSyncDemo.Tests.FrameSyncCoordinatorTests" runstate="Runnable" testcasecount="18" result="Passed" start-time="2026-08-25 02:32:54Z" end-time="2026-08-25 02:32:54Z" duration="0.066527" total="18" passed="18" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1922" name="Advance_ConfirmationHoleThenFill_CatchesUpEveryActualFrameInOrder" fullname="FrameSyncDemo.Tests.FrameSyncCoordinatorTests.Advance_ConfirmationHoleThenFill_CatchesUpEveryActualFrameInOrder" methodname="Advance_ConfirmationHoleThenFill_CatchesUpEveryActualFrameInOrder" classname="FrameSyncDemo.Tests.FrameSyncCoordinatorTests" runstate="Runnable" seed="1316404407" result="Passed" start-time="2026-08-25 02:32:54Z" end-time="2026-08-25 02:32:54Z" duration="0.007847" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1929" name="Advance_IntegrityFault_DoesNotAdvanceEitherWorld" fullname="FrameSyncDemo.Tests.FrameSyncCoordinatorTests.Advance_IntegrityFault_DoesNotAdvanceEitherWorld" methodname="Advance_IntegrityFault_DoesNotAdvanceEitherWorld" classname="FrameSyncDemo.Tests.FrameSyncCoordinatorTests" runstate="Runnable" seed="1326508112" result="Passed" start-time="2026-08-25 02:32:54Z" end-time="2026-08-25 02:32:54Z" duration="0.000323" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1921" name="Advance_OneActualAndOnePrediction_AdvancesOnlyPredictedWorld" fullname="FrameSyncDemo.Tests.FrameSyncCoordinatorTests.Advance_OneActualAndOnePrediction_AdvancesOnlyPredictedWorld" methodname="Advance_OneActualAndOnePrediction_AdvancesOnlyPredictedWorld" classname="FrameSyncDemo.Tests.FrameSyncCoordinatorTests" runstate="Runnable" seed="993184502" result="Passed" start-time="2026-08-25 02:32:54Z" end-time="2026-08-25 02:32:54Z" duration="0.000591" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1923" name="Advance_PredictedMutation_DoesNotAliasConfirmedWorld" fullname="FrameSyncDemo.Tests.FrameSyncCoordinatorTests.Advance_PredictedMutation_DoesNotAliasConfirmedWorld" methodname="Advance_PredictedMutation_DoesNotAliasConfirmedWorld" classname="FrameSyncDemo.Tests.FrameSyncCoordinatorTests" runstate="Runnable" seed="676421224" result="Passed" start-time="2026-08-25 02:32:54Z" end-time="2026-08-25 02:32:54Z" duration="0.000448" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1930" name="ConfirmedWorld_SameActualHistoryDifferentArrivalOrder_ConvergesByFieldsAndHash" fullname="FrameSyncDemo.Tests.FrameSyncCoordinatorTests.ConfirmedWorld_SameActualHistoryDifferentArrivalOrder_ConvergesByFieldsAndHash" methodname="ConfirmedWorld_SameActualHistoryDifferentArrivalOrder_ConvergesByFieldsAndHash" classname="FrameSyncDemo.Tests.FrameSyncCoordinatorTests" runstate="Runnable" seed="1509636404" result="Passed" start-time="2026-08-25 02:32:54Z" end-time="2026-08-25 02:32:54Z" duration="0.000987" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1918" name="EarliestRecoverableCanonicalFrame_EmptySnapshots_UsesInitialWorld" fullname="FrameSyncDemo.Tests.FrameSyncCoordinatorTests.EarliestRecoverableCanonicalFrame_EmptySnapshots_UsesInitialWorld" methodname="EarliestRecoverableCanonicalFrame_EmptySnapshots_UsesInitialWorld" classname="FrameSyncDemo.Tests.FrameSyncCoordinatorTests" runstate="Runnable" seed="1569273222" result="Passed" start-time="2026-08-25 02:32:54Z" end-time="2026-08-25 02:32:54Z" duration="0.000260" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1920" name="EarliestRecoverableCanonicalFrame_LedgerPruneCanAdvanceFloorFurther" fullname="FrameSyncDemo.Tests.FrameSyncCoordinatorTests.EarliestRecoverableCanonicalFrame_LedgerPruneCanAdvanceFloorFurther" methodname="EarliestRecoverableCanonicalFrame_LedgerPruneCanAdvanceFloorFurther" classname="FrameSyncDemo.Tests.FrameSyncCoordinatorTests" runstate="Runnable" seed="2046255229" result="Passed" start-time="2026-08-25 02:32:54Z" end-time="2026-08-25 02:32:54Z" duration="0.000454" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1919" name="EarliestRecoverableCanonicalFrame_SnapshotRingRequiresPrecedingFrame" fullname="FrameSyncDemo.Tests.FrameSyncCoordinatorTests.EarliestRecoverableCanonicalFrame_SnapshotRingRequiresPrecedingFrame" methodname="EarliestRecoverableCanonicalFrame_SnapshotRingRequiresPrecedingFrame" classname="FrameSyncDemo.Tests.FrameSyncCoordinatorTests" runstate="Runnable" seed="1887128732" result="Passed" start-time="2026-08-25 02:32:54Z" end-time="2026-08-25 02:32:54Z" duration="0.000186" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1915" name="FrameSyncCoordinator_P2CNormalAdvanceSurface_IsAvailable" fullname="FrameSyncDemo.Tests.FrameSyncCoordinatorTests.FrameSyncCoordinator_P2CNormalAdvanceSurface_IsAvailable" methodname="FrameSyncCoordinator_P2CNormalAdvanceSurface_IsAvailable" classname="FrameSyncDemo.Tests.FrameSyncCoordinatorTests" runstate="Runnable" seed="649298146" result="Passed" start-time="2026-08-25 02:32:54Z" end-time="2026-08-25 02:32:54Z" duration="0.001050" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1917" name="FrameSyncCoordinator_UnityAdapterReadSurface_IsAvailable" fullname="FrameSyncDemo.Tests.FrameSyncCoordinatorTests.FrameSyncCoordinator_UnityAdapterReadSurface_IsAvailable" methodname="FrameSyncCoordinator_UnityAdapterReadSurface_IsAvailable" classname="FrameSyncDemo.Tests.FrameSyncCoordinatorTests" runstate="Runnable" seed="1428468184" result="Passed" start-time="2026-08-25 02:32:54Z" end-time="2026-08-25 02:32:54Z" duration="0.000248" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1931" name="PredictedWorlds_MayDivergeBeforeActualWhileConfirmedHeadsStayEqual" fullname="FrameSyncDemo.Tests.FrameSyncCoordinatorTests.PredictedWorlds_MayDivergeBeforeActualWhileConfirmedHeadsStayEqual" methodname="PredictedWorlds_MayDivergeBeforeActualWhileConfirmedHeadsStayEqual" classname="FrameSyncDemo.Tests.FrameSyncCoordinatorTests" runstate="Runnable" seed="637359470" result="Passed" start-time="2026-08-25 02:32:54Z" end-time="2026-08-25 02:32:54Z" duration="0.000365" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1927" name="Reconcile_EarlyMismatchSnapshotOverwritten_UsesLatestConfirmedBaseline" fullname="FrameSyncDemo.Tests.FrameSyncCoordinatorTests.Reconcile_EarlyMismatchSnapshotOverwritten_UsesLatestConfirmedBaseline" methodname="Reconcile_EarlyMismatchSnapshotOverwritten_UsesLatestConfirmedBaseline" classname="FrameSyncDemo.Tests.FrameSyncCoordinatorTests" runstate="Runnable" seed="653462841" result="Passed" start-time="2026-08-25 02:32:54Z" end-time="2026-08-25 02:32:54Z" duration="0.001550" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1928" name="Reconcile_IntegrityFault_ReturnsFailureAndDoesNotPublishSuccess" fullname="FrameSyncDemo.Tests.FrameSyncCoordinatorTests.Reconcile_IntegrityFault_ReturnsFailureAndDoesNotPublishSuccess" methodname="Reconcile_IntegrityFault_ReturnsFailureAndDoesNotPublishSuccess" classname="FrameSyncDemo.Tests.FrameSyncCoordinatorTests" runstate="Runnable" seed="2066939261" result="Passed" start-time="2026-08-25 02:32:54Z" end-time="2026-08-25 02:32:54Z" duration="0.000347" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1924" name="Reconcile_LateMismatch_RebuildsPredictedFromLatestConfirmedBaseline" fullname="FrameSyncDemo.Tests.FrameSyncCoordinatorTests.Reconcile_LateMismatch_RebuildsPredictedFromLatestConfirmedBaseline" methodname="Reconcile_LateMismatch_RebuildsPredictedFromLatestConfirmedBaseline" classname="FrameSyncDemo.Tests.FrameSyncCoordinatorTests" runstate="Runnable" seed="2041157402" result="Passed" start-time="2026-08-25 02:32:54Z" end-time="2026-08-25 02:32:54Z" duration="0.000468" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1926" name="Reconcile_PredictionMatched_DoesNotReplay" fullname="FrameSyncDemo.Tests.FrameSyncCoordinatorTests.Reconcile_PredictionMatched_DoesNotReplay" methodname="Reconcile_PredictionMatched_DoesNotReplay" classname="FrameSyncDemo.Tests.FrameSyncCoordinatorTests" runstate="Runnable" seed="1170742384" result="Passed" start-time="2026-08-25 02:32:54Z" end-time="2026-08-25 02:32:54Z" duration="0.000226" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1925" name="Reconcile_TwoOutOfOrderMismatches_UsesOneEarliestSuffixAndClearsBoth" fullname="FrameSyncDemo.Tests.FrameSyncCoordinatorTests.Reconcile_TwoOutOfOrderMismatches_UsesOneEarliestSuffixAndClearsBoth" methodname="Reconcile_TwoOutOfOrderMismatches_UsesOneEarliestSuffixAndClearsBoth" classname="FrameSyncDemo.Tests.FrameSyncCoordinatorTests" runstate="Runnable" seed="1617439704" result="Passed" start-time="2026-08-25 02:32:54Z" end-time="2026-08-25 02:32:54Z" duration="0.000434" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1914" name="RuntimeAssembly_FrameSyncCoordinator_IsAvailable" fullname="FrameSyncDemo.Tests.FrameSyncCoordinatorTests.RuntimeAssembly_FrameSyncCoordinator_IsAvailable" methodname="RuntimeAssembly_FrameSyncCoordinator_IsAvailable" classname="FrameSyncDemo.Tests.FrameSyncCoordinatorTests" runstate="Runnable" seed="809033975" result="Passed" start-time="2026-08-25 02:32:54Z" end-time="2026-08-25 02:32:54Z" duration="0.001328" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1916" name="RuntimeAssembly_P2CReconcileSurface_IsAvailable" fullname="FrameSyncDemo.Tests.FrameSyncCoordinatorTests.RuntimeAssembly_P2CReconcileSurface_IsAvailable" methodname="RuntimeAssembly_P2CReconcileSurface_IsAvailable" classname="FrameSyncDemo.Tests.FrameSyncCoordinatorTests" runstate="Runnable" seed="27351148" result="Passed" start-time="2026-08-25 02:32:54Z" end-time="2026-08-25 02:32:54Z" duration="0.000358" asserts="0">
+              <properties />
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1950" name="KcpResumeProtocolTests" fullname="FrameSyncDemo.Tests.KcpResumeProtocolTests" classname="FrameSyncDemo.Tests.KcpResumeProtocolTests" runstate="Runnable" testcasecount="13" result="Passed" start-time="2026-08-25 02:32:54Z" end-time="2026-08-25 02:32:54Z" duration="0.032407" total="13" passed="13" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1956" name="BeginFreeze_MigratesAlreadyReceivedFramesAboveBoundaryIntoTail" fullname="FrameSyncDemo.Tests.KcpResumeProtocolTests.BeginFreeze_MigratesAlreadyReceivedFramesAboveBoundaryIntoTail" methodname="BeginFreeze_MigratesAlreadyReceivedFramesAboveBoundaryIntoTail" classname="FrameSyncDemo.Tests.KcpResumeProtocolTests" runstate="Runnable" seed="1923814879" result="Passed" start-time="2026-08-25 02:32:54Z" end-time="2026-08-25 02:32:54Z" duration="0.001245" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1964" name="ClientWorker_MissingReconnectActual_SendsAttemptBoundRejection" fullname="FrameSyncDemo.Tests.KcpResumeProtocolTests.ClientWorker_MissingReconnectActual_SendsAttemptBoundRejection" methodname="ClientWorker_MissingReconnectActual_SendsAttemptBoundRejection" classname="FrameSyncDemo.Tests.KcpResumeProtocolTests" runstate="Runnable" seed="1429538065" result="Passed" start-time="2026-08-25 02:32:54Z" end-time="2026-08-25 02:32:54Z" duration="0.008615" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1951" name="HistoryDisposition_DefinesCapacityExceeded" fullname="FrameSyncDemo.Tests.KcpResumeProtocolTests.HistoryDisposition_DefinesCapacityExceeded" methodname="HistoryDisposition_DefinesCapacityExceeded" classname="FrameSyncDemo.Tests.KcpResumeProtocolTests" runstate="Runnable" seed="879598989" result="Passed" start-time="2026-08-25 02:32:54Z" end-time="2026-08-25 02:32:54Z" duration="0.000248" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1957" name="OnlinePeer_ResumeProbe_WaitsForReadinessThenSendsMatchingResumeState" fullname="FrameSyncDemo.Tests.KcpResumeProtocolTests.OnlinePeer_ResumeProbe_WaitsForReadinessThenSendsMatchingResumeState" methodname="OnlinePeer_ResumeProbe_WaitsForReadinessThenSendsMatchingResumeState" classname="FrameSyncDemo.Tests.KcpResumeProtocolTests" runstate="Runnable" seed="568838952" result="Passed" start-time="2026-08-25 02:32:54Z" end-time="2026-08-25 02:32:54Z" duration="0.001204" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1958" name="OnlinePeer_ResumeState_RetriesAfterTwoHundredFiftyMillisecondsWithoutChangingAttempt" fullname="FrameSyncDemo.Tests.KcpResumeProtocolTests.OnlinePeer_ResumeState_RetriesAfterTwoHundredFiftyMillisecondsWithoutChangingAttempt" methodname="OnlinePeer_ResumeState_RetriesAfterTwoHundredFiftyMillisecondsWithoutChangingAttempt" classname="FrameSyncDemo.Tests.KcpResumeProtocolTests" runstate="Runnable" seed="86502483" result="Passed" start-time="2026-08-25 02:32:54Z" end-time="2026-08-25 02:32:54Z" duration="0.000486" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1953" name="Record_FrozenLiveTailBeyondCapacity_ReturnsCapacityExceededWithoutOverwrite" fullname="FrameSyncDemo.Tests.KcpResumeProtocolTests.Record_FrozenLiveTailBeyondCapacity_ReturnsCapacityExceededWithoutOverwrite" methodname="Record_FrozenLiveTailBeyondCapacity_ReturnsCapacityExceededWithoutOverwrite" classname="FrameSyncDemo.Tests.KcpResumeProtocolTests" runstate="Runnable" seed="1037909971" result="Passed" start-time="2026-08-25 02:32:54Z" end-time="2026-08-25 02:32:54Z" duration="0.000655" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1954" name="Record_FrozenLiveTailDuplicate_PreservesFirstRaw" fullname="FrameSyncDemo.Tests.KcpResumeProtocolTests.Record_FrozenLiveTailDuplicate_PreservesFirstRaw" methodname="Record_FrozenLiveTailDuplicate_PreservesFirstRaw" classname="FrameSyncDemo.Tests.KcpResumeProtocolTests" runstate="Runnable" seed="2101931643" result="Passed" start-time="2026-08-25 02:32:54Z" end-time="2026-08-25 02:32:54Z" duration="0.000265" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1952" name="Record_NormalRollingEviction_IsAcceptedNotCapacityExceeded" fullname="FrameSyncDemo.Tests.KcpResumeProtocolTests.Record_NormalRollingEviction_IsAcceptedNotCapacityExceeded" methodname="Record_NormalRollingEviction_IsAcceptedNotCapacityExceeded" classname="FrameSyncDemo.Tests.KcpResumeProtocolTests" runstate="Runnable" seed="521506254" result="Passed" start-time="2026-08-25 02:32:54Z" end-time="2026-08-25 02:32:54Z" duration="0.000197" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1955" name="ReleaseLiveTail_EmitsAscendingImmutableBatchExactlyOnce" fullname="FrameSyncDemo.Tests.KcpResumeProtocolTests.ReleaseLiveTail_EmitsAscendingImmutableBatchExactlyOnce" methodname="ReleaseLiveTail_EmitsAscendingImmutableBatchExactlyOnce" classname="FrameSyncDemo.Tests.KcpResumeProtocolTests" runstate="Runnable" seed="457422307" result="Passed" start-time="2026-08-25 02:32:54Z" end-time="2026-08-25 02:32:54Z" duration="0.000262" asserts="0">
+              <properties />
+            </test-case>
+            <test-suite type="ParameterizedMethod" id="1962" name="ResumeAccepted_PeerWaitsForWholeRangeThenCompletesAndReturnsRunning" fullname="FrameSyncDemo.Tests.KcpResumeProtocolTests.ResumeAccepted_PeerWaitsForWholeRangeThenCompletesAndReturnsRunning" classname="FrameSyncDemo.Tests.KcpResumeProtocolTests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-08-25 02:32:54Z" end-time="2026-08-25 02:32:54Z" duration="0.004122" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1960" name="ResumeAccepted_PeerWaitsForWholeRangeThenCompletesAndReturnsRunning(ResumeGraceExpired)" fullname="FrameSyncDemo.Tests.KcpResumeProtocolTests.ResumeAccepted_PeerWaitsForWholeRangeThenCompletesAndReturnsRunning(ResumeGraceExpired)" methodname="ResumeAccepted_PeerWaitsForWholeRangeThenCompletesAndReturnsRunning" classname="FrameSyncDemo.Tests.KcpResumeProtocolTests" runstate="Runnable" seed="2105619617" result="Passed" start-time="2026-08-25 02:32:54Z" end-time="2026-08-25 02:32:54Z" duration="0.002191" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="1961" name="ResumeAccepted_PeerWaitsForWholeRangeThenCompletesAndReturnsRunning(UnsafeResume)" fullname="FrameSyncDemo.Tests.KcpResumeProtocolTests.ResumeAccepted_PeerWaitsForWholeRangeThenCompletesAndReturnsRunning(UnsafeResume)" methodname="ResumeAccepted_PeerWaitsForWholeRangeThenCompletesAndReturnsRunning" classname="FrameSyncDemo.Tests.KcpResumeProtocolTests" runstate="Runnable" seed="1885954827" result="Passed" start-time="2026-08-25 02:32:54Z" end-time="2026-08-25 02:32:54Z" duration="0.000226" asserts="0">
+                <properties />
+              </test-case>
+            </test-suite>
+            <test-case id="1959" name="ResumeControl_WrongSessionGenerationAttemptAndDirection_AreSeparatelyCounted" fullname="FrameSyncDemo.Tests.KcpResumeProtocolTests.ResumeControl_WrongSessionGenerationAttemptAndDirection_AreSeparatelyCounted" methodname="ResumeControl_WrongSessionGenerationAttemptAndDirection_AreSeparatelyCounted" classname="FrameSyncDemo.Tests.KcpResumeProtocolTests" runstate="Runnable" seed="1318087861" result="Passed" start-time="2026-08-25 02:32:54Z" end-time="2026-08-25 02:32:54Z" duration="0.001660" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1963" name="ResumeCoordinator_MissingReconnectActual_RejectsBeforeFreeze" fullname="FrameSyncDemo.Tests.KcpResumeProtocolTests.ResumeCoordinator_MissingReconnectActual_RejectsBeforeFreeze" methodname="ResumeCoordinator_MissingReconnectActual_RejectsBeforeFreeze" classname="FrameSyncDemo.Tests.KcpResumeProtocolTests" runstate="Runnable" seed="1585652551" result="Passed" start-time="2026-08-25 02:32:54Z" end-time="2026-08-25 02:32:54Z" duration="0.000275" asserts="0">
+              <properties />
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1965" name="KcpUdpClientStateMachineTests" fullname="FrameSyncDemo.Tests.KcpUdpClientStateMachineTests" classname="FrameSyncDemo.Tests.KcpUdpClientStateMachineTests" runstate="Runnable" testcasecount="15" result="Passed" start-time="2026-08-25 02:32:54Z" end-time="2026-08-25 02:32:54Z" duration="0.181176" total="15" passed="15" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1966" name="BusinessTraffic_DoesNotPostponeReconnectHelloRetry" fullname="FrameSyncDemo.Tests.KcpUdpClientStateMachineTests.BusinessTraffic_DoesNotPostponeReconnectHelloRetry" methodname="BusinessTraffic_DoesNotPostponeReconnectHelloRetry" classname="FrameSyncDemo.Tests.KcpUdpClientStateMachineTests" runstate="Runnable" seed="63802013" result="Passed" start-time="2026-08-25 02:32:54Z" end-time="2026-08-25 02:32:54Z" duration="0.002452" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1971" name="Disconnect_IsAdvisoryAndFiveSecondGraceTerminatesSession" fullname="FrameSyncDemo.Tests.KcpUdpClientStateMachineTests.Disconnect_IsAdvisoryAndFiveSecondGraceTerminatesSession" methodname="Disconnect_IsAdvisoryAndFiveSecondGraceTerminatesSession" classname="FrameSyncDemo.Tests.KcpUdpClientStateMachineTests" runstate="Runnable" seed="1902419204" result="Passed" start-time="2026-08-25 02:32:54Z" end-time="2026-08-25 02:32:54Z" duration="0.000820" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1972" name="Heartbeat_BusinessAndValidControlTrafficUseLockedSilenceAndTimeouts" fullname="FrameSyncDemo.Tests.KcpUdpClientStateMachineTests.Heartbeat_BusinessAndValidControlTrafficUseLockedSilenceAndTimeouts" methodname="Heartbeat_BusinessAndValidControlTrafficUseLockedSilenceAndTimeouts" classname="FrameSyncDemo.Tests.KcpUdpClientStateMachineTests" runstate="Runnable" seed="878780243" result="Passed" start-time="2026-08-25 02:32:54Z" end-time="2026-08-25 02:32:54Z" duration="0.000761" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1968" name="Heartbeat_InResuming_RefreshesGraceWithoutCompletingResume" fullname="FrameSyncDemo.Tests.KcpUdpClientStateMachineTests.Heartbeat_InResuming_RefreshesGraceWithoutCompletingResume" methodname="Heartbeat_InResuming_RefreshesGraceWithoutCompletingResume" classname="FrameSyncDemo.Tests.KcpUdpClientStateMachineTests" runstate="Runnable" seed="1869743401" result="Passed" start-time="2026-08-25 02:32:54Z" end-time="2026-08-25 02:32:54Z" duration="0.000570" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1973" name="ReconnectWelcome_WaitsForRealReadinessAndRejectsOldGenerationAndConversation" fullname="FrameSyncDemo.Tests.KcpUdpClientStateMachineTests.ReconnectWelcome_WaitsForRealReadinessAndRejectsOldGenerationAndConversation" methodname="ReconnectWelcome_WaitsForRealReadinessAndRejectsOldGenerationAndConversation" classname="FrameSyncDemo.Tests.KcpUdpClientStateMachineTests" runstate="Runnable" seed="129538569" result="Passed" start-time="2026-08-25 02:32:54Z" end-time="2026-08-25 02:32:54Z" duration="0.005768" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1975" name="ResumeRejected_MatchingSessionTerminatesStartedSession" fullname="FrameSyncDemo.Tests.KcpUdpClientStateMachineTests.ResumeRejected_MatchingSessionTerminatesStartedSession" methodname="ResumeRejected_MatchingSessionTerminatesStartedSession" classname="FrameSyncDemo.Tests.KcpUdpClientStateMachineTests" runstate="Runnable" seed="1822998238" result="Passed" start-time="2026-08-25 02:32:54Z" end-time="2026-08-25 02:32:54Z" duration="0.000491" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1969" name="Resuming_WithoutSuccessfulResume_TerminatesAtFiveSeconds" fullname="FrameSyncDemo.Tests.KcpUdpClientStateMachineTests.Resuming_WithoutSuccessfulResume_TerminatesAtFiveSeconds" methodname="Resuming_WithoutSuccessfulResume_TerminatesAtFiveSeconds" classname="FrameSyncDemo.Tests.KcpUdpClientStateMachineTests" runstate="Runnable" seed="873477887" result="Passed" start-time="2026-08-25 02:32:54Z" end-time="2026-08-25 02:32:54Z" duration="0.000518" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1974" name="RunningTimeout_EntersReconnectingAndCreatesOneNewNonce" fullname="FrameSyncDemo.Tests.KcpUdpClientStateMachineTests.RunningTimeout_EntersReconnectingAndCreatesOneNewNonce" methodname="RunningTimeout_EntersReconnectingAndCreatesOneNewNonce" classname="FrameSyncDemo.Tests.KcpUdpClientStateMachineTests" runstate="Runnable" seed="2023117654" result="Passed" start-time="2026-08-25 02:32:54Z" end-time="2026-08-25 02:32:54Z" duration="0.000960" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1979" name="Start_InitialHelloRetriesAtTwoHundredFiftyMillisecondsWithSameNonce" fullname="FrameSyncDemo.Tests.KcpUdpClientStateMachineTests.Start_InitialHelloRetriesAtTwoHundredFiftyMillisecondsWithSameNonce" methodname="Start_InitialHelloRetriesAtTwoHundredFiftyMillisecondsWithSameNonce" classname="FrameSyncDemo.Tests.KcpUdpClientStateMachineTests" runstate="Runnable" seed="266573690" result="Passed" start-time="2026-08-25 02:32:54Z" end-time="2026-08-25 02:32:54Z" duration="0.000798" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1976" name="Start_MatchingSessionAndGeneration_TransitionsOnceToRunning" fullname="FrameSyncDemo.Tests.KcpUdpClientStateMachineTests.Start_MatchingSessionAndGeneration_TransitionsOnceToRunning" methodname="Start_MatchingSessionAndGeneration_TransitionsOnceToRunning" classname="FrameSyncDemo.Tests.KcpUdpClientStateMachineTests" runstate="Runnable" seed="1644968455" result="Passed" start-time="2026-08-25 02:32:54Z" end-time="2026-08-25 02:32:54Z" duration="0.000532" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1970" name="Transport_StartAndStop_PublishImmutableBoundaryEvents" fullname="FrameSyncDemo.Tests.KcpUdpClientStateMachineTests.Transport_StartAndStop_PublishImmutableBoundaryEvents" methodname="Transport_StartAndStop_PublishImmutableBoundaryEvents" classname="FrameSyncDemo.Tests.KcpUdpClientStateMachineTests" runstate="Runnable" seed="664074888" result="Passed" start-time="2026-08-25 02:32:54Z" end-time="2026-08-25 02:32:54Z" duration="0.151468" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1980" name="TransportBoundary_DoesNotExposeProtocolInternals" fullname="FrameSyncDemo.Tests.KcpUdpClientStateMachineTests.TransportBoundary_DoesNotExposeProtocolInternals" methodname="TransportBoundary_DoesNotExposeProtocolInternals" classname="FrameSyncDemo.Tests.KcpUdpClientStateMachineTests" runstate="Runnable" seed="789415361" result="Passed" start-time="2026-08-25 02:32:54Z" end-time="2026-08-25 02:32:54Z" duration="0.002275" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1967" name="UnexpectedWellFormedControl_IsIgnoredAndCounted" fullname="FrameSyncDemo.Tests.KcpUdpClientStateMachineTests.UnexpectedWellFormedControl_IsIgnoredAndCounted" methodname="UnexpectedWellFormedControl_IsIgnoredAndCounted" classname="FrameSyncDemo.Tests.KcpUdpClientStateMachineTests" runstate="Runnable" seed="1932979199" result="Passed" start-time="2026-08-25 02:32:54Z" end-time="2026-08-25 02:32:54Z" duration="0.001001" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1977" name="Welcome_MatchingAndDuplicate_TransitionsOnceAndRetriesReady" fullname="FrameSyncDemo.Tests.KcpUdpClientStateMachineTests.Welcome_MatchingAndDuplicate_TransitionsOnceAndRetriesReady" methodname="Welcome_MatchingAndDuplicate_TransitionsOnceAndRetriesReady" classname="FrameSyncDemo.Tests.KcpUdpClientStateMachineTests" runstate="Runnable" seed="1841140306" result="Passed" start-time="2026-08-25 02:32:54Z" end-time="2026-08-25 02:32:54Z" duration="0.000837" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1978" name="Welcome_NonceMismatch_IsDroppedWithoutStateChange" fullname="FrameSyncDemo.Tests.KcpUdpClientStateMachineTests.Welcome_NonceMismatch_IsDroppedWithoutStateChange" methodname="Welcome_NonceMismatch_IsDroppedWithoutStateChange" classname="FrameSyncDemo.Tests.KcpUdpClientStateMachineTests" runstate="Runnable" seed="308460245" result="Passed" start-time="2026-08-25 02:32:54Z" end-time="2026-08-25 02:32:54Z" duration="0.000430" asserts="0">
+              <properties />
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1981" name="KcpUdpClientWorkerTests" fullname="FrameSyncDemo.Tests.KcpUdpClientWorkerTests" classname="FrameSyncDemo.Tests.KcpUdpClientWorkerTests" runstate="Runnable" testcasecount="13" result="Passed" start-time="2026-08-25 02:32:54Z" end-time="2026-08-25 02:32:57Z" duration="2.220063" total="13" passed="13" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1992" name="BusinessDequeuedByWorker_PostponesHeartbeatFromActualSendTime" fullname="FrameSyncDemo.Tests.KcpUdpClientWorkerTests.BusinessDequeuedByWorker_PostponesHeartbeatFromActualSendTime" methodname="BusinessDequeuedByWorker_PostponesHeartbeatFromActualSendTime" classname="FrameSyncDemo.Tests.KcpUdpClientWorkerTests" runstate="Runnable" seed="1906556956" result="Passed" start-time="2026-08-25 02:32:55Z" end-time="2026-08-25 02:32:55Z" duration="0.383415" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1993" name="DatagramFloodBeyondRoundBudget_StopTimeoutReportsOnceAndBoundedStopCompletes" fullname="FrameSyncDemo.Tests.KcpUdpClientWorkerTests.DatagramFloodBeyondRoundBudget_StopTimeoutReportsOnceAndBoundedStopCompletes" methodname="DatagramFloodBeyondRoundBudget_StopTimeoutReportsOnceAndBoundedStopCompletes" classname="FrameSyncDemo.Tests.KcpUdpClientWorkerTests" runstate="Runnable" seed="195872107" result="Passed" start-time="2026-08-25 02:32:55Z" end-time="2026-08-25 02:32:55Z" duration="0.140733" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1984" name="DelayedListener_AfterIcmpReset_ReceivesHelloRetryWithoutWorkerFault" fullname="FrameSyncDemo.Tests.KcpUdpClientWorkerTests.DelayedListener_AfterIcmpReset_ReceivesHelloRetryWithoutWorkerFault" methodname="DelayedListener_AfterIcmpReset_ReceivesHelloRetryWithoutWorkerFault" classname="FrameSyncDemo.Tests.KcpUdpClientWorkerTests" runstate="Runnable" seed="1709314273" result="Passed" start-time="2026-08-25 02:32:55Z" end-time="2026-08-25 02:32:55Z" duration="0.404445" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1991" name="InvalidGenerationAndConversation_AreRejectedBeforeKcpInput" fullname="FrameSyncDemo.Tests.KcpUdpClientWorkerTests.InvalidGenerationAndConversation_AreRejectedBeforeKcpInput" methodname="InvalidGenerationAndConversation_AreRejectedBeforeKcpInput" classname="FrameSyncDemo.Tests.KcpUdpClientWorkerTests" runstate="Runnable" seed="1596186282" result="Passed" start-time="2026-08-25 02:32:55Z" end-time="2026-08-25 02:32:56Z" duration="0.326673" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1985" name="LiveWorker_CompletesHandshakeAndRelaysEightByteKcpMessages" fullname="FrameSyncDemo.Tests.KcpUdpClientWorkerTests.LiveWorker_CompletesHandshakeAndRelaysEightByteKcpMessages" methodname="LiveWorker_CompletesHandshakeAndRelaysEightByteKcpMessages" classname="FrameSyncDemo.Tests.KcpUdpClientWorkerTests" runstate="Runnable" seed="750132070" result="Passed" start-time="2026-08-25 02:32:56Z" end-time="2026-08-25 02:32:56Z" duration="0.046220" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1987" name="OutboundHistoryFault_WhenPublished_StatusIsAlreadyTerminated" fullname="FrameSyncDemo.Tests.KcpUdpClientWorkerTests.OutboundHistoryFault_WhenPublished_StatusIsAlreadyTerminated" methodname="OutboundHistoryFault_WhenPublished_StatusIsAlreadyTerminated" classname="FrameSyncDemo.Tests.KcpUdpClientWorkerTests" runstate="Runnable" seed="1182709954" result="Passed" start-time="2026-08-25 02:32:56Z" end-time="2026-08-25 02:32:56Z" duration="0.016779" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1983" name="RequestStop_BeforeStartOnlyRecordsRequest" fullname="FrameSyncDemo.Tests.KcpUdpClientWorkerTests.RequestStop_BeforeStartOnlyRecordsRequest" methodname="RequestStop_BeforeStartOnlyRecordsRequest" classname="FrameSyncDemo.Tests.KcpUdpClientWorkerTests" runstate="Runnable" seed="20710678" result="Passed" start-time="2026-08-25 02:32:56Z" end-time="2026-08-25 02:32:56Z" duration="0.000421" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1990" name="ResumeRejected_TerminatesWorkerWithoutMainThreadClosingSocket" fullname="FrameSyncDemo.Tests.KcpUdpClientWorkerTests.ResumeRejected_TerminatesWorkerWithoutMainThreadClosingSocket" methodname="ResumeRejected_TerminatesWorkerWithoutMainThreadClosingSocket" classname="FrameSyncDemo.Tests.KcpUdpClientWorkerTests" runstate="Runnable" seed="319644859" result="Passed" start-time="2026-08-25 02:32:56Z" end-time="2026-08-25 02:32:56Z" duration="0.002324" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1988" name="ResumeRequired_WaitsForWorkerReadinessCommandBeforeReadyAndRetriesAfterTwoHundredFiftyMilliseconds" fullname="FrameSyncDemo.Tests.KcpUdpClientWorkerTests.ResumeRequired_WaitsForWorkerReadinessCommandBeforeReadyAndRetriesAfterTwoHundredFiftyMilliseconds" methodname="ResumeRequired_WaitsForWorkerReadinessCommandBeforeReadyAndRetriesAfterTwoHundredFiftyMilliseconds" classname="FrameSyncDemo.Tests.KcpUdpClientWorkerTests" runstate="Runnable" seed="154902684" result="Passed" start-time="2026-08-25 02:32:56Z" end-time="2026-08-25 02:32:56Z" duration="0.376529" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1989" name="ResumeRound_ReadinessCommandSendsReadyBeforeBusinessKcpDataInSameWorkerRound" fullname="FrameSyncDemo.Tests.KcpUdpClientWorkerTests.ResumeRound_ReadinessCommandSendsReadyBeforeBusinessKcpDataInSameWorkerRound" methodname="ResumeRound_ReadinessCommandSendsReadyBeforeBusinessKcpDataInSameWorkerRound" classname="FrameSyncDemo.Tests.KcpUdpClientWorkerTests" runstate="Runnable" seed="845765443" result="Passed" start-time="2026-08-25 02:32:56Z" end-time="2026-08-25 02:32:56Z" duration="0.215252" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1986" name="SessionStarted_WhenPubliclyDequeueable_StatusIsAlreadyRunning" fullname="FrameSyncDemo.Tests.KcpUdpClientWorkerTests.SessionStarted_WhenPubliclyDequeueable_StatusIsAlreadyRunning" methodname="SessionStarted_WhenPubliclyDequeueable_StatusIsAlreadyRunning" classname="FrameSyncDemo.Tests.KcpUdpClientWorkerTests" runstate="Runnable" seed="1773716754" result="Passed" start-time="2026-08-25 02:32:56Z" end-time="2026-08-25 02:32:56Z" duration="0.015206" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1982" name="Start_ReturnsImmediatelyAndWorkerSendsInitialHello" fullname="FrameSyncDemo.Tests.KcpUdpClientWorkerTests.Start_ReturnsImmediatelyAndWorkerSendsInitialHello" methodname="Start_ReturnsImmediatelyAndWorkerSendsInitialHello" classname="FrameSyncDemo.Tests.KcpUdpClientWorkerTests" runstate="Runnable" seed="997893852" result="Passed" start-time="2026-08-25 02:32:56Z" end-time="2026-08-25 02:32:57Z" duration="0.138765" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1994" name="WorkerRoundDiagnostics_DatagramFloodIsSplitByMaximumBudget" fullname="FrameSyncDemo.Tests.KcpUdpClientWorkerTests.WorkerRoundDiagnostics_DatagramFloodIsSplitByMaximumBudget" methodname="WorkerRoundDiagnostics_DatagramFloodIsSplitByMaximumBudget" classname="FrameSyncDemo.Tests.KcpUdpClientWorkerTests" runstate="Runnable" seed="1441545941" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.137590" asserts="0">
+              <properties />
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1995" name="KcpUdpVirtualConvergenceTests" fullname="FrameSyncDemo.Tests.KcpUdpVirtualConvergenceTests" classname="FrameSyncDemo.Tests.KcpUdpVirtualConvergenceTests" runstate="Runnable" testcasecount="3" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.020513" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-suite type="ParameterizedMethod" id="1999" name="CompleteBusinessScript_AfterRealKcpFaults_ConvergesBothWorldTracks" fullname="FrameSyncDemo.Tests.KcpUdpVirtualConvergenceTests.CompleteBusinessScript_AfterRealKcpFaults_ConvergesBothWorldTracks" classname="FrameSyncDemo.Tests.KcpUdpVirtualConvergenceTests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.013607" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1997" name="CompleteBusinessScript_AfterRealKcpFaults_ConvergesBothWorldTracks(False)" fullname="FrameSyncDemo.Tests.KcpUdpVirtualConvergenceTests.CompleteBusinessScript_AfterRealKcpFaults_ConvergesBothWorldTracks(False)" methodname="CompleteBusinessScript_AfterRealKcpFaults_ConvergesBothWorldTracks" classname="FrameSyncDemo.Tests.KcpUdpVirtualConvergenceTests" runstate="Runnable" seed="93490674" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.010067" asserts="0">
+                <properties />
+                <output><![CDATA[semantic=udp-datagram-drop scenario=world-convergence faulted=False terminated=True ascendingActuals=True intermediatePredictionDiverged=True confirmedFrame0=11 confirmedFrame1=11 confirmedHash0=9563853222529659313 confirmedHash1=9563853222529659313 predictedHash0=9563853222529659313 predictedHash1=9563853222529659313
+]]></output>
+              </test-case>
+              <test-case id="1998" name="CompleteBusinessScript_AfterRealKcpFaults_ConvergesBothWorldTracks(True)" fullname="FrameSyncDemo.Tests.KcpUdpVirtualConvergenceTests.CompleteBusinessScript_AfterRealKcpFaults_ConvergesBothWorldTracks(True)" methodname="CompleteBusinessScript_AfterRealKcpFaults_ConvergesBothWorldTracks" classname="FrameSyncDemo.Tests.KcpUdpVirtualConvergenceTests" runstate="Runnable" seed="503120135" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.001311" asserts="0">
+                <properties />
+                <output><![CDATA[semantic=udp-datagram-drop scenario=world-convergence faulted=True terminated=True ascendingActuals=True intermediatePredictionDiverged=True confirmedFrame0=11 confirmedFrame1=11 confirmedHash0=9563853222529659313 confirmedHash1=9563853222529659313 predictedHash0=9563853222529659313 predictedHash1=9563853222529659313
+]]></output>
+              </test-case>
+            </test-suite>
+            <test-case id="1996" name="ConvergenceDriver_RequiredSurface_IsAvailable" fullname="FrameSyncDemo.Tests.KcpUdpVirtualConvergenceTests.ConvergenceDriver_RequiredSurface_IsAvailable" methodname="ConvergenceDriver_RequiredSurface_IsAvailable" classname="FrameSyncDemo.Tests.KcpUdpVirtualConvergenceTests" runstate="Runnable" seed="139291860" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.001311" asserts="0">
+              <properties />
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="2000" name="KcpUdpVirtualLinkTests" fullname="FrameSyncDemo.Tests.KcpUdpVirtualLinkTests" classname="FrameSyncDemo.Tests.KcpUdpVirtualLinkTests" runstate="Runnable" testcasecount="34" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.088013" total="34" passed="34" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="2015" name="Decide_CanonicalTraceEvidenceFile_IsWrittenFromDeterministicScript" fullname="FrameSyncDemo.Tests.KcpUdpVirtualLinkTests.Decide_CanonicalTraceEvidenceFile_IsWrittenFromDeterministicScript" methodname="Decide_CanonicalTraceEvidenceFile_IsWrittenFromDeterministicScript" classname="FrameSyncDemo.Tests.KcpUdpVirtualLinkTests" runstate="Runnable" seed="1249787070" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.007561" asserts="0">
+              <properties />
+              <output><![CDATA[decisionTracePath=E:\帧同步_RouteC\.task12-isolation\Frame Synchronization\p2f-task10-decision-trace.jsonl
+]]></output>
+            </test-case>
+            <test-case id="2013" name="Decide_CleanProfile_ReturnsOneImmediateCopyAndAuditableTrace" fullname="FrameSyncDemo.Tests.KcpUdpVirtualLinkTests.Decide_CleanProfile_ReturnsOneImmediateCopyAndAuditableTrace" methodname="Decide_CleanProfile_ReturnsOneImmediateCopyAndAuditableTrace" classname="FrameSyncDemo.Tests.KcpUdpVirtualLinkTests" runstate="Runnable" seed="1349039704" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000612" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2017" name="Decide_DuplicateChannel_DoesNotPerturbDelayDropOrReorderChannels" fullname="FrameSyncDemo.Tests.KcpUdpVirtualLinkTests.Decide_DuplicateChannel_DoesNotPerturbDelayDropOrReorderChannels" methodname="Decide_DuplicateChannel_DoesNotPerturbDelayDropOrReorderChannels" classname="FrameSyncDemo.Tests.KcpUdpVirtualLinkTests" runstate="Runnable" seed="8399609" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000531" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2014" name="Decide_SameSeedAndScript_ProducesNonEmptyByteIdenticalTrace" fullname="FrameSyncDemo.Tests.KcpUdpVirtualLinkTests.Decide_SameSeedAndScript_ProducesNonEmptyByteIdenticalTrace" methodname="Decide_SameSeedAndScript_ProducesNonEmptyByteIdenticalTrace" classname="FrameSyncDemo.Tests.KcpUdpVirtualLinkTests" runstate="Runnable" seed="1670951757" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.002710" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2016" name="Decide_SelectedDifferentSeeds_DivergeWithinFiveHundredTwelveDatagrams" fullname="FrameSyncDemo.Tests.KcpUdpVirtualLinkTests.Decide_SelectedDifferentSeeds_DivergeWithinFiveHundredTwelveDatagrams" methodname="Decide_SelectedDifferentSeeds_DivergeWithinFiveHundredTwelveDatagrams" classname="FrameSyncDemo.Tests.KcpUdpVirtualLinkTests" runstate="Runnable" seed="726698318" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.013985" asserts="0">
+              <properties />
+              <output><![CDATA[firstDifferentSeedDivergenceDatagramSequence=0
+]]></output>
+            </test-case>
+            <test-case id="2007" name="Decision_ExposesFaultOutcomes" fullname="FrameSyncDemo.Tests.KcpUdpVirtualLinkTests.Decision_ExposesFaultOutcomes" methodname="Decision_ExposesFaultOutcomes" classname="FrameSyncDemo.Tests.KcpUdpVirtualLinkTests" runstate="Runnable" seed="1634741535" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000386" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2006" name="Direction_DefinesStableWireIndependentOrderingValues" fullname="FrameSyncDemo.Tests.KcpUdpVirtualLinkTests.Direction_DefinesStableWireIndependentOrderingValues" methodname="Direction_DefinesStableWireIndependentOrderingValues" classname="FrameSyncDemo.Tests.KcpUdpVirtualLinkTests" runstate="Runnable" seed="335696154" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000187" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2008" name="FaultModel_ExposesStableDecisionAndTraceEntryPoint" fullname="FrameSyncDemo.Tests.KcpUdpVirtualLinkTests.FaultModel_ExposesStableDecisionAndTraceEntryPoint" methodname="FaultModel_ExposesStableDecisionAndTraceEntryPoint" classname="FrameSyncDemo.Tests.KcpUdpVirtualLinkTests" runstate="Runnable" seed="1577533056" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000239" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2004" name="KcpHeader_MetadataParserExists" fullname="FrameSyncDemo.Tests.KcpUdpVirtualLinkTests.KcpHeader_MetadataParserExists" methodname="KcpHeader_MetadataParserExists" classname="FrameSyncDemo.Tests.KcpUdpVirtualLinkTests" runstate="Runnable" seed="656965254" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000170" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2012" name="KcpHeader_ValidHeaderParsesLittleEndianAndShortPayloadIsSafe" fullname="FrameSyncDemo.Tests.KcpUdpVirtualLinkTests.KcpHeader_ValidHeaderParsesLittleEndianAndShortPayloadIsSafe" methodname="KcpHeader_ValidHeaderParsesLittleEndianAndShortPayloadIsSafe" classname="FrameSyncDemo.Tests.KcpUdpVirtualLinkTests" runstate="Runnable" seed="476206283" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000241" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2030" name="KcpRecovery_PermanentAckLoss_DoesNotClaimCompletion" fullname="FrameSyncDemo.Tests.KcpUdpVirtualLinkTests.KcpRecovery_PermanentAckLoss_DoesNotClaimCompletion" methodname="KcpRecovery_PermanentAckLoss_DoesNotClaimCompletion" classname="FrameSyncDemo.Tests.KcpUdpVirtualLinkTests" runstate="Runnable" seed="1339056064" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000640" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2003" name="Profile_ConstructorMatchesLockedTask10Contract" fullname="FrameSyncDemo.Tests.KcpUdpVirtualLinkTests.Profile_ConstructorMatchesLockedTask10Contract" methodname="Profile_ConstructorMatchesLockedTask10Contract" classname="FrameSyncDemo.Tests.KcpUdpVirtualLinkTests" runstate="Runnable" seed="66256687" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000215" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2005" name="Profile_ExposesLockedImmutableValues" fullname="FrameSyncDemo.Tests.KcpUdpVirtualLinkTests.Profile_ExposesLockedImmutableValues" methodname="Profile_ExposesLockedImmutableValues" classname="FrameSyncDemo.Tests.KcpUdpVirtualLinkTests" runstate="Runnable" seed="488705290" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000257" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2011" name="Profile_InvalidRanges_Throw" fullname="FrameSyncDemo.Tests.KcpUdpVirtualLinkTests.Profile_InvalidRanges_Throw" methodname="Profile_InvalidRanges_Throw" classname="FrameSyncDemo.Tests.KcpUdpVirtualLinkTests" runstate="Runnable" seed="127531113" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.001151" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2001" name="Profile_TypeExistsInRuntimeAssembly" fullname="FrameSyncDemo.Tests.KcpUdpVirtualLinkTests.Profile_TypeExistsInRuntimeAssembly" methodname="Profile_TypeExistsInRuntimeAssembly" classname="FrameSyncDemo.Tests.KcpUdpVirtualLinkTests" runstate="Runnable" seed="1680848308" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000279" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2010" name="Profile_ValidBoundaryValues_AreRetained" fullname="FrameSyncDemo.Tests.KcpUdpVirtualLinkTests.Profile_ValidBoundaryValues_AreRetained" methodname="Profile_ValidBoundaryValues_AreRetained" classname="FrameSyncDemo.Tests.KcpUdpVirtualLinkTests" runstate="Runnable" seed="1743843410" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000432" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2033" name="RealKcp_AckDrop_RecoversThroughDuplicateDataAndRealAck" fullname="FrameSyncDemo.Tests.KcpUdpVirtualLinkTests.RealKcp_AckDrop_RecoversThroughDuplicateDataAndRealAck" methodname="RealKcp_AckDrop_RecoversThroughDuplicateDataAndRealAck" classname="FrameSyncDemo.Tests.KcpUdpVirtualLinkTests" runstate="Runnable" seed="1793787871" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000880" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2032" name="RealKcp_DataDrop_RecoversOnlyThroughKcpRetransmission" fullname="FrameSyncDemo.Tests.KcpUdpVirtualLinkTests.RealKcp_DataDrop_RecoversOnlyThroughKcpRetransmission" methodname="RealKcp_DataDrop_RecoversOnlyThroughKcpRetransmission" classname="FrameSyncDemo.Tests.KcpUdpVirtualLinkTests" runstate="Runnable" seed="1597754993" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000629" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2034" name="RealKcp_DuplicateAndReorder_DeliverBusinessExactlyOnceInOrder" fullname="FrameSyncDemo.Tests.KcpUdpVirtualLinkTests.RealKcp_DuplicateAndReorder_DeliverBusinessExactlyOnceInOrder" methodname="RealKcp_DuplicateAndReorder_DeliverBusinessExactlyOnceInOrder" classname="FrameSyncDemo.Tests.KcpUdpVirtualLinkTests" runstate="Runnable" seed="885353652" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.002596" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2028" name="RealKcpScenarioDriver_ExposesBoundedRecoveryEntryPoint" fullname="FrameSyncDemo.Tests.KcpUdpVirtualLinkTests.RealKcpScenarioDriver_ExposesBoundedRecoveryEntryPoint" methodname="RealKcpScenarioDriver_ExposesBoundedRecoveryEntryPoint" classname="FrameSyncDemo.Tests.KcpUdpVirtualLinkTests" runstate="Runnable" seed="1997798702" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000360" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2031" name="RealKcpScenarioDriver_ExposesBoundedSequenceEntryPoint" fullname="FrameSyncDemo.Tests.KcpUdpVirtualLinkTests.RealKcpScenarioDriver_ExposesBoundedSequenceEntryPoint" methodname="RealKcpScenarioDriver_ExposesBoundedSequenceEntryPoint" classname="FrameSyncDemo.Tests.KcpUdpVirtualLinkTests" runstate="Runnable" seed="1219461229" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000219" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2029" name="RealKcpScenarioResult_ExposesTerminationDeliveryAndFaultEvidence" fullname="FrameSyncDemo.Tests.KcpUdpVirtualLinkTests.RealKcpScenarioResult_ExposesTerminationDeliveryAndFaultEvidence" methodname="RealKcpScenarioResult_ExposesTerminationDeliveryAndFaultEvidence" classname="FrameSyncDemo.Tests.KcpUdpVirtualLinkTests" runstate="Runnable" seed="1029924605" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000338" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2002" name="RuntimeSurface_DefinesTask10DatagramTypes" fullname="FrameSyncDemo.Tests.KcpUdpVirtualLinkTests.RuntimeSurface_DefinesTask10DatagramTypes" methodname="RuntimeSurface_DefinesTask10DatagramTypes" classname="FrameSyncDemo.Tests.KcpUdpVirtualLinkTests" runstate="Runnable" seed="2112744651" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000224" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2019" name="Trace_MalformedAndNonKcpDatagrams_DoNotReadPastBounds" fullname="FrameSyncDemo.Tests.KcpUdpVirtualLinkTests.Trace_MalformedAndNonKcpDatagrams_DoNotReadPastBounds" methodname="Trace_MalformedAndNonKcpDatagrams_DoNotReadPastBounds" classname="FrameSyncDemo.Tests.KcpUdpVirtualLinkTests" runstate="Runnable" seed="743721085" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000354" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2018" name="Trace_ReconnectSecretsAndLiveTimestamps_AreExcluded" fullname="FrameSyncDemo.Tests.KcpUdpVirtualLinkTests.Trace_ReconnectSecretsAndLiveTimestamps_AreExcluded" methodname="Trace_ReconnectSecretsAndLiveTimestamps_AreExcluded" classname="FrameSyncDemo.Tests.KcpUdpVirtualLinkTests" runstate="Runnable" seed="98170697" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000470" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2009" name="TraceEntry_ExposesLockedUdpDatagramSemanticLabel" fullname="FrameSyncDemo.Tests.KcpUdpVirtualLinkTests.TraceEntry_ExposesLockedUdpDatagramSemanticLabel" methodname="TraceEntry_ExposesLockedUdpDatagramSemanticLabel" classname="FrameSyncDemo.Tests.KcpUdpVirtualLinkTests" runstate="Runnable" seed="1986139029" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000305" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2027" name="VirtualLink_AsymmetricProfiles_AffectOnlyTheirDirection" fullname="FrameSyncDemo.Tests.KcpUdpVirtualLinkTests.VirtualLink_AsymmetricProfiles_AffectOnlyTheirDirection" methodname="VirtualLink_AsymmetricProfiles_AffectOnlyTheirDirection" classname="FrameSyncDemo.Tests.KcpUdpVirtualLinkTests" runstate="Runnable" seed="1718621543" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000469" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2025" name="VirtualLink_DropPermanentlySchedulesNoRecoveryEvent" fullname="FrameSyncDemo.Tests.KcpUdpVirtualLinkTests.VirtualLink_DropPermanentlySchedulesNoRecoveryEvent" methodname="VirtualLink_DropPermanentlySchedulesNoRecoveryEvent" classname="FrameSyncDemo.Tests.KcpUdpVirtualLinkTests" runstate="Runnable" seed="2117287645" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000338" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2023" name="VirtualLink_DuplicateCopiesAreIndependentArrays" fullname="FrameSyncDemo.Tests.KcpUdpVirtualLinkTests.VirtualLink_DuplicateCopiesAreIndependentArrays" methodname="VirtualLink_DuplicateCopiesAreIndependentArrays" classname="FrameSyncDemo.Tests.KcpUdpVirtualLinkTests" runstate="Runnable" seed="3828406" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000538" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2022" name="VirtualLink_EnqueueCopiesWholeEnvelopeBeforeCallerMutation" fullname="FrameSyncDemo.Tests.KcpUdpVirtualLinkTests.VirtualLink_EnqueueCopiesWholeEnvelopeBeforeCallerMutation" methodname="VirtualLink_EnqueueCopiesWholeEnvelopeBeforeCallerMutation" classname="FrameSyncDemo.Tests.KcpUdpVirtualLinkTests" runstate="Runnable" seed="1335357191" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000327" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2020" name="VirtualLink_ExposesVirtualTimeEnvelopeApi" fullname="FrameSyncDemo.Tests.KcpUdpVirtualLinkTests.VirtualLink_ExposesVirtualTimeEnvelopeApi" methodname="VirtualLink_ExposesVirtualTimeEnvelopeApi" classname="FrameSyncDemo.Tests.KcpUdpVirtualLinkTests" runstate="Runnable" seed="1400956011" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000347" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2021" name="VirtualLink_FixedDelay_ReleasesOnlyAtVirtualDueTime" fullname="FrameSyncDemo.Tests.KcpUdpVirtualLinkTests.VirtualLink_FixedDelay_ReleasesOnlyAtVirtualDueTime" methodname="VirtualLink_FixedDelay_ReleasesOnlyAtVirtualDueTime" classname="FrameSyncDemo.Tests.KcpUdpVirtualLinkTests" runstate="Runnable" seed="1485151862" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000441" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2026" name="VirtualLink_JitterAndReorderBecomeDeterministicDueOffset" fullname="FrameSyncDemo.Tests.KcpUdpVirtualLinkTests.VirtualLink_JitterAndReorderBecomeDeterministicDueOffset" methodname="VirtualLink_JitterAndReorderBecomeDeterministicDueOffset" classname="FrameSyncDemo.Tests.KcpUdpVirtualLinkTests" runstate="Runnable" seed="1300641604" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000316" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2024" name="VirtualLink_SameDueTime_ReleasesByDirectionSequenceAndCopyIndex" fullname="FrameSyncDemo.Tests.KcpUdpVirtualLinkTests.VirtualLink_SameDueTime_ReleasesByDirectionSequenceAndCopyIndex" methodname="VirtualLink_SameDueTime_ReleasesByDirectionSequenceAndCopyIndex" classname="FrameSyncDemo.Tests.KcpUdpVirtualLinkTests" runstate="Runnable" seed="884621760" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000671" asserts="0">
+              <properties />
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="2035" name="KcpUdpVirtualScenarioMatrixTests" fullname="FrameSyncDemo.Tests.KcpUdpVirtualScenarioMatrixTests" classname="FrameSyncDemo.Tests.KcpUdpVirtualScenarioMatrixTests" runstate="Runnable" testcasecount="17" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.048040" total="17" passed="17" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-suite type="ParameterizedMethod" id="2048" name="InitialHandshakeMatrix_TerminatesRunningWithinBothBounds" fullname="FrameSyncDemo.Tests.KcpUdpVirtualScenarioMatrixTests.InitialHandshakeMatrix_TerminatesRunningWithinBothBounds" classname="FrameSyncDemo.Tests.KcpUdpVirtualScenarioMatrixTests" runstate="Runnable" testcasecount="10" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.023867" total="10" passed="10" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="2038" name="InitialHandshakeMatrix_TerminatesRunningWithinBothBounds(&quot;clean&quot;)" fullname="FrameSyncDemo.Tests.KcpUdpVirtualScenarioMatrixTests.InitialHandshakeMatrix_TerminatesRunningWithinBothBounds(&quot;clean&quot;)" methodname="InitialHandshakeMatrix_TerminatesRunningWithinBothBounds" classname="FrameSyncDemo.Tests.KcpUdpVirtualScenarioMatrixTests" runstate="Runnable" seed="361302882" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.003660" asserts="0">
+                <properties />
+                <output><![CDATA[semantic=udp-datagram-drop scenario=clean outcome=Running finalState=Running terminated=True timeMs=0 steps=1 hello=1 welcome=1 ready=1 start=1 reconnectWelcome=0 resumeAccepted=0 resumeComplete=0 dropped=0 reordered=0 duplicated=0 jittered=0 observedResumeRejected=False
+]]></output>
+              </test-case>
+              <test-case id="2039" name="InitialHandshakeMatrix_TerminatesRunningWithinBothBounds(&quot;fixed-delay&quot;)" fullname="FrameSyncDemo.Tests.KcpUdpVirtualScenarioMatrixTests.InitialHandshakeMatrix_TerminatesRunningWithinBothBounds(&quot;fixed-delay&quot;)" methodname="InitialHandshakeMatrix_TerminatesRunningWithinBothBounds" classname="FrameSyncDemo.Tests.KcpUdpVirtualScenarioMatrixTests" runstate="Runnable" seed="1002675027" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000237" asserts="0">
+                <properties />
+                <output><![CDATA[semantic=udp-datagram-drop scenario=fixed-delay outcome=Running finalState=Running terminated=True timeMs=80 steps=81 hello=1 welcome=1 ready=1 start=1 reconnectWelcome=0 resumeAccepted=0 resumeComplete=0 dropped=0 reordered=0 duplicated=0 jittered=0 observedResumeRejected=False
+]]></output>
+              </test-case>
+              <test-case id="2040" name="InitialHandshakeMatrix_TerminatesRunningWithinBothBounds(&quot;jitter&quot;)" fullname="FrameSyncDemo.Tests.KcpUdpVirtualScenarioMatrixTests.InitialHandshakeMatrix_TerminatesRunningWithinBothBounds(&quot;jitter&quot;)" methodname="InitialHandshakeMatrix_TerminatesRunningWithinBothBounds" classname="FrameSyncDemo.Tests.KcpUdpVirtualScenarioMatrixTests" runstate="Runnable" seed="1335164812" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000196" asserts="0">
+                <properties />
+                <output><![CDATA[semantic=udp-datagram-drop scenario=jitter outcome=Running finalState=Running terminated=True timeMs=75 steps=76 hello=1 welcome=1 ready=1 start=1 reconnectWelcome=0 resumeAccepted=0 resumeComplete=0 dropped=0 reordered=0 duplicated=0 jittered=3 observedResumeRejected=False
+]]></output>
+              </test-case>
+              <test-case id="2041" name="InitialHandshakeMatrix_TerminatesRunningWithinBothBounds(&quot;reorder&quot;)" fullname="FrameSyncDemo.Tests.KcpUdpVirtualScenarioMatrixTests.InitialHandshakeMatrix_TerminatesRunningWithinBothBounds(&quot;reorder&quot;)" methodname="InitialHandshakeMatrix_TerminatesRunningWithinBothBounds" classname="FrameSyncDemo.Tests.KcpUdpVirtualScenarioMatrixTests" runstate="Runnable" seed="772523890" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000170" asserts="0">
+                <properties />
+                <output><![CDATA[semantic=udp-datagram-drop scenario=reorder outcome=Running finalState=Running terminated=True timeMs=120 steps=121 hello=1 welcome=1 ready=1 start=1 reconnectWelcome=0 resumeAccepted=0 resumeComplete=0 dropped=0 reordered=4 duplicated=0 jittered=0 observedResumeRejected=False
+]]></output>
+              </test-case>
+              <test-case id="2042" name="InitialHandshakeMatrix_TerminatesRunningWithinBothBounds(&quot;duplicate&quot;)" fullname="FrameSyncDemo.Tests.KcpUdpVirtualScenarioMatrixTests.InitialHandshakeMatrix_TerminatesRunningWithinBothBounds(&quot;duplicate&quot;)" methodname="InitialHandshakeMatrix_TerminatesRunningWithinBothBounds" classname="FrameSyncDemo.Tests.KcpUdpVirtualScenarioMatrixTests" runstate="Runnable" seed="1241930014" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000302" asserts="0">
+                <properties />
+                <output><![CDATA[semantic=udp-datagram-drop scenario=duplicate outcome=Running finalState=Running terminated=True timeMs=0 steps=1 hello=1 welcome=2 ready=4 start=8 reconnectWelcome=0 resumeAccepted=0 resumeComplete=0 dropped=0 reordered=0 duplicated=15 jittered=0 observedResumeRejected=False
+]]></output>
+              </test-case>
+              <test-case id="2043" name="InitialHandshakeMatrix_TerminatesRunningWithinBothBounds(&quot;asymmetric&quot;)" fullname="FrameSyncDemo.Tests.KcpUdpVirtualScenarioMatrixTests.InitialHandshakeMatrix_TerminatesRunningWithinBothBounds(&quot;asymmetric&quot;)" methodname="InitialHandshakeMatrix_TerminatesRunningWithinBothBounds" classname="FrameSyncDemo.Tests.KcpUdpVirtualScenarioMatrixTests" runstate="Runnable" seed="426760457" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000187" asserts="0">
+                <properties />
+                <output><![CDATA[semantic=udp-datagram-drop scenario=asymmetric outcome=Running finalState=Running terminated=True timeMs=92 steps=93 hello=1 welcome=1 ready=1 start=1 reconnectWelcome=0 resumeAccepted=0 resumeComplete=0 dropped=0 reordered=0 duplicated=0 jittered=2 observedResumeRejected=False
+]]></output>
+              </test-case>
+              <test-case id="2044" name="InitialHandshakeMatrix_TerminatesRunningWithinBothBounds(&quot;hello-loss&quot;)" fullname="FrameSyncDemo.Tests.KcpUdpVirtualScenarioMatrixTests.InitialHandshakeMatrix_TerminatesRunningWithinBothBounds(&quot;hello-loss&quot;)" methodname="InitialHandshakeMatrix_TerminatesRunningWithinBothBounds" classname="FrameSyncDemo.Tests.KcpUdpVirtualScenarioMatrixTests" runstate="Runnable" seed="2113971907" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000714" asserts="0">
+                <properties />
+                <output><![CDATA[semantic=udp-datagram-drop scenario=hello-loss outcome=Running finalState=Running terminated=True timeMs=1500 steps=1501 hello=2 welcome=1 ready=6 start=1 reconnectWelcome=0 resumeAccepted=0 resumeComplete=0 dropped=6 reordered=0 duplicated=0 jittered=0 observedResumeRejected=False
+]]></output>
+              </test-case>
+              <test-case id="2045" name="InitialHandshakeMatrix_TerminatesRunningWithinBothBounds(&quot;welcome-loss&quot;)" fullname="FrameSyncDemo.Tests.KcpUdpVirtualScenarioMatrixTests.InitialHandshakeMatrix_TerminatesRunningWithinBothBounds(&quot;welcome-loss&quot;)" methodname="InitialHandshakeMatrix_TerminatesRunningWithinBothBounds" classname="FrameSyncDemo.Tests.KcpUdpVirtualScenarioMatrixTests" runstate="Runnable" seed="1046948706" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000217" asserts="0">
+                <properties />
+                <output><![CDATA[semantic=udp-datagram-drop scenario=welcome-loss outcome=Running finalState=Running terminated=True timeMs=250 steps=251 hello=2 welcome=2 ready=1 start=1 reconnectWelcome=0 resumeAccepted=0 resumeComplete=0 dropped=1 reordered=0 duplicated=0 jittered=0 observedResumeRejected=False
+]]></output>
+              </test-case>
+              <test-case id="2046" name="InitialHandshakeMatrix_TerminatesRunningWithinBothBounds(&quot;ready-loss&quot;)" fullname="FrameSyncDemo.Tests.KcpUdpVirtualScenarioMatrixTests.InitialHandshakeMatrix_TerminatesRunningWithinBothBounds(&quot;ready-loss&quot;)" methodname="InitialHandshakeMatrix_TerminatesRunningWithinBothBounds" classname="FrameSyncDemo.Tests.KcpUdpVirtualScenarioMatrixTests" runstate="Runnable" seed="294048669" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000196" asserts="0">
+                <properties />
+                <output><![CDATA[semantic=udp-datagram-drop scenario=ready-loss outcome=Running finalState=Running terminated=True timeMs=250 steps=251 hello=1 welcome=1 ready=2 start=1 reconnectWelcome=0 resumeAccepted=0 resumeComplete=0 dropped=1 reordered=0 duplicated=0 jittered=0 observedResumeRejected=False
+]]></output>
+              </test-case>
+              <test-case id="2047" name="InitialHandshakeMatrix_TerminatesRunningWithinBothBounds(&quot;start-loss&quot;)" fullname="FrameSyncDemo.Tests.KcpUdpVirtualScenarioMatrixTests.InitialHandshakeMatrix_TerminatesRunningWithinBothBounds(&quot;start-loss&quot;)" methodname="InitialHandshakeMatrix_TerminatesRunningWithinBothBounds" classname="FrameSyncDemo.Tests.KcpUdpVirtualScenarioMatrixTests" runstate="Runnable" seed="1966482281" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000207" asserts="0">
+                <properties />
+                <output><![CDATA[semantic=udp-datagram-drop scenario=start-loss outcome=Running finalState=Running terminated=True timeMs=250 steps=251 hello=1 welcome=1 ready=2 start=2 reconnectWelcome=0 resumeAccepted=0 resumeComplete=0 dropped=1 reordered=0 duplicated=0 jittered=0 observedResumeRejected=False
+]]></output>
+              </test-case>
+            </test-suite>
+            <test-suite type="ParameterizedMethod" id="2054" name="KcpDropMatrix_DataAndAckLossRecoverWithoutSyntheticEvents" fullname="FrameSyncDemo.Tests.KcpUdpVirtualScenarioMatrixTests.KcpDropMatrix_DataAndAckLossRecoverWithoutSyntheticEvents" classname="FrameSyncDemo.Tests.KcpUdpVirtualScenarioMatrixTests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.008287" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="2052" name="KcpDropMatrix_DataAndAckLossRecoverWithoutSyntheticEvents(True)" fullname="FrameSyncDemo.Tests.KcpUdpVirtualScenarioMatrixTests.KcpDropMatrix_DataAndAckLossRecoverWithoutSyntheticEvents(True)" methodname="KcpDropMatrix_DataAndAckLossRecoverWithoutSyntheticEvents" classname="FrameSyncDemo.Tests.KcpUdpVirtualScenarioMatrixTests" runstate="Runnable" seed="1337585429" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.001226" asserts="0">
+                <properties />
+                <output><![CDATA[semantic=udp-datagram-drop scenario=kcp-data-drop terminated=True timeMs=220 steps=221 dataDrops=1 ackDrops=0 outputs=2 pendingSend=0
+]]></output>
+              </test-case>
+              <test-case id="2053" name="KcpDropMatrix_DataAndAckLossRecoverWithoutSyntheticEvents(False)" fullname="FrameSyncDemo.Tests.KcpUdpVirtualScenarioMatrixTests.KcpDropMatrix_DataAndAckLossRecoverWithoutSyntheticEvents(False)" methodname="KcpDropMatrix_DataAndAckLossRecoverWithoutSyntheticEvents" classname="FrameSyncDemo.Tests.KcpUdpVirtualScenarioMatrixTests" runstate="Runnable" seed="1487434340" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000319" asserts="0">
+                <properties />
+                <output><![CDATA[semantic=udp-datagram-drop scenario=kcp-ack-drop terminated=True timeMs=220 steps=221 dataDrops=0 ackDrops=1 outputs=2 pendingSend=0
+]]></output>
+              </test-case>
+            </test-suite>
+            <test-case id="2036" name="ProtocolDriver_ExposesBoundedScenarioEntryPoint" fullname="FrameSyncDemo.Tests.KcpUdpVirtualScenarioMatrixTests.ProtocolDriver_ExposesBoundedScenarioEntryPoint" methodname="ProtocolDriver_ExposesBoundedScenarioEntryPoint" classname="FrameSyncDemo.Tests.KcpUdpVirtualScenarioMatrixTests" runstate="Runnable" seed="451064372" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000301" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2037" name="ProtocolResult_ExposesOutcomeBoundsAndDecisionEvidence" fullname="FrameSyncDemo.Tests.KcpUdpVirtualScenarioMatrixTests.ProtocolResult_ExposesOutcomeBoundsAndDecisionEvidence" methodname="ProtocolResult_ExposesOutcomeBoundsAndDecisionEvidence" classname="FrameSyncDemo.Tests.KcpUdpVirtualScenarioMatrixTests" runstate="Runnable" seed="752435377" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000361" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2049" name="ReconnectWelcomeLoss_RetriesThenTerminatesRunning" fullname="FrameSyncDemo.Tests.KcpUdpVirtualScenarioMatrixTests.ReconnectWelcomeLoss_RetriesThenTerminatesRunning" methodname="ReconnectWelcomeLoss_RetriesThenTerminatesRunning" classname="FrameSyncDemo.Tests.KcpUdpVirtualScenarioMatrixTests" runstate="Runnable" seed="2059669271" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000845" asserts="0">
+              <properties />
+              <output><![CDATA[semantic=udp-datagram-drop scenario=reconnect-welcome-loss outcome=Running finalState=Running terminated=True timeMs=3251 steps=3252 hello=3 welcome=3 ready=2 start=1 reconnectWelcome=2 resumeAccepted=1 resumeComplete=2 dropped=1 reordered=0 duplicated=0 jittered=0 observedResumeRejected=False
+]]></output>
+            </test-case>
+            <test-case id="2050" name="ResumeControlLoss_RetriesThenTerminatesRunning" fullname="FrameSyncDemo.Tests.KcpUdpVirtualScenarioMatrixTests.ResumeControlLoss_RetriesThenTerminatesRunning" methodname="ResumeControlLoss_RetriesThenTerminatesRunning" classname="FrameSyncDemo.Tests.KcpUdpVirtualScenarioMatrixTests" runstate="Runnable" seed="1839609355" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.001892" asserts="0">
+              <properties />
+              <output><![CDATA[semantic=udp-datagram-drop scenario=resume-control-loss outcome=Running finalState=Running terminated=True timeMs=3250 steps=3251 hello=2 welcome=2 ready=3 start=1 reconnectWelcome=1 resumeAccepted=2 resumeComplete=2 dropped=1 reordered=0 duplicated=0 jittered=0 observedResumeRejected=False
+]]></output>
+            </test-case>
+            <test-case id="2051" name="UnsafeResumeControl_TerminatesAsExplicitResumeRejected" fullname="FrameSyncDemo.Tests.KcpUdpVirtualScenarioMatrixTests.UnsafeResumeControl_TerminatesAsExplicitResumeRejected" methodname="UnsafeResumeControl_TerminatesAsExplicitResumeRejected" classname="FrameSyncDemo.Tests.KcpUdpVirtualScenarioMatrixTests" runstate="Runnable" seed="598168303" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000617" asserts="0">
+              <properties />
+              <output><![CDATA[semantic=udp-datagram-drop scenario=resume-control-rejected outcome=ResumeRejected finalState=Terminated terminated=True timeMs=3000 steps=3001 hello=2 welcome=2 ready=2 start=1 reconnectWelcome=1 resumeAccepted=0 resumeComplete=0 dropped=0 reordered=0 duplicated=0 jittered=0 observedResumeRejected=True
+]]></output>
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="2055" name="KcpVendorProvenanceTests" fullname="FrameSyncDemo.Tests.KcpVendorProvenanceTests" classname="FrameSyncDemo.Tests.KcpVendorProvenanceTests" runstate="Runnable" testcasecount="4" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.001871" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-suite type="ParameterizedMethod" id="2060" name="RuntimeAssembly_HighLevelKcpType_IsNotImported" fullname="FrameSyncDemo.Tests.KcpVendorProvenanceTests.RuntimeAssembly_HighLevelKcpType_IsNotImported" classname="FrameSyncDemo.Tests.KcpVendorProvenanceTests" runstate="Runnable" testcasecount="3" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000895" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="2057" name="RuntimeAssembly_HighLevelKcpType_IsNotImported(&quot;kcp2k.KcpClient&quot;)" fullname="FrameSyncDemo.Tests.KcpVendorProvenanceTests.RuntimeAssembly_HighLevelKcpType_IsNotImported(&quot;kcp2k.KcpClient&quot;)" methodname="RuntimeAssembly_HighLevelKcpType_IsNotImported" classname="FrameSyncDemo.Tests.KcpVendorProvenanceTests" runstate="Runnable" seed="2096166345" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000306" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="2058" name="RuntimeAssembly_HighLevelKcpType_IsNotImported(&quot;kcp2k.KcpServer&quot;)" fullname="FrameSyncDemo.Tests.KcpVendorProvenanceTests.RuntimeAssembly_HighLevelKcpType_IsNotImported(&quot;kcp2k.KcpServer&quot;)" methodname="RuntimeAssembly_HighLevelKcpType_IsNotImported" classname="FrameSyncDemo.Tests.KcpVendorProvenanceTests" runstate="Runnable" seed="1555060911" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000089" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="2059" name="RuntimeAssembly_HighLevelKcpType_IsNotImported(&quot;kcp2k.KcpConnection&quot;)" fullname="FrameSyncDemo.Tests.KcpVendorProvenanceTests.RuntimeAssembly_HighLevelKcpType_IsNotImported(&quot;kcp2k.KcpConnection&quot;)" methodname="RuntimeAssembly_HighLevelKcpType_IsNotImported" classname="FrameSyncDemo.Tests.KcpVendorProvenanceTests" runstate="Runnable" seed="958846229" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000073" asserts="0">
+                <properties />
+              </test-case>
+            </test-suite>
+            <test-case id="2056" name="SetNoDelay_OneAndFiveMilliseconds_RemainEffective" fullname="FrameSyncDemo.Tests.KcpVendorProvenanceTests.SetNoDelay_OneAndFiveMilliseconds_RemainEffective" methodname="SetNoDelay_OneAndFiveMilliseconds_RemainEffective" classname="FrameSyncDemo.Tests.KcpVendorProvenanceTests" runstate="Runnable" seed="1972911653" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000472" asserts="0">
+              <properties />
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="2086" name="NetworkLedgerWiringTests" fullname="FrameSyncDemo.Tests.NetworkLedgerWiringTests" classname="FrameSyncDemo.Tests.NetworkLedgerWiringTests" runstate="Runnable" testcasecount="5" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.015537" total="5" passed="5" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="2088" name="ConcreteTransportsOwnArrivalFifoAndFacadeKeepsDequeueSurfaces" fullname="FrameSyncDemo.Tests.NetworkLedgerWiringTests.ConcreteTransportsOwnArrivalFifoAndFacadeKeepsDequeueSurfaces" methodname="ConcreteTransportsOwnArrivalFifoAndFacadeKeepsDequeueSurfaces" classname="FrameSyncDemo.Tests.NetworkLedgerWiringTests" runstate="Runnable" seed="894733076" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000989" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2090" name="Ledger_CanonicalRemoteArrivalsOutOfOrder_ConfirmsOnlyWhenGapFills" fullname="FrameSyncDemo.Tests.NetworkLedgerWiringTests.Ledger_CanonicalRemoteArrivalsOutOfOrder_ConfirmsOnlyWhenGapFills" methodname="Ledger_CanonicalRemoteArrivalsOutOfOrder_ConfirmsOnlyWhenGapFills" classname="FrameSyncDemo.Tests.NetworkLedgerWiringTests" runstate="Runnable" seed="198741396" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000306" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2091" name="Ledger_PlayerOneLocalAndRemoteFrames_MapToSameCanonicalFrameBeforeAccess" fullname="FrameSyncDemo.Tests.NetworkLedgerWiringTests.Ledger_PlayerOneLocalAndRemoteFrames_MapToSameCanonicalFrameBeforeAccess" methodname="Ledger_PlayerOneLocalAndRemoteFrames_MapToSameCanonicalFrameBeforeAccess" classname="FrameSyncDemo.Tests.NetworkLedgerWiringTests" runstate="Runnable" seed="957254420" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000577" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2087" name="NetworkClient_HasNoSecondRemoteActualDictionaryOrIndexApis" fullname="FrameSyncDemo.Tests.NetworkLedgerWiringTests.NetworkClient_HasNoSecondRemoteActualDictionaryOrIndexApis" methodname="NetworkClient_HasNoSecondRemoteActualDictionaryOrIndexApis" classname="FrameSyncDemo.Tests.NetworkLedgerWiringTests" runstate="Runnable" seed="1784694347" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000254" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2089" name="NetworkPacketArrival_PreservesProtocolAndReceiveMetadata" fullname="FrameSyncDemo.Tests.NetworkLedgerWiringTests.NetworkPacketArrival_PreservesProtocolAndReceiveMetadata" methodname="NetworkPacketArrival_PreservesProtocolAndReceiveMetadata" classname="FrameSyncDemo.Tests.NetworkLedgerWiringTests" runstate="Runnable" seed="1323788556" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000208" asserts="0">
+              <properties />
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="2100" name="OutboundActualHistoryTests" fullname="FrameSyncDemo.Tests.OutboundActualHistoryTests" classname="FrameSyncDemo.Tests.OutboundActualHistoryTests" runstate="Runnable" testcasecount="8" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.007863" total="8" passed="8" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="2103" name="Constructor_NonPositiveCapacity_Throws" fullname="FrameSyncDemo.Tests.OutboundActualHistoryTests.Constructor_NonPositiveCapacity_Throws" methodname="Constructor_NonPositiveCapacity_Throws" classname="FrameSyncDemo.Tests.OutboundActualHistoryTests" runstate="Runnable" seed="971785024" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000653" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2105" name="Record_EvictedFrame_DoesNotOverwriteNewestRingSlot" fullname="FrameSyncDemo.Tests.OutboundActualHistoryTests.Record_EvictedFrame_DoesNotOverwriteNewestRingSlot" methodname="Record_EvictedFrame_DoesNotOverwriteNewestRingSlot" classname="FrameSyncDemo.Tests.OutboundActualHistoryTests" runstate="Runnable" seed="1197023669" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.001186" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2108" name="Record_FutureJump_EvictsFramesOutsideLogicalWindow" fullname="FrameSyncDemo.Tests.OutboundActualHistoryTests.Record_FutureJump_EvictsFramesOutsideLogicalWindow" methodname="Record_FutureJump_EvictsFramesOutsideLogicalWindow" classname="FrameSyncDemo.Tests.OutboundActualHistoryTests" runstate="Runnable" seed="635376778" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000714" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2104" name="Record_NegativeFrame_Throws" fullname="FrameSyncDemo.Tests.OutboundActualHistoryTests.Record_NegativeFrame_Throws" methodname="Record_NegativeFrame_Throws" classname="FrameSyncDemo.Tests.OutboundActualHistoryTests" runstate="Runnable" seed="1866515884" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000276" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2101" name="Record_SameFrameDifferentRaw_ReturnsConflictWithoutOverwrite" fullname="FrameSyncDemo.Tests.OutboundActualHistoryTests.Record_SameFrameDifferentRaw_ReturnsConflictWithoutOverwrite" methodname="Record_SameFrameDifferentRaw_ReturnsConflictWithoutOverwrite" classname="FrameSyncDemo.Tests.OutboundActualHistoryTests" runstate="Runnable" seed="117529891" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000257" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2102" name="Record_SameFrameSameRaw_ReturnsIdempotentDuplicate" fullname="FrameSyncDemo.Tests.OutboundActualHistoryTests.Record_SameFrameSameRaw_ReturnsIdempotentDuplicate" methodname="Record_SameFrameSameRaw_ReturnsIdempotentDuplicate" classname="FrameSyncDemo.Tests.OutboundActualHistoryTests" runstate="Runnable" seed="1411716429" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000242" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2107" name="TryCopyRange_AnyMissingFrame_RejectsWholeRange" fullname="FrameSyncDemo.Tests.OutboundActualHistoryTests.TryCopyRange_AnyMissingFrame_RejectsWholeRange" methodname="TryCopyRange_AnyMissingFrame_RejectsWholeRange" classname="FrameSyncDemo.Tests.OutboundActualHistoryTests" runstate="Runnable" seed="28794436" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000185" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2106" name="TryCopyRange_ContiguousFrames_ReturnsImmutableEightByteCopies" fullname="FrameSyncDemo.Tests.OutboundActualHistoryTests.TryCopyRange_ContiguousFrames_ReturnsImmutableEightByteCopies" methodname="TryCopyRange_ContiguousFrames_ReturnsImmutableEightByteCopies" classname="FrameSyncDemo.Tests.OutboundActualHistoryTests" runstate="Runnable" seed="1063220077" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000283" asserts="0">
+              <properties />
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="2109" name="P2CRuntimeOwnershipTests" fullname="FrameSyncDemo.Tests.P2CRuntimeOwnershipTests" classname="FrameSyncDemo.Tests.P2CRuntimeOwnershipTests" runstate="Runnable" testcasecount="5" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.012001" total="5" passed="5" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="2113" name="GameController_OwnsSerializedConfirmedPlaybackSettingsAndOneCursor" fullname="FrameSyncDemo.Tests.P2CRuntimeOwnershipTests.GameController_OwnsSerializedConfirmedPlaybackSettingsAndOneCursor" methodname="GameController_OwnsSerializedConfirmedPlaybackSettingsAndOneCursor" classname="FrameSyncDemo.Tests.P2CRuntimeOwnershipTests" runstate="Runnable" seed="1656097910" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000378" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2110" name="GameController_P2CUsesCoordinatorAsOnlyFrameSyncCoreOwner" fullname="FrameSyncDemo.Tests.P2CRuntimeOwnershipTests.GameController_P2CUsesCoordinatorAsOnlyFrameSyncCoreOwner" methodname="GameController_P2CUsesCoordinatorAsOnlyFrameSyncCoreOwner" classname="FrameSyncDemo.Tests.P2CRuntimeOwnershipTests" runstate="Runnable" seed="2109441306" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000185" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2111" name="GameController_P2DRealtimePresentationOwnsNoSecondLogicWorld" fullname="FrameSyncDemo.Tests.P2CRuntimeOwnershipTests.GameController_P2DRealtimePresentationOwnsNoSecondLogicWorld" methodname="GameController_P2DRealtimePresentationOwnsNoSecondLogicWorld" classname="FrameSyncDemo.Tests.P2CRuntimeOwnershipTests" runstate="Runnable" seed="177282760" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000160" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2112" name="GameController_P2EDiagnosticsIsSidecarOnly" fullname="FrameSyncDemo.Tests.P2CRuntimeOwnershipTests.GameController_P2EDiagnosticsIsSidecarOnly" methodname="GameController_P2EDiagnosticsIsSidecarOnly" classname="FrameSyncDemo.Tests.P2CRuntimeOwnershipTests" runstate="Runnable" seed="1131187088" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.001151" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2114" name="GameController_UsesAdvanceThenFinalSampleOrchestrationEntryPoint" fullname="FrameSyncDemo.Tests.P2CRuntimeOwnershipTests.GameController_UsesAdvanceThenFinalSampleOrchestrationEntryPoint" methodname="GameController_UsesAdvanceThenFinalSampleOrchestrationEntryPoint" classname="FrameSyncDemo.Tests.P2CRuntimeOwnershipTests" runstate="Runnable" seed="593565765" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000200" asserts="0">
+              <properties />
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="2115" name="P2FClientTransportOwnershipTests" fullname="FrameSyncDemo.Tests.P2FClientTransportOwnershipTests" classname="FrameSyncDemo.Tests.P2FClientTransportOwnershipTests" runstate="Runnable" testcasecount="8" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.024106" total="8" passed="8" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-suite type="ParameterizedMethod" id="2120" name="ConcreteTransport_OwnsExactlyOneRemoteArrivalQueue" fullname="FrameSyncDemo.Tests.P2FClientTransportOwnershipTests.ConcreteTransport_OwnsExactlyOneRemoteArrivalQueue" classname="FrameSyncDemo.Tests.P2FClientTransportOwnershipTests" runstate="Runnable" testcasecount="3" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.008654" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="2117" name="ConcreteTransport_OwnsExactlyOneRemoteArrivalQueue(&quot;FrameSyncDemo.KcpUdpClientTransport&quot;)" fullname="FrameSyncDemo.Tests.P2FClientTransportOwnershipTests.ConcreteTransport_OwnsExactlyOneRemoteArrivalQueue(&quot;FrameSyncDemo.KcpUdpClientTransport&quot;)" methodname="ConcreteTransport_OwnsExactlyOneRemoteArrivalQueue" classname="FrameSyncDemo.Tests.P2FClientTransportOwnershipTests" runstate="Runnable" seed="1322722224" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000926" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="2118" name="ConcreteTransport_OwnsExactlyOneRemoteArrivalQueue(&quot;FrameSyncDemo.TcpClientTransport&quot;)" fullname="FrameSyncDemo.Tests.P2FClientTransportOwnershipTests.ConcreteTransport_OwnsExactlyOneRemoteArrivalQueue(&quot;FrameSyncDemo.TcpClientTransport&quot;)" methodname="ConcreteTransport_OwnsExactlyOneRemoteArrivalQueue" classname="FrameSyncDemo.Tests.P2FClientTransportOwnershipTests" runstate="Runnable" seed="1310477834" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000192" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="2119" name="ConcreteTransport_OwnsExactlyOneRemoteArrivalQueue(&quot;FrameSyncDemo.RawUdpInputTransport&quot;)" fullname="FrameSyncDemo.Tests.P2FClientTransportOwnershipTests.ConcreteTransport_OwnsExactlyOneRemoteArrivalQueue(&quot;FrameSyncDemo.RawUdpInputTransport&quot;)" methodname="ConcreteTransport_OwnsExactlyOneRemoteArrivalQueue" classname="FrameSyncDemo.Tests.P2FClientTransportOwnershipTests" runstate="Runnable" seed="770262481" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000158" asserts="0">
+                <properties />
+              </test-case>
+            </test-suite>
+            <test-case id="2123" name="GameController_DoesNotOwnRemoteArrivalQueue" fullname="FrameSyncDemo.Tests.P2FClientTransportOwnershipTests.GameController_DoesNotOwnRemoteArrivalQueue" methodname="GameController_DoesNotOwnRemoteArrivalQueue" classname="FrameSyncDemo.Tests.P2FClientTransportOwnershipTests" runstate="Runnable" seed="580339339" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000369" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2124" name="GameController_StartUsesAllmanBraces" fullname="FrameSyncDemo.Tests.P2FClientTransportOwnershipTests.GameController_StartUsesAllmanBraces" methodname="GameController_StartUsesAllmanBraces" classname="FrameSyncDemo.Tests.P2FClientTransportOwnershipTests" runstate="Runnable" seed="1041748659" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.005169" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2122" name="KcpWorker_UsesDeadlineSelectWithoutUnityOrOneMillisecondPolling" fullname="FrameSyncDemo.Tests.P2FClientTransportOwnershipTests.KcpWorker_UsesDeadlineSelectWithoutUnityOrOneMillisecondPolling" methodname="KcpWorker_UsesDeadlineSelectWithoutUnityOrOneMillisecondPolling" classname="FrameSyncDemo.Tests.P2FClientTransportOwnershipTests" runstate="Runnable" seed="766546688" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.001195" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2116" name="NetworkClient_IsTransportFacadeWithoutProtocolOrSocketOwnership" fullname="FrameSyncDemo.Tests.P2FClientTransportOwnershipTests.NetworkClient_IsTransportFacadeWithoutProtocolOrSocketOwnership" methodname="NetworkClient_IsTransportFacadeWithoutProtocolOrSocketOwnership" classname="FrameSyncDemo.Tests.P2FClientTransportOwnershipTests" runstate="Runnable" seed="821439859" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000592" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2121" name="TcpTransport_ExclusivelyOwnsTcpClientAndStream" fullname="FrameSyncDemo.Tests.P2FClientTransportOwnershipTests.TcpTransport_ExclusivelyOwnsTcpClientAndStream" methodname="TcpTransport_ExclusivelyOwnsTcpClientAndStream" classname="FrameSyncDemo.Tests.P2FClientTransportOwnershipTests" runstate="Runnable" seed="444403519" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000317" asserts="0">
+              <properties />
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="2377" name="ResumeReadinessTests" fullname="FrameSyncDemo.Tests.ResumeReadinessTests" classname="FrameSyncDemo.Tests.ResumeReadinessTests" runstate="Runnable" testcasecount="5" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.007033" total="5" passed="5" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="2379" name="Constructor_ExactLowerBounds_AreValid" fullname="FrameSyncDemo.Tests.ResumeReadinessTests.Constructor_ExactLowerBounds_AreValid" methodname="Constructor_ExactLowerBounds_AreValid" classname="FrameSyncDemo.Tests.ResumeReadinessTests" runstate="Runnable" seed="131324149" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000261" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2378" name="Constructor_ValidValues_PreservesAllFields" fullname="FrameSyncDemo.Tests.ResumeReadinessTests.Constructor_ValidValues_PreservesAllFields" methodname="Constructor_ValidValues_PreservesAllFields" classname="FrameSyncDemo.Tests.ResumeReadinessTests" runstate="Runnable" seed="203448082" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000198" asserts="0">
+              <properties />
+            </test-case>
+            <test-suite type="ParameterizedMethod" id="2383" name="Constructor_ValueBelowFieldFloor_Throws" fullname="FrameSyncDemo.Tests.ResumeReadinessTests.Constructor_ValueBelowFieldFloor_Throws" classname="FrameSyncDemo.Tests.ResumeReadinessTests" runstate="Runnable" testcasecount="3" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.003927" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="2380" name="Constructor_ValueBelowFieldFloor_Throws(-2,0,-1)" fullname="FrameSyncDemo.Tests.ResumeReadinessTests.Constructor_ValueBelowFieldFloor_Throws(-2,0,-1)" methodname="Constructor_ValueBelowFieldFloor_Throws" classname="FrameSyncDemo.Tests.ResumeReadinessTests" runstate="Runnable" seed="1520400750" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000790" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="2381" name="Constructor_ValueBelowFieldFloor_Throws(-1,-1,-1)" fullname="FrameSyncDemo.Tests.ResumeReadinessTests.Constructor_ValueBelowFieldFloor_Throws(-1,-1,-1)" methodname="Constructor_ValueBelowFieldFloor_Throws" classname="FrameSyncDemo.Tests.ResumeReadinessTests" runstate="Runnable" seed="521636091" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000178" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="2382" name="Constructor_ValueBelowFieldFloor_Throws(-1,0,-2)" fullname="FrameSyncDemo.Tests.ResumeReadinessTests.Constructor_ValueBelowFieldFloor_Throws(-1,0,-2)" methodname="Constructor_ValueBelowFieldFloor_Throws" classname="FrameSyncDemo.Tests.ResumeReadinessTests" runstate="Runnable" seed="953703016" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000131" asserts="0">
+                <properties />
+              </test-case>
+            </test-suite>
+          </test-suite>
+          <test-suite type="TestFixture" id="2388" name="RouteCControlPayloadCodecTests" fullname="FrameSyncDemo.Tests.RouteCControlPayloadCodecTests" classname="FrameSyncDemo.Tests.RouteCControlPayloadCodecTests" runstate="Runnable" testcasecount="7" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.005600" total="7" passed="7" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="2393" name="ControlPayloadDecoders_WrongExactLength_ReturnFalse" fullname="FrameSyncDemo.Tests.RouteCControlPayloadCodecTests.ControlPayloadDecoders_WrongExactLength_ReturnFalse" methodname="ControlPayloadDecoders_WrongExactLength_ReturnFalse" classname="FrameSyncDemo.Tests.RouteCControlPayloadCodecTests" runstate="Runnable" seed="375862501" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000423" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2394" name="HelloPayloadDecoders_WrongKind_ReturnFalse" fullname="FrameSyncDemo.Tests.RouteCControlPayloadCodecTests.HelloPayloadDecoders_WrongKind_ReturnFalse" methodname="HelloPayloadDecoders_WrongKind_ReturnFalse" classname="FrameSyncDemo.Tests.RouteCControlPayloadCodecTests" runstate="Runnable" seed="864901229" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000192" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2389" name="HelloPayloads_UseKindNonceAndTokenLayout" fullname="FrameSyncDemo.Tests.RouteCControlPayloadCodecTests.HelloPayloads_UseKindNonceAndTokenLayout" methodname="HelloPayloads_UseKindNonceAndTokenLayout" classname="FrameSyncDemo.Tests.RouteCControlPayloadCodecTests" runstate="Runnable" seed="21077597" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000576" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2391" name="ReadyAndStart_RoundTripSignedFieldsInNetworkByteOrder" fullname="FrameSyncDemo.Tests.RouteCControlPayloadCodecTests.ReadyAndStart_RoundTripSignedFieldsInNetworkByteOrder" methodname="ReadyAndStart_RoundTripSignedFieldsInNetworkByteOrder" classname="FrameSyncDemo.Tests.RouteCControlPayloadCodecTests" runstate="Runnable" seed="1693242986" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000320" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2392" name="ResumePayloads_RoundTripAttemptAndFrozenBounds" fullname="FrameSyncDemo.Tests.RouteCControlPayloadCodecTests.ResumePayloads_RoundTripAttemptAndFrozenBounds" methodname="ResumePayloads_RoundTripAttemptAndFrozenBounds" classname="FrameSyncDemo.Tests.RouteCControlPayloadCodecTests" runstate="Runnable" seed="454259949" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000807" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2395" name="TryDecodeWelcome_InvalidResumeRequiredByte_ReturnsFalse" fullname="FrameSyncDemo.Tests.RouteCControlPayloadCodecTests.TryDecodeWelcome_InvalidResumeRequiredByte_ReturnsFalse" methodname="TryDecodeWelcome_InvalidResumeRequiredByte_ReturnsFalse" classname="FrameSyncDemo.Tests.RouteCControlPayloadCodecTests" runstate="Runnable" seed="996133587" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000173" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2390" name="Welcome_RoundTrip_UsesExactNetworkByteOrderAndCopiesSecrets" fullname="FrameSyncDemo.Tests.RouteCControlPayloadCodecTests.Welcome_RoundTrip_UsesExactNetworkByteOrderAndCopiesSecrets" methodname="Welcome_RoundTrip_UsesExactNetworkByteOrderAndCopiesSecrets" classname="FrameSyncDemo.Tests.RouteCControlPayloadCodecTests" runstate="Runnable" seed="1089559811" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000531" asserts="0">
+              <properties />
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="2396" name="RouteCKcpSessionTests" fullname="FrameSyncDemo.Tests.RouteCKcpSessionTests" classname="FrameSyncDemo.Tests.RouteCKcpSessionTests" runstate="Runnable" testcasecount="27" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.037788" total="27" passed="27" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-suite type="ParameterizedMethod" id="2423" name="CheckDrivenUpdates_SupportedInterval_IsNeverClamped" fullname="FrameSyncDemo.Tests.RouteCKcpSessionTests.CheckDrivenUpdates_SupportedInterval_IsNeverClamped" classname="FrameSyncDemo.Tests.RouteCKcpSessionTests" runstate="Runnable" testcasecount="4" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.004760" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="2419" name="CheckDrivenUpdates_SupportedInterval_IsNeverClamped(1)" fullname="FrameSyncDemo.Tests.RouteCKcpSessionTests.CheckDrivenUpdates_SupportedInterval_IsNeverClamped(1)" methodname="CheckDrivenUpdates_SupportedInterval_IsNeverClamped" classname="FrameSyncDemo.Tests.RouteCKcpSessionTests" runstate="Runnable" seed="259725341" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.001758" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="2420" name="CheckDrivenUpdates_SupportedInterval_IsNeverClamped(5)" fullname="FrameSyncDemo.Tests.RouteCKcpSessionTests.CheckDrivenUpdates_SupportedInterval_IsNeverClamped(5)" methodname="CheckDrivenUpdates_SupportedInterval_IsNeverClamped" classname="FrameSyncDemo.Tests.RouteCKcpSessionTests" runstate="Runnable" seed="1826280791" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000186" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="2421" name="CheckDrivenUpdates_SupportedInterval_IsNeverClamped(10)" fullname="FrameSyncDemo.Tests.RouteCKcpSessionTests.CheckDrivenUpdates_SupportedInterval_IsNeverClamped(10)" methodname="CheckDrivenUpdates_SupportedInterval_IsNeverClamped" classname="FrameSyncDemo.Tests.RouteCKcpSessionTests" runstate="Runnable" seed="967964394" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000118" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="2422" name="CheckDrivenUpdates_SupportedInterval_IsNeverClamped(20)" fullname="FrameSyncDemo.Tests.RouteCKcpSessionTests.CheckDrivenUpdates_SupportedInterval_IsNeverClamped(20)" methodname="CheckDrivenUpdates_SupportedInterval_IsNeverClamped" classname="FrameSyncDemo.Tests.RouteCKcpSessionTests" runstate="Runnable" seed="2117832464" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000100" asserts="0">
+                <properties />
+              </test-case>
+            </test-suite>
+            <test-case id="2424" name="Diagnostics_LateUpdate_RecordsGapAndWakeupErrorInIntegerTicks" fullname="FrameSyncDemo.Tests.RouteCKcpSessionTests.Diagnostics_LateUpdate_RecordsGapAndWakeupErrorInIntegerTicks" methodname="Diagnostics_LateUpdate_RecordsGapAndWakeupErrorInIntegerTicks" classname="FrameSyncDemo.Tests.RouteCKcpSessionTests" runstate="Runnable" seed="251028154" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000719" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2426" name="Diagnostics_ReceivedBusinessInput_RecordsOneReceive" fullname="FrameSyncDemo.Tests.RouteCKcpSessionTests.Diagnostics_ReceivedBusinessInput_RecordsOneReceive" methodname="Diagnostics_ReceivedBusinessInput_RecordsOneReceive" classname="FrameSyncDemo.Tests.RouteCKcpSessionTests" runstate="Runnable" seed="897627439" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000816" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2425" name="Diagnostics_SendAndInvalidInput_RecordsTrafficErrorsAndWaitSndHighWater" fullname="FrameSyncDemo.Tests.RouteCKcpSessionTests.Diagnostics_SendAndInvalidInput_RecordsTrafficErrorsAndWaitSndHighWater" methodname="Diagnostics_SendAndInvalidInput_RecordsTrafficErrorsAndWaitSndHighWater" classname="FrameSyncDemo.Tests.RouteCKcpSessionTests" runstate="Runnable" seed="1455147840" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000531" asserts="0">
+              <properties />
+            </test-case>
+            <test-suite type="ParameterizedMethod" id="2412" name="FirstUpdate_ConfiguredInterval_IsEffectiveCheckDelta" fullname="FrameSyncDemo.Tests.RouteCKcpSessionTests.FirstUpdate_ConfiguredInterval_IsEffectiveCheckDelta" classname="FrameSyncDemo.Tests.RouteCKcpSessionTests" runstate="Runnable" testcasecount="4" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.002462" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="2408" name="FirstUpdate_ConfiguredInterval_IsEffectiveCheckDelta(1)" fullname="FrameSyncDemo.Tests.RouteCKcpSessionTests.FirstUpdate_ConfiguredInterval_IsEffectiveCheckDelta(1)" methodname="FirstUpdate_ConfiguredInterval_IsEffectiveCheckDelta" classname="FrameSyncDemo.Tests.RouteCKcpSessionTests" runstate="Runnable" seed="1379048895" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000358" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="2409" name="FirstUpdate_ConfiguredInterval_IsEffectiveCheckDelta(5)" fullname="FrameSyncDemo.Tests.RouteCKcpSessionTests.FirstUpdate_ConfiguredInterval_IsEffectiveCheckDelta(5)" methodname="FirstUpdate_ConfiguredInterval_IsEffectiveCheckDelta" classname="FrameSyncDemo.Tests.RouteCKcpSessionTests" runstate="Runnable" seed="44687989" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000144" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="2410" name="FirstUpdate_ConfiguredInterval_IsEffectiveCheckDelta(10)" fullname="FrameSyncDemo.Tests.RouteCKcpSessionTests.FirstUpdate_ConfiguredInterval_IsEffectiveCheckDelta(10)" methodname="FirstUpdate_ConfiguredInterval_IsEffectiveCheckDelta" classname="FrameSyncDemo.Tests.RouteCKcpSessionTests" runstate="Runnable" seed="1584386522" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000099" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="2411" name="FirstUpdate_ConfiguredInterval_IsEffectiveCheckDelta(20)" fullname="FrameSyncDemo.Tests.RouteCKcpSessionTests.FirstUpdate_ConfiguredInterval_IsEffectiveCheckDelta(20)" methodname="FirstUpdate_ConfiguredInterval_IsEffectiveCheckDelta" classname="FrameSyncDemo.Tests.RouteCKcpSessionTests" runstate="Runnable" seed="686271232" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000096" asserts="0">
+                <properties />
+              </test-case>
+            </test-suite>
+            <test-case id="2415" name="HasPendingBusinessInput_BeforeAndAfterReceive_TracksQueueWithoutConsuming" fullname="FrameSyncDemo.Tests.RouteCKcpSessionTests.HasPendingBusinessInput_BeforeAndAfterReceive_TracksQueueWithoutConsuming" methodname="HasPendingBusinessInput_BeforeAndAfterReceive_TracksQueueWithoutConsuming" classname="FrameSyncDemo.Tests.RouteCKcpSessionTests" runstate="Runnable" seed="1626971688" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000498" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2414" name="InputDatagram_DuplicateDataPacket_DeliversBusinessInputOnce" fullname="FrameSyncDemo.Tests.RouteCKcpSessionTests.InputDatagram_DuplicateDataPacket_DeliversBusinessInputOnce" methodname="InputDatagram_DuplicateDataPacket_DeliversBusinessInputOnce" classname="FrameSyncDemo.Tests.RouteCKcpSessionTests" runstate="Runnable" seed="713778932" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000442" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2418" name="KcpMethod_CalledFromAnotherThread_Throws" fullname="FrameSyncDemo.Tests.RouteCKcpSessionTests.KcpMethod_CalledFromAnotherThread_Throws" methodname="KcpMethod_CalledFromAnotherThread_Throws" classname="FrameSyncDemo.Tests.RouteCKcpSessionTests" runstate="Runnable" seed="1471497510" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.001011" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2417" name="Retransmission_FirstAckLost_DuplicateDataAndAckRecover" fullname="FrameSyncDemo.Tests.RouteCKcpSessionTests.Retransmission_FirstAckLost_DuplicateDataAndAckRecover" methodname="Retransmission_FirstAckLost_DuplicateDataAndAckRecover" classname="FrameSyncDemo.Tests.RouteCKcpSessionTests" runstate="Runnable" seed="520895633" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000515" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2416" name="Retransmission_FirstDataDatagramLost_EventuallyDeliversOnce" fullname="FrameSyncDemo.Tests.RouteCKcpSessionTests.Retransmission_FirstDataDatagramLost_EventuallyDeliversOnce" methodname="Retransmission_FirstDataDatagramLost_EventuallyDeliversOnce" classname="FrameSyncDemo.Tests.RouteCKcpSessionTests" runstate="Runnable" seed="1656106847" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000373" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2413" name="SendBusinessInput_InMemoryPeer_DeliversExactEightByteMessage" fullname="FrameSyncDemo.Tests.RouteCKcpSessionTests.SendBusinessInput_InMemoryPeer_DeliversExactEightByteMessage" methodname="SendBusinessInput_InMemoryPeer_DeliversExactEightByteMessage" classname="FrameSyncDemo.Tests.RouteCKcpSessionTests" runstate="Runnable" seed="1660758142" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000292" asserts="0">
+              <properties />
+            </test-case>
+            <test-suite type="ParameterizedMethod" id="2401" name="Settings_SupportedInterval_IsPreserved" fullname="FrameSyncDemo.Tests.RouteCKcpSessionTests.Settings_SupportedInterval_IsPreserved" classname="FrameSyncDemo.Tests.RouteCKcpSessionTests" runstate="Runnable" testcasecount="4" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.005690" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="2397" name="Settings_SupportedInterval_IsPreserved(1)" fullname="FrameSyncDemo.Tests.RouteCKcpSessionTests.Settings_SupportedInterval_IsPreserved(1)" methodname="Settings_SupportedInterval_IsPreserved" classname="FrameSyncDemo.Tests.RouteCKcpSessionTests" runstate="Runnable" seed="1320947802" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000299" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="2398" name="Settings_SupportedInterval_IsPreserved(5)" fullname="FrameSyncDemo.Tests.RouteCKcpSessionTests.Settings_SupportedInterval_IsPreserved(5)" methodname="Settings_SupportedInterval_IsPreserved" classname="FrameSyncDemo.Tests.RouteCKcpSessionTests" runstate="Runnable" seed="1328836000" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000112" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="2399" name="Settings_SupportedInterval_IsPreserved(10)" fullname="FrameSyncDemo.Tests.RouteCKcpSessionTests.Settings_SupportedInterval_IsPreserved(10)" methodname="Settings_SupportedInterval_IsPreserved" classname="FrameSyncDemo.Tests.RouteCKcpSessionTests" runstate="Runnable" seed="946643395" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000081" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="2400" name="Settings_SupportedInterval_IsPreserved(20)" fullname="FrameSyncDemo.Tests.RouteCKcpSessionTests.Settings_SupportedInterval_IsPreserved(20)" methodname="Settings_SupportedInterval_IsPreserved" classname="FrameSyncDemo.Tests.RouteCKcpSessionTests" runstate="Runnable" seed="531322893" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000073" asserts="0">
+                <properties />
+              </test-case>
+            </test-suite>
+            <test-suite type="ParameterizedMethod" id="2407" name="Settings_UnsupportedInterval_Throws" fullname="FrameSyncDemo.Tests.RouteCKcpSessionTests.Settings_UnsupportedInterval_Throws" classname="FrameSyncDemo.Tests.RouteCKcpSessionTests" runstate="Runnable" testcasecount="5" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.005885" total="5" passed="5" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="2402" name="Settings_UnsupportedInterval_Throws(0)" fullname="FrameSyncDemo.Tests.RouteCKcpSessionTests.Settings_UnsupportedInterval_Throws(0)" methodname="Settings_UnsupportedInterval_Throws" classname="FrameSyncDemo.Tests.RouteCKcpSessionTests" runstate="Runnable" seed="1870007131" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000385" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="2403" name="Settings_UnsupportedInterval_Throws(2)" fullname="FrameSyncDemo.Tests.RouteCKcpSessionTests.Settings_UnsupportedInterval_Throws(2)" methodname="Settings_UnsupportedInterval_Throws" classname="FrameSyncDemo.Tests.RouteCKcpSessionTests" runstate="Runnable" seed="1287145453" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000116" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="2404" name="Settings_UnsupportedInterval_Throws(4)" fullname="FrameSyncDemo.Tests.RouteCKcpSessionTests.Settings_UnsupportedInterval_Throws(4)" methodname="Settings_UnsupportedInterval_Throws" classname="FrameSyncDemo.Tests.RouteCKcpSessionTests" runstate="Runnable" seed="402013534" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000086" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="2405" name="Settings_UnsupportedInterval_Throws(6)" fullname="FrameSyncDemo.Tests.RouteCKcpSessionTests.Settings_UnsupportedInterval_Throws(6)" methodname="Settings_UnsupportedInterval_Throws" classname="FrameSyncDemo.Tests.RouteCKcpSessionTests" runstate="Runnable" seed="768428773" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000081" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="2406" name="Settings_UnsupportedInterval_Throws(21)" fullname="FrameSyncDemo.Tests.RouteCKcpSessionTests.Settings_UnsupportedInterval_Throws(21)" methodname="Settings_UnsupportedInterval_Throws" classname="FrameSyncDemo.Tests.RouteCKcpSessionTests" runstate="Runnable" seed="1162771546" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000082" asserts="0">
+                <properties />
+              </test-case>
+            </test-suite>
+            <test-case id="2427" name="StopwatchClock_RepeatedReads_DoNotMoveBackward" fullname="FrameSyncDemo.Tests.RouteCKcpSessionTests.StopwatchClock_RepeatedReads_DoNotMoveBackward" methodname="StopwatchClock_RepeatedReads_DoNotMoveBackward" classname="FrameSyncDemo.Tests.RouteCKcpSessionTests" runstate="Runnable" seed="1028076709" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000344" asserts="0">
+              <properties />
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="2428" name="RouteCProtocolCodecTests" fullname="FrameSyncDemo.Tests.RouteCProtocolCodecTests" classname="FrameSyncDemo.Tests.RouteCProtocolCodecTests" runstate="Runnable" testcasecount="28" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.014181" total="28" passed="28" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="2449" name="BusinessInput_MinimumSignedFrame_RoundTripsWithoutSignLoss" fullname="FrameSyncDemo.Tests.RouteCProtocolCodecTests.BusinessInput_MinimumSignedFrame_RoundTripsWithoutSignLoss" methodname="BusinessInput_MinimumSignedFrame_RoundTripsWithoutSignLoss" classname="FrameSyncDemo.Tests.RouteCProtocolCodecTests" runstate="Runnable" seed="485572119" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000305" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2448" name="BusinessInput_RoundTrip_PreservesExistingLittleEndianLayout" fullname="FrameSyncDemo.Tests.RouteCProtocolCodecTests.BusinessInput_RoundTrip_PreservesExistingLittleEndianLayout" methodname="BusinessInput_RoundTrip_PreservesExistingLittleEndianLayout" classname="FrameSyncDemo.Tests.RouteCProtocolCodecTests" runstate="Runnable" seed="979844244" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000245" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2441" name="Encode_KcpPayloadShorterThanHeader_ThrowsArgumentException" fullname="FrameSyncDemo.Tests.RouteCProtocolCodecTests.Encode_KcpPayloadShorterThanHeader_ThrowsArgumentException" methodname="Encode_KcpPayloadShorterThanHeader_ThrowsArgumentException" classname="FrameSyncDemo.Tests.RouteCProtocolCodecTests" runstate="Runnable" seed="1068366629" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000508" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2442" name="Encode_PayloadAboveMaximum_ThrowsArgumentOutOfRangeException" fullname="FrameSyncDemo.Tests.RouteCProtocolCodecTests.Encode_PayloadAboveMaximum_ThrowsArgumentOutOfRangeException" methodname="Encode_PayloadAboveMaximum_ThrowsArgumentOutOfRangeException" classname="FrameSyncDemo.Tests.RouteCProtocolCodecTests" runstate="Runnable" seed="2124416479" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000244" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2443" name="Encode_UnknownMessageType_ThrowsArgumentOutOfRangeException" fullname="FrameSyncDemo.Tests.RouteCProtocolCodecTests.Encode_UnknownMessageType_ThrowsArgumentOutOfRangeException" methodname="Encode_UnknownMessageType_ThrowsArgumentOutOfRangeException" classname="FrameSyncDemo.Tests.RouteCProtocolCodecTests" runstate="Runnable" seed="864214457" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000229" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2444" name="Envelope_MaximumIntegerFields_RoundTripWithoutSignLoss" fullname="FrameSyncDemo.Tests.RouteCProtocolCodecTests.Envelope_MaximumIntegerFields_RoundTripWithoutSignLoss" methodname="Envelope_MaximumIntegerFields_RoundTripWithoutSignLoss" classname="FrameSyncDemo.Tests.RouteCProtocolCodecTests" runstate="Runnable" seed="921411438" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000272" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2447" name="Envelope_RawMessageBytes13Through18_AreKnownAndByte19IsRejected" fullname="FrameSyncDemo.Tests.RouteCProtocolCodecTests.Envelope_RawMessageBytes13Through18_AreKnownAndByte19IsRejected" methodname="Envelope_RawMessageBytes13Through18_AreKnownAndByte19IsRejected" classname="FrameSyncDemo.Tests.RouteCProtocolCodecTests" runstate="Runnable" seed="829089833" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000466" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2429" name="Envelope_RoundTrip_UsesExactTwentyEightByteHeader" fullname="FrameSyncDemo.Tests.RouteCProtocolCodecTests.Envelope_RoundTrip_UsesExactTwentyEightByteHeader" methodname="Envelope_RoundTrip_UsesExactTwentyEightByteHeader" classname="FrameSyncDemo.Tests.RouteCProtocolCodecTests" runstate="Runnable" seed="1385819496" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000374" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2445" name="SessionId_ZeroEqualityAndHashCode_UseBothHalves" fullname="FrameSyncDemo.Tests.RouteCProtocolCodecTests.SessionId_ZeroEqualityAndHashCode_UseBothHalves" methodname="SessionId_ZeroEqualityAndHashCode_UseBothHalves" classname="FrameSyncDemo.Tests.RouteCProtocolCodecTests" runstate="Runnable" seed="1789766456" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000350" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2446" name="TransportAndSessionEnums_UseLockedProtocolValues" fullname="FrameSyncDemo.Tests.RouteCProtocolCodecTests.TransportAndSessionEnums_UseLockedProtocolValues" methodname="TransportAndSessionEnums_UseLockedProtocolValues" classname="FrameSyncDemo.Tests.RouteCProtocolCodecTests" runstate="Runnable" seed="274159132" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000279" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2435" name="TryDecode_BadMagic_ReturnsInvalidMagic" fullname="FrameSyncDemo.Tests.RouteCProtocolCodecTests.TryDecode_BadMagic_ReturnsInvalidMagic" methodname="TryDecode_BadMagic_ReturnsInvalidMagic" classname="FrameSyncDemo.Tests.RouteCProtocolCodecTests" runstate="Runnable" seed="419585987" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000256" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2432" name="TryDecode_CountBeyondSocketBuffer_ReturnsDatagramLengthOutOfRange" fullname="FrameSyncDemo.Tests.RouteCProtocolCodecTests.TryDecode_CountBeyondSocketBuffer_ReturnsDatagramLengthOutOfRange" methodname="TryDecode_CountBeyondSocketBuffer_ReturnsDatagramLengthOutOfRange" classname="FrameSyncDemo.Tests.RouteCProtocolCodecTests" runstate="Runnable" seed="41661524" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000134" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2434" name="TryDecode_DatagramAboveTwelveHundredBytes_ReturnsDatagramTooLarge" fullname="FrameSyncDemo.Tests.RouteCProtocolCodecTests.TryDecode_DatagramAboveTwelveHundredBytes_ReturnsDatagramTooLarge" methodname="TryDecode_DatagramAboveTwelveHundredBytes_ReturnsDatagramTooLarge" classname="FrameSyncDemo.Tests.RouteCProtocolCodecTests" runstate="Runnable" seed="1554459614" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000119" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2438" name="TryDecode_DeclaredPayloadAboveMaximum_ReturnsPayloadTooLarge" fullname="FrameSyncDemo.Tests.RouteCProtocolCodecTests.TryDecode_DeclaredPayloadAboveMaximum_ReturnsPayloadTooLarge" methodname="TryDecode_DeclaredPayloadAboveMaximum_ReturnsPayloadTooLarge" classname="FrameSyncDemo.Tests.RouteCProtocolCodecTests" runstate="Runnable" seed="1796584556" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000134" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2439" name="TryDecode_DeclaredPayloadDoesNotMatchDatagram_ReturnsPayloadLengthMismatch" fullname="FrameSyncDemo.Tests.RouteCProtocolCodecTests.TryDecode_DeclaredPayloadDoesNotMatchDatagram_ReturnsPayloadLengthMismatch" methodname="TryDecode_DeclaredPayloadDoesNotMatchDatagram_ReturnsPayloadLengthMismatch" classname="FrameSyncDemo.Tests.RouteCProtocolCodecTests" runstate="Runnable" seed="1201232739" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000145" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2431" name="TryDecode_HeaderShorterThanTwentyEightBytes_ReturnsHeaderTooShort" fullname="FrameSyncDemo.Tests.RouteCProtocolCodecTests.TryDecode_HeaderShorterThanTwentyEightBytes_ReturnsHeaderTooShort" methodname="TryDecode_HeaderShorterThanTwentyEightBytes_ReturnsHeaderTooShort" classname="FrameSyncDemo.Tests.RouteCProtocolCodecTests" runstate="Runnable" seed="1600353132" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000115" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2440" name="TryDecode_KcpPayloadShorterThanHeader_ReturnsKcpPayloadTooShort" fullname="FrameSyncDemo.Tests.RouteCProtocolCodecTests.TryDecode_KcpPayloadShorterThanHeader_ReturnsKcpPayloadTooShort" methodname="TryDecode_KcpPayloadShorterThanHeader_ReturnsKcpPayloadTooShort" classname="FrameSyncDemo.Tests.RouteCProtocolCodecTests" runstate="Runnable" seed="932406629" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000133" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2433" name="TryDecode_NegativeCount_ReturnsDatagramLengthOutOfRange" fullname="FrameSyncDemo.Tests.RouteCProtocolCodecTests.TryDecode_NegativeCount_ReturnsDatagramLengthOutOfRange" methodname="TryDecode_NegativeCount_ReturnsDatagramLengthOutOfRange" classname="FrameSyncDemo.Tests.RouteCProtocolCodecTests" runstate="Runnable" seed="435714078" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000118" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2430" name="TryDecode_ReusedSocketBufferAndReturnedPayloadMutate_MessageStaysImmutable" fullname="FrameSyncDemo.Tests.RouteCProtocolCodecTests.TryDecode_ReusedSocketBufferAndReturnedPayloadMutate_MessageStaysImmutable" methodname="TryDecode_ReusedSocketBufferAndReturnedPayloadMutate_MessageStaysImmutable" classname="FrameSyncDemo.Tests.RouteCProtocolCodecTests" runstate="Runnable" seed="176563974" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000232" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2437" name="TryDecode_UnknownMessageType_ReturnsUnknownMessageType" fullname="FrameSyncDemo.Tests.RouteCProtocolCodecTests.TryDecode_UnknownMessageType_ReturnsUnknownMessageType" methodname="TryDecode_UnknownMessageType_ReturnsUnknownMessageType" classname="FrameSyncDemo.Tests.RouteCProtocolCodecTests" runstate="Runnable" seed="1630942700" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000129" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2436" name="TryDecode_UnknownVersion_ReturnsUnsupportedVersion" fullname="FrameSyncDemo.Tests.RouteCProtocolCodecTests.TryDecode_UnknownVersion_ReturnsUnsupportedVersion" methodname="TryDecode_UnknownVersion_ReturnsUnsupportedVersion" classname="FrameSyncDemo.Tests.RouteCProtocolCodecTests" runstate="Runnable" seed="1570561985" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000125" asserts="0">
+              <properties />
+            </test-case>
+            <test-suite type="ParameterizedMethod" id="2453" name="TryDecodeBusinessInput_NonEightBytePayload_ReturnsFalse" fullname="FrameSyncDemo.Tests.RouteCProtocolCodecTests.TryDecodeBusinessInput_NonEightBytePayload_ReturnsFalse" classname="FrameSyncDemo.Tests.RouteCProtocolCodecTests" runstate="Runnable" testcasecount="3" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.001239" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="2450" name="TryDecodeBusinessInput_NonEightBytePayload_ReturnsFalse(0)" fullname="FrameSyncDemo.Tests.RouteCProtocolCodecTests.TryDecodeBusinessInput_NonEightBytePayload_ReturnsFalse(0)" methodname="TryDecodeBusinessInput_NonEightBytePayload_ReturnsFalse" classname="FrameSyncDemo.Tests.RouteCProtocolCodecTests" runstate="Runnable" seed="1558463755" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000189" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="2451" name="TryDecodeBusinessInput_NonEightBytePayload_ReturnsFalse(7)" fullname="FrameSyncDemo.Tests.RouteCProtocolCodecTests.TryDecodeBusinessInput_NonEightBytePayload_ReturnsFalse(7)" methodname="TryDecodeBusinessInput_NonEightBytePayload_ReturnsFalse" classname="FrameSyncDemo.Tests.RouteCProtocolCodecTests" runstate="Runnable" seed="400024331" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000089" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="2452" name="TryDecodeBusinessInput_NonEightBytePayload_ReturnsFalse(9)" fullname="FrameSyncDemo.Tests.RouteCProtocolCodecTests.TryDecodeBusinessInput_NonEightBytePayload_ReturnsFalse(9)" methodname="TryDecodeBusinessInput_NonEightBytePayload_ReturnsFalse" classname="FrameSyncDemo.Tests.RouteCProtocolCodecTests" runstate="Runnable" seed="522665776" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000080" asserts="0">
+                <properties />
+              </test-case>
+            </test-suite>
+            <test-case id="2454" name="TryReadConversation_LittleEndianHeader_ReturnsConversation" fullname="FrameSyncDemo.Tests.RouteCProtocolCodecTests.TryReadConversation_LittleEndianHeader_ReturnsConversation" methodname="TryReadConversation_LittleEndianHeader_ReturnsConversation" classname="FrameSyncDemo.Tests.RouteCProtocolCodecTests" runstate="Runnable" seed="1062902995" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000163" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2455" name="TryReadConversation_MaximumConversation_RoundTrips" fullname="FrameSyncDemo.Tests.RouteCProtocolCodecTests.TryReadConversation_MaximumConversation_RoundTrips" methodname="TryReadConversation_MaximumConversation_RoundTrips" classname="FrameSyncDemo.Tests.RouteCProtocolCodecTests" runstate="Runnable" seed="2045688531" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000150" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2456" name="TryReadConversation_PayloadShorterThanKcpHeader_ReturnsFalse" fullname="FrameSyncDemo.Tests.RouteCProtocolCodecTests.TryReadConversation_PayloadShorterThanKcpHeader_ReturnsFalse" methodname="TryReadConversation_PayloadShorterThanKcpHeader_ReturnsFalse" classname="FrameSyncDemo.Tests.RouteCProtocolCodecTests" runstate="Runnable" seed="2002248701" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000137" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2457" name="TryReadConversation_TrailingSessionLikeBytes_DoNotAffectConversation" fullname="FrameSyncDemo.Tests.RouteCProtocolCodecTests.TryReadConversation_TrailingSessionLikeBytes_DoNotAffectConversation" methodname="TryReadConversation_TrailingSessionLikeBytes_DoNotAffectConversation" classname="FrameSyncDemo.Tests.RouteCProtocolCodecTests" runstate="Runnable" seed="118459427" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000162" asserts="0">
+              <properties />
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="2470" name="RuntimeNetworkDiagnosticsTests" fullname="FrameSyncDemo.Tests.RuntimeNetworkDiagnosticsTests" classname="FrameSyncDemo.Tests.RuntimeNetworkDiagnosticsTests" runstate="Runnable" testcasecount="9" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.037295" total="9" passed="9" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="2474" name="ActualArrival_CacheIsBoundedAndDuplicateKeepsFirstTimestamp" fullname="FrameSyncDemo.Tests.RuntimeNetworkDiagnosticsTests.ActualArrival_CacheIsBoundedAndDuplicateKeepsFirstTimestamp" methodname="ActualArrival_CacheIsBoundedAndDuplicateKeepsFirstTimestamp" classname="FrameSyncDemo.Tests.RuntimeNetworkDiagnosticsTests" runstate="Runnable" seed="1696145570" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.007736" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2472" name="ActualArrival_FirstVisibleSample_EmitsLatencyOnceUsingCanonicalFrame" fullname="FrameSyncDemo.Tests.RuntimeNetworkDiagnosticsTests.ActualArrival_FirstVisibleSample_EmitsLatencyOnceUsingCanonicalFrame" methodname="ActualArrival_FirstVisibleSample_EmitsLatencyOnceUsingCanonicalFrame" classname="FrameSyncDemo.Tests.RuntimeNetworkDiagnosticsTests" runstate="Runnable" seed="808400799" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000459" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2475" name="BallSourceSwitch_EmitsOnlyWhenSourceOrHolderChanges" fullname="FrameSyncDemo.Tests.RuntimeNetworkDiagnosticsTests.BallSourceSwitch_EmitsOnlyWhenSourceOrHolderChanges" methodname="BallSourceSwitch_EmitsOnlyWhenSourceOrHolderChanges" classname="FrameSyncDemo.Tests.RuntimeNetworkDiagnosticsTests" runstate="Runnable" seed="879302790" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000465" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2471" name="DisabledRecorder_ProducesNoLines" fullname="FrameSyncDemo.Tests.RuntimeNetworkDiagnosticsTests.DisabledRecorder_ProducesNoLines" methodname="DisabledRecorder_ProducesNoLines" classname="FrameSyncDemo.Tests.RuntimeNetworkDiagnosticsTests" runstate="Runnable" seed="544723780" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.001069" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2479" name="Formatting_IsInvariantUnderCommaDecimalCulture" fullname="FrameSyncDemo.Tests.RuntimeNetworkDiagnosticsTests.Formatting_IsInvariantUnderCommaDecimalCulture" methodname="Formatting_IsInvariantUnderCommaDecimalCulture" classname="FrameSyncDemo.Tests.RuntimeNetworkDiagnosticsTests" runstate="Runnable" seed="1483914699" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.002002" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2477" name="LogicAndRollback_EmitHeadsDeltaReplayAndConfirmedHash" fullname="FrameSyncDemo.Tests.RuntimeNetworkDiagnosticsTests.LogicAndRollback_EmitHeadsDeltaReplayAndConfirmedHash" methodname="LogicAndRollback_EmitHeadsDeltaReplayAndConfirmedHash" classname="FrameSyncDemo.Tests.RuntimeNetworkDiagnosticsTests" runstate="Runnable" seed="924513723" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000502" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2473" name="PlaybackDiagnostics_EmitBacklogSpeedDropAndOverflowRange" fullname="FrameSyncDemo.Tests.RuntimeNetworkDiagnosticsTests.PlaybackDiagnostics_EmitBacklogSpeedDropAndOverflowRange" methodname="PlaybackDiagnostics_EmitBacklogSpeedDropAndOverflowRange" classname="FrameSyncDemo.Tests.RuntimeNetworkDiagnosticsTests" runstate="Runnable" seed="892178820" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000346" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2476" name="ReceiveAndDrain_EmitIntervalsCountsAndQueueSpan" fullname="FrameSyncDemo.Tests.RuntimeNetworkDiagnosticsTests.ReceiveAndDrain_EmitIntervalsCountsAndQueueSpan" methodname="ReceiveAndDrain_EmitIntervalsCountsAndQueueSpan" classname="FrameSyncDemo.Tests.RuntimeNetworkDiagnosticsTests" runstate="Runnable" seed="767543984" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000431" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2478" name="RemoteRender_TracksDisplacementReverseAndStationaryDuration" fullname="FrameSyncDemo.Tests.RuntimeNetworkDiagnosticsTests.RemoteRender_TracksDisplacementReverseAndStationaryDuration" methodname="RemoteRender_TracksDisplacementReverseAndStationaryDuration" classname="FrameSyncDemo.Tests.RuntimeNetworkDiagnosticsTests" runstate="Runnable" seed="1448655814" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000258" asserts="0">
+              <properties />
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="2492" name="Task6RuntimeOwnershipTests" fullname="FrameSyncDemo.Tests.Task6RuntimeOwnershipTests" classname="FrameSyncDemo.Tests.Task6RuntimeOwnershipTests" runstate="Runnable" testcasecount="1" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.005186" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="2493" name="GameController_DoesNotKeepRollbackRequestBufferAsMismatchFactSource" fullname="FrameSyncDemo.Tests.Task6RuntimeOwnershipTests.GameController_DoesNotKeepRollbackRequestBufferAsMismatchFactSource" methodname="GameController_DoesNotKeepRollbackRequestBufferAsMismatchFactSource" classname="FrameSyncDemo.Tests.Task6RuntimeOwnershipTests" runstate="Runnable" seed="227491559" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000280" asserts="0">
+              <properties />
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="2554" name="WorldSnapshotStoreTests" fullname="FrameSyncDemo.Tests.WorldSnapshotStoreTests" classname="FrameSyncDemo.Tests.WorldSnapshotStoreTests" runstate="Runnable" testcasecount="9" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.010916" total="9" passed="9" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="2555" name="Constructor_NonPositiveCapacity_Throws" fullname="FrameSyncDemo.Tests.WorldSnapshotStoreTests.Constructor_NonPositiveCapacity_Throws" methodname="Constructor_NonPositiveCapacity_Throws" classname="FrameSyncDemo.Tests.WorldSnapshotStoreTests" runstate="Runnable" seed="2104151393" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000767" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2562" name="CreateIsolated_StepClone_DoesNotMutateSourceRuntimeWorld" fullname="FrameSyncDemo.Tests.WorldSnapshotStoreTests.CreateIsolated_StepClone_DoesNotMutateSourceRuntimeWorld" methodname="CreateIsolated_StepClone_DoesNotMutateSourceRuntimeWorld" classname="FrameSyncDemo.Tests.WorldSnapshotStoreTests" runstate="Runnable" seed="993767849" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000348" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2560" name="DeterministicWorld_P2CCloneFactory_IsAvailable" fullname="FrameSyncDemo.Tests.WorldSnapshotStoreTests.DeterministicWorld_P2CCloneFactory_IsAvailable" methodname="DeterministicWorld_P2CCloneFactory_IsAvailable" classname="FrameSyncDemo.Tests.WorldSnapshotStoreTests" runstate="Runnable" seed="1681509219" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000156" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2556" name="ReadableBounds_EmptyThenRingWrap_ReportsActualSnapshots" fullname="FrameSyncDemo.Tests.WorldSnapshotStoreTests.ReadableBounds_EmptyThenRingWrap_ReportsActualSnapshots" methodname="ReadableBounds_EmptyThenRingWrap_ReportsActualSnapshots" classname="FrameSyncDemo.Tests.WorldSnapshotStoreTests" runstate="Runnable" seed="415135548" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000363" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2557" name="ReadableBounds_TruncatePastOverwrittenHistoryThenRewrite_TracksActualWindow" fullname="FrameSyncDemo.Tests.WorldSnapshotStoreTests.ReadableBounds_TruncatePastOverwrittenHistoryThenRewrite_TracksActualWindow" methodname="ReadableBounds_TruncatePastOverwrittenHistoryThenRewrite_TracksActualWindow" classname="FrameSyncDemo.Tests.WorldSnapshotStoreTests" runstate="Runnable" seed="846251455" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000326" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2563" name="Restore_ExactSnapshotAndInitial_AreExplicitAndMissingIsNonMutating" fullname="FrameSyncDemo.Tests.WorldSnapshotStoreTests.Restore_ExactSnapshotAndInitial_AreExplicitAndMissingIsNonMutating" methodname="Restore_ExactSnapshotAndInitial_AreExplicitAndMissingIsNonMutating" classname="FrameSyncDemo.Tests.WorldSnapshotStoreTests" runstate="Runnable" seed="464070025" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000395" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2559" name="RuntimeAssembly_P2CWorldSnapshotStore_IsAvailable" fullname="FrameSyncDemo.Tests.WorldSnapshotStoreTests.RuntimeAssembly_P2CWorldSnapshotStore_IsAvailable" methodname="RuntimeAssembly_P2CWorldSnapshotStore_IsAvailable" classname="FrameSyncDemo.Tests.WorldSnapshotStoreTests" runstate="Runnable" seed="1124813234" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000460" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2561" name="Stores_SameFrameDifferentValues_RemainIndependentValueCopies" fullname="FrameSyncDemo.Tests.WorldSnapshotStoreTests.Stores_SameFrameDifferentValues_RemainIndependentValueCopies" methodname="Stores_SameFrameDifferentValues_RemainIndependentValueCopies" classname="FrameSyncDemo.Tests.WorldSnapshotStoreTests" runstate="Runnable" seed="1682293483" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000404" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="2558" name="TruncateAfter_HidesFutureSnapshotsUntilRewritten" fullname="FrameSyncDemo.Tests.WorldSnapshotStoreTests.TruncateAfter_HidesFutureSnapshotsUntilRewritten" methodname="TruncateAfter_HidesFutureSnapshotsUntilRewritten" classname="FrameSyncDemo.Tests.WorldSnapshotStoreTests" runstate="Runnable" seed="584885115" result="Passed" start-time="2026-08-25 02:32:57Z" end-time="2026-08-25 02:32:57Z" duration="0.000318" asserts="0">
+              <properties />
+            </test-case>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>

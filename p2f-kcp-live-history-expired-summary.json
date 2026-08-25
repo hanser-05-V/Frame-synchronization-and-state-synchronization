@@ -1,0 +1,20 @@
+{
+  "schema": "route-c-kcp-live-socket-v1",
+  "scenario": "history-expired",
+  "status": "PASS",
+  "transport": "kcp-udp",
+  "endpointChanged": true,
+  "retainedGapFrames": 300,
+  "historyCapacity": 256,
+  "rejectedPeers": 2,
+  "rejectionReason": "UnsafeResume",
+  "diagnosticFailureKind": "RangeCapacityExceeded",
+  "finalStates": [
+    "Terminated",
+    "Terminated"
+  ],
+  "cleanup": {
+    "serverStopped": true,
+    "portReleased": true
+  }
+}

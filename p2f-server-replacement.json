@@ -1,0 +1,21 @@
+{
+  "schema": "route-c-task12-server-replacement-v1",
+  "copiedAt": "2026-08-25T10:59:53.9677219+08:00",
+  "source": {
+    "path": "E:\\帧同步_RouteC\\Project\\NetworkServer\\bin\\Release\\net48\\NetworkServer.exe",
+    "bytes": 142848,
+    "sha256": "283770E3ECC5D2F13C3B1E4262563D3AEDE388407B90753F176D237AE14DA7A7"
+  },
+  "targetBefore": {
+    "path": "E:\\帧同步_RouteC\\Project\\NetworkServer\\NetworkServer.exe",
+    "bytes": 150016,
+    "sha256": "51546BBA794FD9943803BEDB53176860DEFDF0F08334D429B7002AC6D5B2BB43"
+  },
+  "targetAfter": {
+    "path": "E:\\帧同步_RouteC\\Project\\NetworkServer\\NetworkServer.exe",
+    "bytes": 142848,
+    "sha256": "283770E3ECC5D2F13C3B1E4262563D3AEDE388407B90753F176D237AE14DA7A7"
+  },
+  "intentional": true,
+  "preCopyGate": "E:\\帧同步_RouteC\\p2f-server-pre-copy-gate.json"
+}
